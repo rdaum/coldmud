@@ -2,10 +2,11 @@
 
 #ifndef CODE_PRV_H
 #define CODE_PRV_H
-#include "codegen.h"
 
 typedef union instr Instr;
 typedef struct handler_positions Handler_positions;
+
+#include "codegen.h"
 
 /* An instruction is the code generator's temporary representation of what will
  * become an opcode after the code has been completely compiled and there are

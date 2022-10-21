@@ -118,42 +118,40 @@ void op_get_var(void)
 
 void op_compile(void)
 {
-    int i, lines;
-    Data *args, *code;
+    Data *args, *d;
     Method *method;
-    List *errors;
+    List *code, *errors;
 
     /* Accept a list of lines of code and a symbol for the name. */
     if (!func_init_2(&args, LIST, SYMBOL))
 	return;
+    code = args[0].u.list;
 
     /* Make sure that every element in the code list is a string. */
-    code = data_dptr(&args[0]);
-    lines = args[0].u.sublist.span;
-    for (i = 0; i < lines; i++) {
-	if (code[i].type != STRING) {
-	    throw(type_id, "Element %d of code is %D, not a string.", i,
-		  &code[i]);
+    for (d = list_first(code); d; d = list_next(code, d)) {
+	if (d->type != STRING) {
+	    throw(type_id, "Line %d (%D) is not a string.",
+		  d - list_first(code), d);
 	    return;
 	}
     }
 
-    method = compile(cur_frame->object, code, lines, &errors);
+    method = compile(cur_frame->object, code, &errors);
     if (method) {
 	object_add_method(cur_frame->object, args[1].u.symbol, method);
 	method_discard(method);
     }
     pop(2);
-    stack[stack_pos].type = LIST;
-    sublist_set_to_full_list(&stack[stack_pos].u.sublist, errors);
-    stack_pos++;
+    push_list(errors);
+    list_discard(errors);
 }
 
 void op_methods(void)
 {
     List *methods;
+    Data d;
     Object *obj;
-    int i, j;
+    int i;
 
     /* Accept no arguments. */
     if (!func_init_0())
@@ -162,21 +160,18 @@ void op_methods(void)
     /* Construct the list of method names. */
     obj = cur_frame->object;
     methods = list_new(obj->methods.size);
-    j = 0;
     for (i = 0; i < obj->methods.size; i++) {
 	if (obj->methods.tab[i].m) {
-	    methods->el[j].type = SYMBOL;
-	    methods->el[j].u.symbol = ident_dup(obj->methods.tab[i].m->name);
-	    j++;
+	    d.type = SYMBOL;
+	    d.u.symbol = obj->methods.tab[i].m->name;
+	    methods = list_add(methods, &d);
 	}
     }
-    methods->len = j;
 
     /* Push the list onto the stack. */
     check_stack(1);
-    stack[stack_pos].type = LIST;
-    sublist_set_to_full_list(&stack[stack_pos].u.sublist, methods);
-    stack_pos++;
+    push_list(methods);
+    list_discard(methods);
 }
 
 void op_find_method(void)

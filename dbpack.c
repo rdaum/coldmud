@@ -12,7 +12,7 @@
 #include "cmstring.h"
 #include "ident.h"
 
-static void pack_list(Data *base, int len, FILE *fp);
+static void pack_list(List *list, FILE *fp);
 static void pack_dict(Dict *dict, FILE *fp);
 static void pack_data(Data *data, FILE *fp);
 static void pack_vars(Object *obj, FILE *fp);
@@ -30,7 +30,7 @@ static Method *unpack_method(FILE *fp);
 static void unpack_strings(Object *obj, FILE *fp);
 static void unpack_idents(Object *obj, FILE *fp);
 
-static int size_list(Data *base, int len);
+static int size_list(List *list);
 static int size_dict(Dict *dict);
 static int size_data(Data *data);
 static int size_vars(Object *obj);
@@ -43,14 +43,10 @@ static void write_ident(long id, FILE *fp);
 static long read_ident(FILE *fp);
 static long size_ident(long id);
 
-static void write_long(long n, FILE *fp);
-static long read_long(FILE *fp);
-static int size_long(long n);
-
 void pack_object(Object *obj, FILE *fp)
 {
-    pack_list(obj->parents->el, obj->parents->len, fp);
-    pack_list(obj->children->el, obj->children->len, fp);
+    pack_list(obj->parents, fp);
+    pack_list(obj->children, fp);
     pack_vars(obj, fp);
     pack_methods(obj, fp);
     pack_strings(obj, fp);
@@ -58,21 +54,21 @@ void pack_object(Object *obj, FILE *fp)
     write_long(obj->search, fp);
 }
 
-static void pack_list(Data *base, int len, FILE *fp)
+static void pack_list(List *list, FILE *fp)
 {
-    int i;
+    Data *d;
 
-    write_long(len, fp);
-    for (i = 0; i < len; i++)
-	pack_data(&base[i], fp);
+    write_long(list_length(list), fp);
+    for (d = list_first(list); d; d = list_next(list, d))
+	pack_data(d, fp);
 }
 
 static void pack_dict(Dict *dict, FILE *fp)
 {
     int i;
 
-    pack_list(dict->keys->el, dict->keys->len, fp);
-    pack_list(dict->values->el, dict->values->len, fp);
+    pack_list(dict->keys, fp);
+    pack_list(dict->values, fp);
     write_long(dict->hashtab_size, fp);
     for (i = 0; i < dict->hashtab_size; i++) {
 	write_long(dict->links[i], fp);
@@ -90,16 +86,14 @@ static void pack_data(Data *data, FILE *fp)
 	break;
 
       case STRING:
-	write_long(data->u.substr.span, fp);
-	fwrite(data_sptr(data), sizeof(char), data->u.substr.span, fp);
-	break;
+	string_pack(data->u.str, fp);
 
       case DBREF:
 	write_long(data->u.dbref, fp);
 	break;
 
       case LIST:
-	pack_list(data_dptr(data), data->u.sublist.span, fp);
+	pack_list(data->u.list, fp);
 	break;
 
       case SYMBOL:
@@ -111,14 +105,8 @@ static void pack_data(Data *data, FILE *fp)
 	break;
 
       case FROB:
-	write_long(data->u.frob.class, fp);
-	write_long(data->u.frob.rep_type, fp);
-	if (data->u.frob.rep_type == LIST) {
-	    pack_list(data->u.frob.rep.list->el, data->u.frob.rep.list->len,
-		      fp);
-	} else {
-	    pack_dict(data->u.frob.rep.dict, fp);
-	}
+	write_long(data->u.frob->class, fp);
+	pack_data(&data->u.frob->rep, fp);
 	break;
 
       case DICT:
@@ -207,19 +195,13 @@ static void pack_method(Method *method, FILE *fp)
 static void pack_strings(Object *obj, FILE *fp)
 {
     int i;
-    String *str;
 
     write_long(obj->strings_size, fp);
     write_long(obj->num_strings, fp);
     for (i = 0; i < obj->num_strings; i++) {
-	str = obj->strings[i].str;
-	if (str) {
-	    write_long(str->len, fp);
-	    fwrite(str->s, sizeof(char), str->len, fp);
+	string_pack(obj->strings[i].str, fp);
+	if (obj->strings[i].str)
 	    write_long(obj->strings[i].refs, fp);
-	} else {
-	    write_long(-1, fp);
-	}
     }
 }
 
@@ -254,11 +236,13 @@ static List *unpack_list(FILE *fp)
 {
     int len, i;
     List *list;
+    Data *d;
 
     len = read_long(fp);
     list = list_new(len);
+    d = list_empty_spaces(list, len);
     for (i = 0; i < len; i++)
-	unpack_data(&list->el[i], fp);
+	unpack_data(d++, fp);
     return list;
 }
 
@@ -290,24 +274,16 @@ static void unpack_data(Data *data, FILE *fp)
 	data->u.val = read_long(fp);
 	break;
 
-      case STRING: {
-	  String *str;
-	  int len;
-
-	  len = read_long(fp);
-	  str = string_new(len);
-	  fread(str->s, sizeof(char), len, fp);
-	  str->s[len] = 0;
-	  substr_set_to_full_string(&data->u.substr, str);
-	  break;
-      }
+      case STRING:
+	data->u.str = string_unpack(fp);
+	break;
 
       case DBREF:
 	data->u.dbref = read_long(fp);
 	break;
 
       case LIST:
-	sublist_set_to_full_list(&data->u.sublist, unpack_list(fp));
+	data->u.list = unpack_list(fp);
 	break;
 
       case SYMBOL:
@@ -319,12 +295,8 @@ static void unpack_data(Data *data, FILE *fp)
 	break;
 
       case FROB:
-	data->u.frob.class = read_long(fp);
-	data->u.frob.rep_type = read_long(fp);
-	if (data->u.frob.rep_type == LIST)
-	    data->u.frob.rep.list = unpack_list(fp);
-	else
-	    data->u.frob.rep.dict = unpack_dict(fp);
+	data->u.frob->class = read_long(fp);
+	unpack_data(&data->u.frob->rep, fp);
 	break;
 
       case DICT:
@@ -437,21 +409,15 @@ static Method *unpack_method(FILE *fp)
 
 static void unpack_strings(Object *obj, FILE *fp)
 {
-    int len, i;
+    int i;
 
     obj->strings_size = read_long(fp);
     obj->num_strings = read_long(fp);
     obj->strings = EMALLOC(String_entry, obj->strings_size);
     for (i = 0; i < obj->num_strings; i++) {
-	len = read_long(fp);
-	if (len == -1) {
-	    obj->strings[i].str = NULL;
-	} else {
-	    obj->strings[i].str = string_new(len);
-	    fread(obj->strings[i].str->s, sizeof(char), len, fp);
-	    obj->strings[i].str->s[len] = 0;
+	obj->strings[i].str = string_unpack(fp);
+	if (obj->strings[i].str)
 	    obj->strings[i].refs = read_long(fp);
-	}
     }
 }
 
@@ -473,8 +439,8 @@ int size_object(Object *obj)
 {
     int size = 0;
 
-    size = size_list(obj->parents->el, obj->parents->len);
-    size += size_list(obj->children->el, obj->children->len);
+    size = size_list(obj->parents);
+    size += size_list(obj->children);
     size += size_vars(obj);
     size += size_methods(obj);
     size += size_strings(obj);
@@ -483,13 +449,14 @@ int size_object(Object *obj)
     return size;
 }
 
-static int size_list(Data *base, int len)
+static int size_list(List *list)
 {
-    int size = 0, i;
+    Data *d;
+    int size = 0;
 
-    size += size_long(len);
-    for (i = 0; i < len; i++)
-	size += size_data(&base[i]);
+    size += size_long(list_length(list));
+    for (d = list_first(list); d; d = list_next(list, d))
+	size += size_data(d);
     return size;
 }
 
@@ -497,8 +464,8 @@ static int size_dict(Dict *dict)
 {
     int size = 0, i;
 
-    size += size_list(dict->keys->el, dict->keys->len);
-    size += size_list(dict->values->el, dict->values->len);
+    size += size_list(dict->keys);
+    size += size_list(dict->values);
     size += size_long(dict->hashtab_size);
     for (i = 0; i < dict->hashtab_size; i++) {
 	size += size_long(dict->links[i]);
@@ -519,8 +486,7 @@ static int size_data(Data *data)
 	break;
 
       case STRING:
-	size += size_long(data->u.substr.span);
-	size += sizeof(char) * data->u.substr.span;
+	size += string_packed_size(data->u.str);
 	break;
 
       case DBREF:
@@ -528,7 +494,7 @@ static int size_data(Data *data)
 	break;
 
       case LIST:
-	size += size_list(data_dptr(data), data->u.sublist.span);
+	size += size_list(data->u.list);
 	break;
 
       case SYMBOL:
@@ -540,14 +506,8 @@ static int size_data(Data *data)
 	break;
 
       case FROB:
-	size += size_long(data->u.frob.class);
-	size += size_long(data->u.frob.rep_type);
-	if (data->u.frob.rep_type == LIST) {
-	    size += size_list(data->u.frob.rep.list->el,
-			      data->u.frob.rep.list->len);
-	} else {
-	    size += size_dict(data->u.frob.rep.dict);
-	}
+	size += size_long(data->u.frob->class);
+	size += size_data(&data->u.frob->rep);
 	break;
 
       case DICT:
@@ -641,19 +601,13 @@ static int size_method(Method *method)
 static int size_strings(Object *obj)
 {
     int size = 0, i;
-    String *str;
 
     size += size_long(obj->strings_size);
     size += size_long(obj->num_strings);
     for (i = 0; i < obj->num_strings; i++) {
-	str = obj->strings[i].str;
-	if (str) {
-	    size += size_long(str->len);
-	    size += sizeof(char) * str->len;
+	size += string_packed_size(obj->strings[i].str);
+	if (obj->strings[i].str)
 	    size += size_long(obj->strings[i].refs);
-	} else {
-	    size += size_long(-1);
-	}
     }
 
     return size;
@@ -722,7 +676,7 @@ static long size_ident(long id)
 }
 
 /* Write a four-byte number to fp in a consistent byte-order. */
-static void write_long(long n, FILE *fp)
+void write_long(long n, FILE *fp)
 {
     /* Since first byte is special, special-case 0 as well. */
     if (!n) {
@@ -743,7 +697,7 @@ static void write_long(long n, FILE *fp)
 }
 
 /* Read a four-byte number in a consistent byte-order. */
-static long read_long(FILE *fp)
+long read_long(FILE *fp)
 {
     int c;
     long n, place;
@@ -766,7 +720,7 @@ static long read_long(FILE *fp)
     }
 }
 
-static int size_long(long n)
+int size_long(long n)
 {
     int count = 2;
 

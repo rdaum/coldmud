@@ -42,10 +42,9 @@ extern long heartbeat_freq, db_top;
 
 void op_create(void)
 {
-    Data *args;
+    Data *args, *d;
     List *parents;
     Object *obj;
-    int i;
 
     /* Accept a list of parents. */
     if (!func_init_1(&args, LIST))
@@ -58,29 +57,21 @@ void op_create(void)
     }
 
     /* Get parents list from second argument. */
-    if (args[0].u.sublist.span == args[0].u.sublist.list->len)
-	parents = list_dup(args[0].u.sublist.list);
-    else
-	parents = list_from_data(data_dptr(&args[0]), args[0].u.sublist.span);
+    parents = args[0].u.list;
 
     /* Verify that all parents are dbrefs. */
-    for (i = 0; i < parents->len; i++) {
-	if (parents->el[i].type != DBREF) {
-	    throw(type_id, "Element %d of parents list (%D) is not a dbref.",
-		  i, &parents->el[i]);
-	    list_discard(parents);
+    for (d = list_first(parents); d; d = list_next(parents, d)) {
+	if (d->type != DBREF) {
+	    throw(type_id, "Parent %D is not a dbref.", d);
 	    return;
-	} else if (!cache_check(parents->el[i].u.dbref)) {
-	    throw(objnf_id, "Parent dbref %D does not refer to an object.",
-		  &parents->el[i]);
-	    list_discard(parents);
+	} else if (!cache_check(d->u.dbref)) {
+	    throw(objnf_id, "Parent %D does not refer to an object.", d);
 	    return;
 	}
     }
 
     /* Create the new object. */
     obj = object_new(-1, parents);
-    list_discard(parents);
 
     pop(1);
     push_dbref(obj->dbref);
@@ -114,16 +105,16 @@ void op_chparents(void)
 	return;
     }
 
-    if (!args[1].u.sublist.span) {
+    if (!list_length(args[1].u.list)) {
 	throw(perm_id, "You must specify at least one parent.");
 	return;
     }
 
     /* Call object_change_parents().  This will return the number of a
      * parent which was invalid, or -1 if they were all okay. */
-    wrong = object_change_parents(obj, &args[1].u.sublist);
+    wrong = object_change_parents(obj, args[1].u.list);
     if (wrong >= 0) {
-	d = data_dptr(&args[1]) + wrong;
+	d = list_elem(args[1].u.list, wrong);
 	if (d->type != DBREF) {
 	    throw(type_id, "New parent %D is not a dbref.", d);
 	} else if (d->u.dbref == args[0].u.dbref) {
@@ -188,7 +179,7 @@ void op_log(void)
 	throw(perm_id, "Current object (#%l) is not the system object.",
 	      cur_frame->object->dbref);
     } else {
-	write_log("> %S", data_sptr(&args[0]), args[0].u.substr.span);
+	write_log("> %S", args[0].u.str);
 	pop(1);
 	push_int(1);
     }
@@ -262,8 +253,9 @@ void op_text_dump(void)
 
 void op_run_script(void)
 {
-    Data *args, *base;
-    int num_args, i, fd, status;
+    Data *args, *d;
+    List *script_args;
+    int num_args, argc, len, i, fd, status;
     pid_t pid;
     char *fname, **argv;
 
@@ -271,13 +263,12 @@ void op_run_script(void)
      * an optional flag signifying that we should not wait for completion. */
     if (!func_init_2_or_3(&args, &num_args, STRING, LIST, INTEGER))
 	return;
+    script_args = args[1].u.list;
 
     /* Verify that all items in argument list are strings. */
-    base = data_dptr(&args[1]);
-    for (i = 0; i < args[1].u.sublist.span; i++) {
-	if (base[i].type != STRING) {
-	    throw(type_id, "Argument %d (%D) is not a string.",
-		  i + 1, data_dptr(&args[1]) + i);
+    for (d = list_first(script_args); d; d = list_next(script_args, d)) {
+	if (d->type != STRING) {
+	    throw(type_id, "Script argument %D is not a string.", i + 1, d);
 	    return;
 	}
     }
@@ -289,29 +280,30 @@ void op_run_script(void)
 	return;
     }
 
-    /* Construct the name of the script. */
-    fname = TMALLOC(char, args[0].u.substr.span + 9);
-    memcpy(fname, "scripts/", 8);
-    memcpy(fname + 8, data_sptr(&args[0]), args[0].u.substr.span);
-    fname[args[0].u.substr.span + 8] = 0;
-
     /* Don't walking back up the directory tree. */
-    if (strstr(fname, "../")) {
-	tfree_chars(fname);
+    if (strstr(string_chars(args[0].u.str), "../")) {
 	throw(perm_id, "Filename %D is not legal.", &args[0]);
 	return;
     }
 
+    /* Construct the name of the script. */
+    len = string_length(args[0].u.str);
+    fname = TMALLOC(char, len + 9);
+    memcpy(fname, "scripts/", 8);
+    memcpy(fname + 8, string_chars(args[0].u.str), len);
+    fname[len + 8] = 0;
+
     /* Build an argument list. */
-    argv = TMALLOC(char *, args[1].u.substr.span + 2);
+    argc = list_length(script_args) + 1;
+    argv = TMALLOC(char *, argc + 1);
     argv[0] = tstrdup(fname);
-    for (i = 0; i < args[1].u.sublist.span; i++)
-	argv[1] = tstrndup(data_sptr(&base[i]), base[i].u.substr.span);
-    argv[args[1].u.sublist.span + 1] = NULL;
+    for (d = list_first(script_args); d; d = list_next(script_args, d))
+	argv[i + 1] = tstrdup(string_chars(d->u.str));
+    argv[argc] = NULL;
 
     pop(num_args);
 
-    /* Fork off a process using vfork() (not POSIX). */
+    /* Fork off a process. */
 #ifdef BSD_FEATURES
     pid = vfork();
 #else
@@ -337,9 +329,14 @@ void op_run_script(void)
 	    waitpid(pid, &status, 0);
 	}
     } else {
-	write_log("EXEC: Failed to vfork: %s.", strerror(errno));
+	write_log("EXEC: Failed to fork: %s.", strerror(errno));
 	status = -1;
     }
+
+    /* Free the argument list. */
+    for (i = 0; i < argc; i++)
+	tfree_chars(argv[i]);
+    TFREE(argv, argc + 1);
 
     push_int(status);
 }
@@ -408,6 +405,9 @@ void op_unbind(void)
 void op_connect(void)
 {
     Data *args;
+    char *address;
+    int port;
+    Dbref receiver;
     long r;
 
     if (!func_init_3(&args, STRING, INTEGER, DBREF))
@@ -419,8 +419,11 @@ void op_connect(void)
 	return;
     }
 
-    substring_truncate(&args[0].u.substr);
-    r = make_connection(data_sptr(&args[0]), args[1].u.val, args[2].u.dbref);
+    address = string_chars(args[0].u.str);
+    port = args[1].u.val;
+    receiver = args[2].u.dbref;
+
+    r = make_connection(address, port, receiver);
     if (r == address_id)
 	throw(address_id, "Invalid address");
     else if (r == socket_id)

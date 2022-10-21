@@ -263,13 +263,13 @@ cvals	: rexpr				{ $$ = expr_list($1, NULL); }
 
 %%
 
-Method *compile(Object *object, Data *code, int lines, List **error_ret)
+Method *compile(Object *object, List *code, List **error_ret)
 {
     Method *method = NULL;
 
     /* Initialize compiler globals. */
     errors = list_new(0);
-    lex_start(code, lines);
+    lex_start(code);
 
     /* Parse text.  This sets prog if successful. */
     yyparse();
@@ -305,7 +305,7 @@ void compiler_error(int lineno, char *fmt, ...)
     }
 
     d.type = STRING;
-    substr_set_to_full_string(&d.u.substr, line);
+    d.u.str = line;
     errors = list_add(errors, &d);
 
     string_discard(line);

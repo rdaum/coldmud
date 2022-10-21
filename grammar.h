@@ -6,7 +6,7 @@
 #include "object.h"
 #include "data.h"
 
-Method *compile(Object *object, Data *code, int lines, List **error_ret);
+Method *compile(Object *object, List *code, List **error_ret);
 void compiler_error(int lineno, char *fmt, ...);
 int no_errors(void);
 

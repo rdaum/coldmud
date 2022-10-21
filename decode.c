@@ -406,14 +406,14 @@ List *decompile(Method *method, Object *object, int increment, int parens)
 	str = string_from_chars("arg ", 4);
 	for (i = method->num_args - 1; i >= 0; i--) {
 	    s = ident_name(object_get_ident(object, method->argnames[i]));
-	    str = string_add(str, s, strlen(s));
+	    str = string_add_chars(str, s, strlen(s));
 	    if (i > 0 || method->rest != -1)
-		str = string_add(str, ", ", 2);
+		str = string_add_chars(str, ", ", 2);
 	}
 	if (method->rest != -1) {
 	    str = string_addc(str, '[');
 	    s = ident_name(object_get_ident(object, method->rest));
-	    str = string_add(str, s, strlen(s));
+	    str = string_add_chars(str, s, strlen(s));
 	    str = string_addc(str, ']');
 	}
 	str = string_addc(str, ';');
@@ -425,9 +425,9 @@ List *decompile(Method *method, Object *object, int increment, int parens)
 	str = string_from_chars("var ", 4);
 	for (i = method->num_vars - 1; i >= 0; i--) {
 	    s = ident_name(object_get_ident(object, method->varnames[i]));
-	    str = string_add(str, s, strlen(s));
+	    str = string_add_chars(str, s, strlen(s));
 	    if (i > 0)
-		str = string_add(str, ", ", 2);
+		str = string_add_chars(str, ", ", 2);
 	}
 	str = string_addc(str, ';');
 	output = add_and_discard_string(output, str);
@@ -435,7 +435,7 @@ List *decompile(Method *method, Object *object, int increment, int parens)
 
     /* Add blank line if there were declarations and there is code. */
     if (output->len && method->num_opcodes)
-	output = add_and_discard_string(output, string_empty(0));
+	output = add_and_discard_string(output, string_new(0));
 
     /* Decompile opcodes into parse tree. */
     body = decompile_stmt_list(0, method->num_opcodes);
@@ -470,7 +470,7 @@ static Stmt *decompile_stmt(int *pos_ptr)
 
       case COMMENT:
 	/* COMMENT opcode follows no expressions. */
-	comment = the_object->strings[the_opcodes[pos + 1]].str->s;
+	comment = string_chars(the_object->strings[the_opcodes[pos + 1]].str);
 	(*pos_ptr) = pos + 2;
 	return comment_stmt(comment);
 
@@ -759,7 +759,7 @@ static Expr_list *decompile_expressions_bounded(int *pos_ptr, int expr_end)
 	    break;
 
 	  case STRING:
-	    s = the_object->strings[the_opcodes[pos + 1]].str->s;
+	    s = string_chars(the_object->strings[the_opcodes[pos + 1]].str);
 	    stack = expr_list(string_expr(s), stack);
 	    pos += 2;
 	    break;
@@ -1010,10 +1010,10 @@ static List *unparse_stmt(List *output, Stmt *stmt, int indent, Stmt *last)
 	/* Add a blank line if there is a previous line and it is not a
 	 * comment. */
 	if (last && last->type != COMMENT)
-	    output = add_and_discard_string(output, string_empty(0));
+	    output = add_and_discard_string(output, string_new(0));
 	str = string_of_char(' ', indent);
-	str = string_add(str, "//", 2);
-	str = string_add(str, stmt->u.comment, strlen(stmt->u.comment));
+	str = string_add_chars(str, "//", 2);
+	str = string_add_chars(str, stmt->u.comment, strlen(stmt->u.comment));
 	return add_and_discard_string(output, str);
 
       case EXPR:
@@ -1031,8 +1031,8 @@ static List *unparse_stmt(List *output, Stmt *stmt, int indent, Stmt *last)
 
 	  s = stmt->u.assign.var;
 	  str = string_of_char(' ', indent);
-	  str = string_add(str, s, strlen(s));
-	  str = string_add(str, " = ", 3);
+	  str = string_add_chars(str, s, strlen(s));
+	  str = string_add_chars(str, " = ", 3);
 	  str = unparse_expr(str, stmt->u.assign.value);
 	  str = string_addc(str, ';');
 	  return add_and_discard_string(output, str);
@@ -1040,7 +1040,7 @@ static List *unparse_stmt(List *output, Stmt *stmt, int indent, Stmt *last)
 
       case IF:
 	str = string_of_char(' ', indent);
-	str = string_add(str, "if (", 4);
+	str = string_add_chars(str, "if (", 4);
 	str = unparse_expr(str, stmt->u.if_.cond);
 	str = string_addc(str, ')');
 	return unparse_body(output, stmt->u.if_.true, str, indent);
@@ -1061,7 +1061,7 @@ static List *unparse_stmt(List *output, Stmt *stmt, int indent, Stmt *last)
 
 	  /* Execute this for stmt as well as any else-ifs. */
 	  while (stmt->type == IF_ELSE) {
-	      str = string_add(str, "if (", 4);
+	      str = string_add_chars(str, "if (", 4);
 	      str = unparse_expr(str, stmt->u.if_.cond);
 	      str = string_addc(str, ')');
 
@@ -1070,12 +1070,12 @@ static List *unparse_stmt(List *output, Stmt *stmt, int indent, Stmt *last)
 		  output = add_and_discard_string(output, str);
 		  str = string_of_char(' ', indent);
 	      } else if (complex) {
-		  str = string_add(str, " {", 2);
+		  str = string_add_chars(str, " {", 2);
 		  output = add_and_discard_string(output, str);
 		  output = unparse_stmt(output, stmt->u.if_.true,
 					indent + the_increment, NULL);
 		  str = string_of_char(' ', indent);
-		  str = string_add(str, "} ", 2);
+		  str = string_add_chars(str, "} ", 2);
 	      } else {
 		  output = add_and_discard_string(output, str);
 		  output = unparse_stmt(output, stmt->u.if_.true,
@@ -1083,7 +1083,7 @@ static List *unparse_stmt(List *output, Stmt *stmt, int indent, Stmt *last)
 		  str = string_of_char(' ', indent);
 	      }
 	      
-	      str = string_add(str, "else ", 5);
+	      str = string_add_chars(str, "else ", 5);
 
 	      /* Set stmt to stmt->u.if_.false, so that we will continue the
 	       * loop if the false statement is an if statement. */
@@ -1091,16 +1091,17 @@ static List *unparse_stmt(List *output, Stmt *stmt, int indent, Stmt *last)
 	  }
 
 	  if (stmt->type == IF) {
-	      str = string_add(str, "if (", 4);
+	      str = string_add_chars(str, "if (", 4);
 	      str = unparse_expr(str, stmt->u.if_.cond);
-	      str = string_add(str, ") ", 2);
+	      str = string_add_chars(str, ") ", 2);
 	      stmt = stmt->u.if_.true;
 	  }
 
 	  /* Now unparse the final statement, which is in stmt. */
 	  if (stmt->type == NOOP) {
 	      /* Replace the trailing space with a semicolon. */
-	      str->s[str->len - 1] = ';';
+	      str = string_truncate(str, string_length(str) - 1);
+	      str = string_addc(str, ';');
 	      return add_and_discard_string(output, str);
 	  } else if (complex) {
 	      str = string_addc(str, '{');
@@ -1112,7 +1113,7 @@ static List *unparse_stmt(List *output, Stmt *stmt, int indent, Stmt *last)
 	      return add_and_discard_string(output, str);
 	  } else {
 	      /* Just eliminate the trailing space. */
-	      str->s[--str->len] = 0;
+	      str = string_truncate(str, string_length(str) - 1);
 	      output = add_and_discard_string(output, str);
 	      return unparse_stmt(output, stmt, indent + the_increment, NULL);
 	  }
@@ -1123,11 +1124,11 @@ static List *unparse_stmt(List *output, Stmt *stmt, int indent, Stmt *last)
 
 	  s = stmt->u.for_range.var;
 	  str = string_of_char(' ', indent);
-	  str = string_add(str, "for ", 4);
-	  str = string_add(str, s, strlen(s));
-	  str = string_add(str, " in [", 5);
+	  str = string_add_chars(str, "for ", 4);
+	  str = string_add_chars(str, s, strlen(s));
+	  str = string_add_chars(str, " in [", 5);
 	  str = unparse_expr(str, stmt->u.for_range.lower);
-	  str = string_add(str, " .. ", 4);
+	  str = string_add_chars(str, " .. ", 4);
 	  str = unparse_expr(str, stmt->u.for_range.upper);
 	  str = string_addc(str, ']');
 	  return unparse_body(output, stmt->u.for_range.body, str, indent);
@@ -1138,9 +1139,9 @@ static List *unparse_stmt(List *output, Stmt *stmt, int indent, Stmt *last)
 
 	  s = stmt->u.for_list.var;
 	  str = string_of_char(' ', indent);
-	  str = string_add(str, "for ", 4);
-	  str = string_add(str, s, strlen(s));
-	  str = string_add(str, " in (", 5);
+	  str = string_add_chars(str, "for ", 4);
+	  str = string_add_chars(str, s, strlen(s));
+	  str = string_add_chars(str, " in (", 5);
 	  str = unparse_expr(str, stmt->u.for_list.list);
 	  str = string_addc(str, ')');
 	  return unparse_body(output, stmt->u.for_list.body, str, indent);
@@ -1148,16 +1149,16 @@ static List *unparse_stmt(List *output, Stmt *stmt, int indent, Stmt *last)
 
       case WHILE:
 	str = string_of_char(' ', indent);
-	str = string_add(str, "while (", 7);
+	str = string_add_chars(str, "while (", 7);
 	str = unparse_expr(str, stmt->u.while_.cond);
 	str = string_addc(str, ')');
 	return unparse_body(output, stmt->u.while_.body, str, indent);
 
       case SWITCH:
 	str = string_of_char(' ', indent);
-	str = string_add(str, "switch (", 8);
+	str = string_add_chars(str, "switch (", 8);
 	str = unparse_expr(str, stmt->u.switch_.expr);
-	str = string_add(str, ") {", 3);
+	str = string_add_chars(str, ") {", 3);
 	output = add_and_discard_string(output, str);
 	output = unparse_cases(output, stmt->u.switch_.cases,
 			       indent + the_increment);
@@ -1167,22 +1168,22 @@ static List *unparse_stmt(List *output, Stmt *stmt, int indent, Stmt *last)
 
       case BREAK:
 	str = string_of_char(' ', indent);
-	str = string_add(str, "break;", 6);
+	str = string_add_chars(str, "break;", 6);
 	return add_and_discard_string(output, str);
 
       case CONTINUE:
 	str = string_of_char(' ', indent);
-	str = string_add(str, "continue;", 9);
+	str = string_add_chars(str, "continue;", 9);
 	return add_and_discard_string(output, str);
 
       case RETURN:
 	str = string_of_char(' ', indent);
-	str = string_add(str, "return;", 7);
+	str = string_add_chars(str, "return;", 7);
 	return add_and_discard_string(output, str);
 	
       case RETURN_EXPR:
 	str = string_of_char(' ', indent);
-	str = string_add(str, "return ", 7);
+	str = string_add_chars(str, "return ", 7);
 	str = unparse_expr(str, stmt->u.expr);
 	str = string_addc(str, ';');
 	return add_and_discard_string(output, str);
@@ -1191,25 +1192,25 @@ static List *unparse_stmt(List *output, Stmt *stmt, int indent, Stmt *last)
 	  Id_list *errors;
 
 	  str = string_of_char(' ', indent);
-	  str = string_add(str, "catch ", 6);
+	  str = string_add_chars(str, "catch ", 6);
 	  errors = stmt->u.catch.errors;
 	  if (errors) {
 	      for (; errors; errors = errors->next) {
 		  str = string_addc(str, '~');
-		  str = string_add(str, errors->ident, strlen(errors->ident));
+		  str = string_add_chars(str, errors->ident, strlen(errors->ident));
 		  if (errors->next)
-		      str = string_add(str, ", ", 2);
+		      str = string_add_chars(str, ", ", 2);
 	      }
 	  } else {
-	     str = string_add(str, "any", 3);
+	     str = string_add_chars(str, "any", 3);
 	  }
-	  str = string_add(str, " {", 2);
+	  str = string_add_chars(str, " {", 2);
 	  output = add_and_discard_string(output, str);
 	  output = unparse_stmt(output, stmt->u.catch.body,
 				indent + the_increment, NULL);
 	  if (stmt->u.catch.handler) {
 	      str = string_of_char(' ', indent);
-	      str = string_add(str, "} with handler {", 16);
+	      str = string_add_chars(str, "} with handler {", 16);
 	      output = add_and_discard_string(output, str);
 	      output = unparse_stmt(output, stmt->u.catch.handler,
 				    indent + the_increment, NULL);
@@ -1245,13 +1246,13 @@ static int is_complex_if_else_stmt(Stmt *stmt)
 static int is_complex_type(int type)
 {
     return (type != NOOP && type != EXPR && type != ASSIGN && type != BREAK &&
-	    type != CONTINUE && type != RETURN_EXPR);
+	    type != CONTINUE && type != RETURN && type != RETURN_EXPR);
 }
 
 static List *unparse_body(List *output, Stmt *body, String *str, int indent)
 {
     if (is_complex_type(body->type)) {
-	str = string_add(str, " {", 2);
+	str = string_add_chars(str, " {", 2);
 	output = add_and_discard_string(output, str);
 	output = unparse_stmt(output, body, indent + the_increment, NULL);
 	str = string_of_char(' ', indent);
@@ -1278,9 +1279,9 @@ static List *unparse_case(List *output, Case_entry *case_entry, int indent)
 
     str = string_of_char(' ', indent);
     if (!case_entry->values) {
-	str = string_add(str, "default:", 8);
+	str = string_add_chars(str, "default:", 8);
     } else {
-	str = string_add(str, "case ", 5);
+	str = string_add_chars(str, "case ", 5);
 	str = unparse_args(str, case_entry->values);
 	str = string_addc(str, ':');
     }
@@ -1299,7 +1300,7 @@ static String *unparse_expr(String *str, Expr *expr)
 	  Number_buf nbuf;
 
 	  s = long_to_ascii(expr->u.num, nbuf);
-	  return string_add(str, s, strlen(s));
+	  return string_add_chars(str, s, strlen(s));
       }
 
       case STRING:
@@ -1310,14 +1311,14 @@ static String *unparse_expr(String *str, Expr *expr)
 
 	  str = string_addc(str, '#');
 	  s = long_to_ascii(expr->u.dbref, nbuf);
-	  return string_add(str, s, strlen(s));
+	  return string_add_chars(str, s, strlen(s));
       }
 
       case SYMBOL:
 	s = expr->u.symbol;
 	str = string_addc(str, '\'');
 	if (is_valid_ident(expr->u.symbol))
-	    return string_add(str, s, strlen(s));
+	    return string_add_chars(str, s, strlen(s));
 	else
 	    return string_add_unparsed(str, s, strlen(s));
 
@@ -1325,7 +1326,7 @@ static String *unparse_expr(String *str, Expr *expr)
 	s = expr->u.error;
 	str = string_addc(str, '~');
 	if (is_valid_ident(expr->u.error))
-	    return string_add(str, s, strlen(s));
+	    return string_add_chars(str, s, strlen(s));
 	else
 	    return string_add_unparsed(str, s, strlen(s));
 
@@ -1333,22 +1334,22 @@ static String *unparse_expr(String *str, Expr *expr)
 	s = expr->u.name;
 	str = string_addc(str, '$');
 	if (is_valid_ident(expr->u.name))
-	    return string_add(str, s, strlen(s));
+	    return string_add_chars(str, s, strlen(s));
 	else
 	    return string_add_unparsed(str, s, strlen(s));
 
       case VAR:
-	return string_add(str, expr->u.name, strlen(expr->u.name));
+	return string_add_chars(str, expr->u.name, strlen(expr->u.name));
 
       case FUNCTION_CALL:
 	s = expr->u.function.name;
-	str = string_add(str, s, strlen(s));
+	str = string_add_chars(str, s, strlen(s));
 	str = string_addc(str, '(');
 	str = unparse_args(str, expr->u.function.args);
 	return string_addc(str, ')');
 
       case PASS:
-	str = string_add(str, "pass(", 5);
+	str = string_add_chars(str, "pass(", 5);
 	str = unparse_args(str, expr->u.args);
 	return string_addc(str, ')');
 
@@ -1360,7 +1361,7 @@ static String *unparse_expr(String *str, Expr *expr)
 	    str = unparse_expr_prec(str, expr->u.message.to, MESSAGE, 0);
 
 	str = string_addc(str, '.');
-	str = string_add(str, s, strlen(s));
+	str = string_add_chars(str, s, strlen(s));
 	str = string_addc(str, '(');
 	str = unparse_args(str, expr->u.message.args);
 	str = string_addc(str, ')');
@@ -1371,7 +1372,7 @@ static String *unparse_expr(String *str, Expr *expr)
 	if (!is_this(expr->u.expr_message.to))
 	    str = unparse_expr_prec(str, expr->u.message.to, MESSAGE, 0);
 
-	str = string_add(str, ".(", 2);
+	str = string_add_chars(str, ".(", 2);
 	str = unparse_expr(str, expr->u.expr_message.message);
 	str = string_addc(str, ')');
 	str = string_addc(str, '(');
@@ -1384,19 +1385,19 @@ static String *unparse_expr(String *str, Expr *expr)
 	return string_addc(str, ']');
 
       case DICT:
-	str = string_add(str, "#[", 2);
+	str = string_add_chars(str, "#[", 2);
 	str = unparse_args(str, expr->u.args);
 	return string_addc(str, ']');
 
       case BUFFER:
-	str = string_add(str, "`[", 2);
+	str = string_add_chars(str, "`[", 2);
 	str = unparse_args(str, expr->u.args);
 	return string_addc(str, ']');
 
       case FROB:
 	str = string_addc(str, '<');
 	str = unparse_expr(str, expr->u.frob.class);
-	str = string_add(str, ", ", 2);
+	str = string_add_chars(str, ", ", 2);
 	str = unparse_expr(str, expr->u.frob.rep);
 	return string_addc(str, '>');
 
@@ -1419,37 +1420,37 @@ static String *unparse_expr(String *str, Expr *expr)
 	  s = binary_token(opcode);
 	  str = unparse_expr_prec(str, expr->u.binary.left, opcode, 0);
 	  str = string_addc(str, ' ');
-	  str = string_add(str, s, strlen(s));
+	  str = string_add_chars(str, s, strlen(s));
 	  str = string_addc(str, ' ');
 	  return unparse_expr_prec(str, expr->u.binary.right, opcode, 1);
       }
 
       case AND:
 	str = unparse_expr_prec(str, expr->u.and.left, AND, 1);
-	str = string_add(str, " && ", 4);
+	str = string_add_chars(str, " && ", 4);
 	return unparse_expr_prec(str, expr->u.and.right, AND, 0);
 
       case OR:
 	str = unparse_expr_prec(str, expr->u.or.left, OR, 1);
-	str = string_add(str, " || ", 4);
+	str = string_add_chars(str, " || ", 4);
 	return unparse_expr_prec(str, expr->u.or.right, OR, 0);
 
       case CONDITIONAL:
 	str = unparse_expr_prec(str, expr->u.cond.cond, CONDITIONAL, 1);
-	str = string_add(str, " ? ", 3);
+	str = string_add_chars(str, " ? ", 3);
 	str = unparse_expr(str, expr->u.cond.true);
-	str = string_add(str, " | ", 3);
+	str = string_add_chars(str, " | ", 3);
 	return unparse_expr_prec(str, expr->u.cond.false, CONDITIONAL, 0);
 
       case CRITICAL:
-	str = string_add(str, "(| ", 3);
+	str = string_add_chars(str, "(| ", 3);
 	str = unparse_expr(str, expr->u.expr);
-	return string_add(str, " |)", 3);
+	return string_add_chars(str, " |)", 3);
 
       case PROPAGATE:
-	str = string_add(str, "(> ", 3);
+	str = string_add_chars(str, "(> ", 3);
 	str = unparse_expr(str, expr->u.expr);
-	return string_add(str, " <)", 3);
+	return string_add_chars(str, " <)", 3);
 
       case SPLICE:
 	str = string_addc(str, '@');
@@ -1464,7 +1465,7 @@ static String *unparse_expr(String *str, Expr *expr)
 
       case RANGE:
 	str = unparse_expr(str, expr->u.range.lower);
-	str = string_add(str, " .. ", 4);
+	str = string_add_chars(str, " .. ", 4);
 	return unparse_expr(str, expr->u.range.upper);
 
       default:
@@ -1485,7 +1486,7 @@ static String *unparse_args(String *str, Expr_list *args)
     if (args) {
 	if (args->next) {
 	    str = unparse_args(str, args->next);
-	    str = string_add(str, ", ", 2);
+	    str = string_add_chars(str, ", ", 2);
 	}
 	str = unparse_expr(str, args->expr);
     }
@@ -1544,7 +1545,7 @@ static List *add_and_discard_string(List *output, String *str)
     Data d;
 
     d.type = STRING;
-    substr_set_to_full_string(&d.u.substr, str);
+    d.u.str = str;
     output = list_add(output, &d);
     string_discard(str);
     return output;

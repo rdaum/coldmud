@@ -8,8 +8,10 @@
 #ifndef REGEXP_H
 #define REGEXP_H
 
+typedef struct regexp regexp;
+
 #define NSUBEXP  10
-typedef struct regexp {
+struct regexp {
 	char *startp[NSUBEXP];
 	char *endp[NSUBEXP];
 	char regstart;		/* Internal use only. */
@@ -17,12 +19,12 @@ typedef struct regexp {
 	char *regmust;		/* Internal use only. */
 	int regmlen;		/* Internal use only. */
 	char program[1];	/* Unwarranted chumminess with compiler. */
-} regexp;
+};
 
 extern regexp *regcomp(char *exp);
 extern int regexec(regexp *prog, char *string, int case_flag);
 extern int regsub(regexp *prog, char *src, char *dest);
-extern void regerror(char *msg);
+extern char *regerror(char *msg);
 
 #endif
 

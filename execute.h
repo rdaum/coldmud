@@ -2,6 +2,11 @@
 
 #ifndef EXECUTE_H
 #define EXECUTE_H
+
+typedef struct frame Frame;
+typedef struct error_action_specifier Error_action_specifier;
+typedef struct handler_info Handler_info;
+
 #include <sys/types.h>
 #include <stdarg.h>
 #include "data.h"
@@ -13,14 +18,10 @@
 #define STACK_MALLOC_DELTA 4
 #define ARG_STACK_MALLOC_DELTA 8
 
-typedef struct frame Frame;
-typedef struct error_action_specifier Error_action_specifier;
-typedef struct handler_info Handler_info;
-
 struct frame {
     Object *object;
-    long sender;
-    long caller;
+    Dbref sender;
+    Dbref caller;
     Method *method;
     long *opcodes;
     int pc;
@@ -53,8 +54,7 @@ struct error_action_specifier {
 
 struct handler_info {
     List *traceback;
-    Data arg;
-    long id;
+    Ident error;
     Handler_info *next;
 };
 
@@ -67,22 +67,22 @@ extern String *numargs_str;
 extern long task_id;
 
 void init_execute(void);
-void task(Connection *conn, long dbref, long message, int num_args, ...);
+void task(Connection *conn, Dbref dbref, long message, int num_args, ...);
 void task_method(Connection *conn, Object *obj, Method *method);
-long frame_start(Object *obj, Method *method, long caller, long caller_definer,
+long frame_start(Object *obj, Method *method, Dbref sender, Dbref caller,
 		 int stack_start, int arg_start);
 void frame_return(void);
 void anticipate_assignment(void);
-long pass_message(int stack_start, int arg_start);
-long send_message(long dbref, long message, int stack_start, int arg_start);
+Ident pass_message(int stack_start, int arg_start);
+Ident send_message(Dbref dbref, Ident message, int stack_start, int arg_start);
 void pop(int n);
 void check_stack(int n);
 void push_int(long n);
 void push_string(String *str);
-void push_dbref(long dbref);
+void push_dbref(Dbref dbref);
 void push_list(List *list);
-void push_symbol(long id);
-void push_error(long id);
+void push_symbol(Ident id);
+void push_error(Ident id);
 void push_dict(Dict *dict);
 void push_buffer(Buffer *buffer);
 int func_init_0();
@@ -97,12 +97,12 @@ int func_init_1_to_3(Data **args, int *num_args, int type1, int type2,
 		     int type3);
 void func_num_error(int num_args, char *required);
 void func_type_error(char *which, Data *wrong, char *required);
-void func_error(long id, char *fmt, ...);
+void func_error(Ident id, char *fmt, ...);
 void throw(long id, char *fmt, ...);
-void unignorable_error(long id, String *str);
-void interp_error(long id, String *str);
-void user_error(long id, String *str, Data *arg);
-void propagate_error(List *traceback, long id, Data *arg);
+void unignorable_error(Ident id, String *str);
+void interp_error(Ident error, String *str);
+void user_error(Ident error, String *str, Data *arg);
+void propagate_error(List *traceback, Ident error);
 void pop_error_action_specifier(void);
 void pop_handler_info(void);
 

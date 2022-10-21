@@ -114,22 +114,25 @@ void op_buffer_to_strings(void)
 
 void op_buffer_from_strings(void)
 {
-    Data *args, *base;
+    Data *args, *d;
     int num_args, i;
     Buffer *buf, *sep;
+    List *list;
 
     if (!func_init_1_or_2(&args, &num_args, LIST, BUFFER))
 	return;
+
+    list = args[0].u.list;
     sep = (num_args == 2) ? args[1].u.buffer : NULL;
-    base = data_dptr(&args[0]);
-    for (i = 0; i < args[0].u.substr.span; i++) {
-	if (base[i].type != STRING) {
-	    throw(type_id, "List element %d (%D) not a string.", i + 1,
-		  &base[i]);
+
+    for (d = list_first(list); d; d = list_next(list, d)) {
+	if (d->type != STRING) {
+	    throw(type_id, "List element %d (%D) not a string.", i + 1, d);
 	    return;
 	}
     }
-    buf = buffer_from_strings(base, args[0].u.substr.span, sep);
+
+    buf = buffer_from_strings(list, sep);
     pop(num_args);
     push_buffer(buf);
     buffer_discard(buf);

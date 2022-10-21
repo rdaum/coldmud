@@ -2,15 +2,16 @@
 
 #ifndef UTIL_H
 #define UTIL_H
+
+#define NUMBER_BUF_SIZE 32
+typedef char Number_buf[NUMBER_BUF_SIZE];
+
 #include <stdio.h>
 #include <stdarg.h>
 #include "cmstring.h"
 
-#define NUMBER_BUF_SIZE 32
 #define LCASE(c) lowercase[(int) c]
 #define UCASE(c) uppercase[(int) c]
-
-typedef char Number_buf[NUMBER_BUF_SIZE];
 
 void init_util(void);
 unsigned long hash(char *s);
@@ -20,6 +21,7 @@ char *long_to_ascii(long num, Number_buf nbuf);
 int strccmp(char *s1, char *s2);
 int strnccmp(char *s1, char *s2, int n);
 char *strcchr(char *s, int c);
+char *strcstr(char *s, char *search);
 long random_number(long n);
 char *crypt_string(char *key, char *salt);
 String *vformat(char *fmt, va_list arg);

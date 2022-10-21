@@ -54,7 +54,7 @@ static void initialize(int argc, char **argv)
     List *parents, *args;
     int i, use_text_dump;
     String *str;
-    Data d;
+    Data arg, *d;
 
     /* Ditch stdin and stdout, so we can reuse the file descriptors. */
     fclose(stdin);
@@ -62,12 +62,12 @@ static void initialize(int argc, char **argv)
 
     /* Initialize internal tables and variables. */
     init_codegen();
+    init_ident();
     init_op_table();
     init_match();
     init_util();
     init_sig();
     init_execute();
-    init_ident();
     init_scratch_file();
     init_token();
 
@@ -85,10 +85,12 @@ static void initialize(int argc, char **argv)
 
     /* Build argument list from arguments. */
     args = list_new(argc);
+    d = list_empty_spaces(args, argc);
     for (i = 0; i < argc; i++) {
-	args->el[i].type = STRING;
 	str = string_from_chars(argv[i], strlen(argv[i]));
-	substr_set_to_full_string(&args->el[i].u.substr, str);
+	d->type = STRING;
+	d->u.str = str;
+	d++;
     }
 
     /* Initialize database and network modules. */
@@ -114,8 +116,9 @@ static void initialize(int argc, char **argv)
     obj = cache_retrieve(SYSTEM_DBREF);
     if (!obj) {
 	parents = list_new(1);
-	parents->el[0].type = DBREF;
-	parents->el[0].u.dbref = ROOT_DBREF;
+	d = list_empty_spaces(parents, 1);
+	d->type = DBREF;
+	d->u.dbref = ROOT_DBREF;
 	obj = object_new(SYSTEM_DBREF, parents);
 	list_discard(parents);
     }
@@ -133,9 +136,9 @@ static void initialize(int argc, char **argv)
     }
 
     /* Send a startup message to the system object. */
-    d.type = LIST;
-    sublist_set_to_full_list(&d.u.sublist, args);
-    task(NULL, SYSTEM_DBREF, startup_id, 1, &d);
+    arg.type = LIST;
+    arg.u.list = args;
+    task(NULL, SYSTEM_DBREF, startup_id, 1, &arg);
     list_discard(args);
 }
 

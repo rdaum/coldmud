@@ -97,7 +97,7 @@ void op_modulo(void)
 	throw(type_id, "Left side (%D) is not an integer.", d1);
     } else if (d2->type != INTEGER) {
 	throw(type_id, "Right side (%D) is not an integer.", d2);
-    } else if (d2->type == 0) {
+    } else if (d2->u.val == 0) {
 	throw(div_id, "Attempt to divide %D by zero.", d1);
     } else {
 	/* Replace d1 with d1 % d2, and pop d2. */
@@ -113,8 +113,6 @@ void op_add(void)
 {
     Data *d1 = &stack[stack_pos - 2];
     Data *d2 = &stack[stack_pos - 1];
-    Substring *s1;
-    Sublist *l1;
 
     /* If we're adding two integers or two strings, replace d1 with d1+d2 and
      * discard d2. */
@@ -123,16 +121,10 @@ void op_add(void)
 	d1->u.val += d2->u.val;
     } else if (d1->type == STRING && d2->type == STRING) {
 	anticipate_assignment();
-	s1 = &d1->u.substr;
-	substring_truncate(s1);
-	s1->str = string_add(s1->str, data_sptr(d2), d2->u.substr.span);
-	s1->span += d2->u.substr.span;
+	d1->u.str = string_add(d1->u.str, d2->u.str);
     } else if (d1->type == LIST && d2->type == LIST) {
 	anticipate_assignment();
-	l1 = &d1->u.sublist;
-	sublist_truncate(l1);
-	l1->list = list_append(l1->list, data_dptr(d2), d2->u.sublist.span);
-	l1->span += d2->u.sublist.span;
+	d1->u.list = list_append(d1->u.list, d2->u.list);
     } else {
 	throw(type_id, "Cannot add %D and %D.", d1, d2);
 	return;
@@ -145,7 +137,6 @@ void op_splice_add(void)
 {
     Data *d1 = &stack[stack_pos - 2];
     Data *d2 = &stack[stack_pos - 1];
-    Sublist *l1;
 
     /* No need to check if d2 is a list, due to code generation. */
     if (d1->type != LIST) {
@@ -154,10 +145,7 @@ void op_splice_add(void)
     }
 
     anticipate_assignment();
-    l1 = &d1->u.sublist;
-    sublist_truncate(l1);
-    l1->list = list_append(l1->list, data_dptr(d2), d2->u.sublist.span);
-    l1->span += d2->u.sublist.span;
+    d1->u.list = list_append(d1->u.list, d2->u.list);
     pop(1);
 }
 
@@ -292,17 +280,16 @@ void op_less_or_equal(void)
 /* Effects: If the top value on the stack is a string or a list, pops the top
  *	    two values on the stack and pushes the location of the first value
  *	    in the second (where the first element is 1), or 0 if the first
- *	    value does not exist in the second.  If the second value is a
- *	    string, then the first must be a string of length one. */
+ *	    value does not exist in the second. */
 void op_in(void)
 {
     Data *d1 = &stack[stack_pos - 2];
     Data *d2 = &stack[stack_pos - 1];
-    int pos, i, c;
+    int pos;
     char *s;
 
     if (d2->type == LIST) {
-	pos = sublist_search(&d2->u.sublist, d1);
+	pos = list_search(d2->u.list, d1);
 	pop(2);
 	push_int(pos + 1);
 	return;
@@ -313,32 +300,14 @@ void op_in(void)
 	return;
     }
 
-    /* Return 1 if d1 is an empty string. */
-    if (!d1->u.substr.span) {
-	pop(2);
-	push_int(1);
-	return;
-    }
-
-    c = LCASE(*d1->u.substr.str->s);
-    s = d1->u.substr.str->s + 1;
-    i = 0;
-    while (1) {
-	for (; i <= d2->u.substr.span - d1->u.substr.span; i++) {
-	    if (c == LCASE(*(data_sptr(d2) + i)))
-		break;
-	}
-	if (i > d2->u.substr.span - d1->u.substr.span)
-	    break;
-	if (strnccmp(data_sptr(d2) + i + 1, s, d1->u.substr.span - 1) == 0) {
-	    pop(2);
-	    push_int(i + 1);
-	    return;
-	}
-	i++;
+    s = strcstr(string_chars(d1->u.str), string_chars(d2->u.str));
+    if (s) {
+	pos = s - string_chars(d1->u.str);
+    } else {
+	pos = -1;
     }
 
     pop(2);
-    push_int(0);
+    push_int(pos + 1);
 }
 

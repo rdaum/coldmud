@@ -39,8 +39,9 @@ void init_match(void)
 List *match_template(char *template, char *s)
 {
     char *p;
-    int i, j, coupled;
+    int i, coupled;
     List *l;
+    Data *d;
     String *str;
 
     field_pos = 0;
@@ -111,25 +112,25 @@ List *match_template(char *template, char *s)
 
     /* The match succeeded.  Construct a list of the fields. */
     l = list_new(field_pos);
+    d = list_empty_spaces(l, field_pos);
     for (i = 0; i < field_pos; i++) {
 	s = fields[i].start;
-	p = fields[i].end;
-	if (fields[i].strip) {
-	    str = string_new(p - s);
-	    j = 0;
-	    while (s < p) {
-		if (*s == '\\' && s + 1 < p)
-		    s++;
-		str->s[j++] = *s;
-		s++;
+	if (fields[i].strip && fields[i].end > s) {
+	    str = string_new(fields[i].end - s);
+	    p = memchr(s, '\\', fields[i].end - 1 - s);
+	    while (p) {
+		str = string_add_chars(str, s, p - s);
+		str = string_addc(str, p[1]);
+		s = p + 2;
+		p = memchr(s, '\\', fields[i].end - 1 - s);
 	    }
-	    str->s[j] = 0;
-	    str->len = j;
+	    str = string_add_chars(str, s, fields[i].end - s);
 	} else {
-	    str = string_from_chars(s, p - s);
+	    str = string_from_chars(s, fields[i].end - s);
 	}
-	l->el[i].type = STRING;
-	substr_set_to_full_string(&l->el[i].u.substr, str);
+	d->type = STRING;
+	d->u.str = str;
+	d++;
     }
 
     return l;
@@ -344,9 +345,10 @@ List *match_pattern(char *pattern, char *s)
     /* Match always succeeds if wildcard is at end of line. */
     if (!p[1]) {
 	list = list_new(1);
-	list->el[0].type = STRING;
 	str = string_from_chars(s, strlen(s));
-	substr_set_to_full_string(&list->el[0].u.substr, str);
+	d.type = STRING;
+	d.u.str = str;
+	list = list_add(list, &d);
 	return list;
     }
 
@@ -359,9 +361,9 @@ List *match_pattern(char *pattern, char *s)
 	list = match_pattern(p + 1, q);
 	if (list) {
 	    /* It matched.  Append a field and return the list. */
-	    d.type = STRING;
 	    str = string_from_chars(s, q - s);
-	    substr_set_to_full_string(&d.u.substr, str);
+	    d.type = STRING;
+	    d.u.str = str;
 	    list = list_add(list, &d);
 	    string_discard(str);
 	    return list;

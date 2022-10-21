@@ -18,6 +18,7 @@ static void find_extreme(int which);
 void op_version(void)
 {
     List *version;
+    Data *d;
 
     /* Take no arguments. */
     if (!func_init_0())
@@ -25,10 +26,11 @@ void op_version(void)
 
     /* Construct a list of the version numbers and push it. */
     version = list_new(3);
-    version->el[0].type = version->el[1].type = version->el[2].type = INTEGER;
-    version->el[0].u.val = VERSION_MAJOR;
-    version->el[1].u.val = VERSION_MINOR;
-    version->el[2].u.val = VERSION_BUGFIX;
+    d = list_empty_spaces(version, 3);
+    d[0].type = d[1].type = d[2].type = INTEGER;
+    d[0].u.val = VERSION_MAJOR;
+    d[1].u.val = VERSION_MINOR;
+    d[2].u.val = VERSION_BUGFIX;
     push_list(version);
     list_discard(version);
 }

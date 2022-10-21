@@ -4,7 +4,7 @@
 
 #include <stdio.h>
 #include "x.tab.h"
-#include "data.h"
+#include "dict.h"
 #include "memory.h"
 #include "ident.h"
 
@@ -75,24 +75,23 @@ Dict *dict_new_empty(void)
 
 Dict *dict_from_slices(List *slices)
 {
-    int i;
     List *keys, *values;
     Dict *dict;
+    Data *d;
 
     /* Make lists for keys and values. */
-    keys = list_new(slices->len);
-    values = list_new(slices->len);
+    keys = list_new(list_length(slices));
+    values = list_new(list_length(slices));
 
-    for (i = 0; i < slices->len; i++) {
-	if (slices->el[i].type != LIST || slices->el[i].u.sublist.span != 2) {
+    for (d = list_first(slices); d; d = list_next(slices, d)) {
+	if (d->type != LIST || list_length(d->u.list) != 2) {
 	    /* Invalid slice.  Throw away what we had and return NULL. */
-	    keys->len = values->len = i;
 	    list_discard(keys);
 	    list_discard(values);
 	    return NULL;
 	}
-	data_dup(&keys->el[i], data_dptr(&slices->el[i]));
-	data_dup(&values->el[i], data_dptr(&slices->el[i]) + 1);
+	keys = list_add(keys, list_elem(d->u.list, 0));
+	values = list_add(values, list_elem(d->u.list, 1));
     }
 
     /* Slices were all valid; return new dict. */
@@ -241,15 +240,15 @@ String *dict_add_literal_to_str(String *str, Dict *dict)
 {
     int i;
 
-    str = string_add(str, "#[", 2);
+    str = string_add_chars(str, "#[", 2);
     for (i = 0; i < dict->keys->len; i++) {
 	str = string_addc(str, '[');
 	str = data_add_literal_to_str(str, &dict->keys->el[i]);
-	str = string_add(str, ", ", 2);
+	str = string_add_chars(str, ", ", 2);
 	str = data_add_literal_to_str(str, &dict->values->el[i]);
 	str = string_addc(str, ']');
 	if (i < dict->keys->len - 1)
-	    str = string_add(str, ", ", 2);
+	    str = string_add_chars(str, ", ", 2);
     }	
     return string_addc(str, ']');
 }
@@ -295,6 +294,11 @@ static int search(Dict *dict, Data *key)
     }
 
     return -1;
+}
+
+int dict_size(Dict *dict)
+{
+    return list_length(dict->keys);
 }
 
 static void double_hashtab_size(Dict *dict)

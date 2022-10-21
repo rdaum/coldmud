@@ -4,7 +4,7 @@
 
 #include <ctype.h>
 #include "x.tab.h"
-#include "data.h"
+#include "buffer.h"
 #include "memory.h"
 
 #define BUFALLOC(len)		emalloc(sizeof(Buffer) + (len) - 1)
@@ -123,7 +123,7 @@ List *buffer_to_strings(Buffer *buf, Buffer *sep)
 	str->len = s - str->s;
 
 	d.type = STRING;
-	substr_set_to_full_string(&d.u.substr, str);
+	d.u.str = str;
 	result = list_add(result, &d);
 	string_discard(str);
 
@@ -141,24 +141,29 @@ List *buffer_to_strings(Buffer *buf, Buffer *sep)
     return result;
 }
 
-Buffer *buffer_from_strings(Data *d, int n, Buffer *sep)
+Buffer *buffer_from_strings(List *string_list, Buffer *sep)
 {
+    Data *string_data;
     Buffer *buf;
-    int i, len, pos;
+    int num_strings, i, len, pos;
     unsigned char *s;
+
+    string_data = list_first(string_list);
+    num_strings = list_length(string_list);
 
     /* Find length of finished buffer. */
     len = 0;
-    for (i = 0; i < n; i++)
-	len += d[i].u.substr.span + ((sep) ? sep->len : 2);
+    for (i = 0; i < num_strings; i++)
+	len += string_length(string_data[i].u.str) + ((sep) ? sep->len : 2);
 
     /* Make a buffer and copy the strings into it. */
     buf = buffer_new(len);
     pos = 0;
-    for (i = 0; i < n; i++) {
-	s = (unsigned char *) data_sptr(&d[i]);
-	MEMCPY(buf->s + pos, s, d->u.substr.span);
-	pos += d->u.substr.span;
+    for (i = 0; i < num_strings; i++) {
+	s = string_chars(string_data[i].u.str);
+	len = string_length(string_data[i].u.str);
+	MEMCPY(buf->s + pos, s, len);
+	pos += len;
 	if (sep) {
 	    MEMCPY(buf->s + pos, sep->s, sep->len);
 	    pos += sep->len;

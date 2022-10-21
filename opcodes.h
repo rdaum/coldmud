@@ -5,12 +5,15 @@
 
 typedef struct op_info Op_info;
 
+#include "ident.h"
+
 struct op_info {
     long opcode;
     char *name;
     void (*func)(void);
     int arg1;
     int arg2;
+    Ident symbol;
 };
 
 extern Op_info op_table[LAST_TOKEN];

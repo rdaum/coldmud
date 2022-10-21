@@ -134,6 +134,19 @@ char *strcchr(char *s, int c)
     return (c) ? NULL : s;
 }
 
+char *strcstr(char *s, char *search)
+{
+    char *p;
+    int search_len = strlen(search);
+
+    for (p = strcchr(s, *search); p; p = strcchr(p + 1, *search)) {
+	if (strnccmp(p, search, search_len) == 0)
+	    return p;
+    }
+
+    return NULL;
+}
+
 /* A random number generator.  A lot of Unix rand() implementations don't
  * produce very random low bits, so we shift by eight bits if we can do that
  * without truncating the range. */
@@ -167,7 +180,7 @@ String *vformat(char *fmt, va_list arg)
     char *p, *s;
     Number_buf nbuf;
 
-    buf = string_empty(0);
+    buf = string_new(0);
 
     while (1) {
 
@@ -175,10 +188,10 @@ String *vformat(char *fmt, va_list arg)
 	p = strchr(fmt, '%');
 	if (!p || !p[1]) {
 	    /* No more percents; copy rest and stop. */
-	    buf = string_add(buf, fmt, strlen(fmt));
+	    buf = string_add_chars(buf, fmt, strlen(fmt));
 	    break;
 	}
-	buf = string_add(buf, fmt, p - fmt);
+	buf = string_add_chars(buf, fmt, p - fmt);
 
 	switch (p[1]) {
 
@@ -188,38 +201,38 @@ String *vformat(char *fmt, va_list arg)
 
 	  case 's':
 	    s = va_arg(arg, char *);
-	    buf = string_add(buf, s, strlen(s));
+	    buf = string_add_chars(buf, s, strlen(s));
 	    break;
 
 	  case 'S':
-	    s = va_arg(arg, char *);
-	    buf = string_add(buf, s, va_arg(arg, int));
+	    str = va_arg(arg, String *);
+	    buf = string_add(buf, str);
 	    break;
 
 	  case 'd':
 	    s = long_to_ascii(va_arg(arg, int), nbuf);
-	    buf = string_add(buf, s, strlen(s));
+	    buf = string_add_chars(buf, s, strlen(s));
 	    break;
 
 	  case 'l':
 	    s = long_to_ascii(va_arg(arg, long), nbuf);
-	    buf = string_add(buf, s, strlen(s));
+	    buf = string_add_chars(buf, s, strlen(s));
 	    break;
 
 	  case 'D':
 	    str = data_to_literal(va_arg(arg, Data *));
-	    if (str->len > MAX_DATA_DISPLAY) {
+	    if (string_length(str) > MAX_DATA_DISPLAY) {
 		str = string_truncate(str, MAX_DATA_DISPLAY - 3);
-		str = string_add(str, "...", 3);
+		str = string_add_chars(str, "...", 3);
 	    }
-	    buf = string_add(buf, str->s, str->len);
+	    buf = string_add_chars(buf, string_chars(str), string_length(str));
 	    string_discard(str);
 	    break;
 
 	  case 'I':
 	    s = ident_name(va_arg(arg, long));
 	    if (is_valid_ident(s))
-		buf = string_add(buf, s, strlen(s));
+		buf = string_add_chars(buf, s, strlen(s));
 	    else
 		buf = string_add_unparsed(buf, s, strlen(s));
 	    break;
@@ -251,7 +264,7 @@ void fformat(FILE *fp, char *fmt, ...)
     va_start(arg, fmt);
 
     str = vformat(fmt, arg);
-    fputs(str->s, fp);
+    fputs(string_chars(str), fp);
     string_discard(str);
 
     va_end(arg);
@@ -263,13 +276,13 @@ String *fgetstring(FILE *fp)
     char buf[1000];
     int len;
 
-    line = string_empty(0);
+    line = string_new(0);
     while (fgets(buf, 1000, fp)) {
 	len = strlen(buf);
 	if (buf[len - 1] == '\n')
-	    return string_add(line, buf, len - 1);
+	    return string_add_chars(line, buf, len - 1);
 	else
-	    line = string_add(line, buf, len);
+	    line = string_add_chars(line, buf, len);
     }
     if (line->len) {
 	return line;
@@ -321,7 +334,7 @@ long parse_ident(char **sptr)
 	str = string_from_chars(*sptr, s - *sptr);
     }
 
-    id = ident_get(str->s);
+    id = ident_get(string_chars(str));
     string_discard(str);
     *sptr = s;
     return id;

@@ -113,8 +113,8 @@ void op_for_list(void)
 	return;
     }
 
-    len = (domain->type == LIST) ? domain->u.sublist.span
-				 : domain->u.dict->keys->len;
+    len = (domain->type == LIST) ? list_length(domain->u.list)
+				 : dict_size(domain->u.dict);
 
     if (counter->u.val >= len) {
 	/* We're finished; pop the list and counter and jump to the end. */
@@ -127,11 +127,11 @@ void op_for_list(void)
      * the counter. */
     data_discard(&stack[var]);
     if (domain->type == LIST) {
-	data_dup(&stack[var], data_dptr(domain) + counter->u.val);
+	data_dup(&stack[var], list_elem(domain->u.list, counter->u.val));
     } else {
-	stack[var].type = LIST;
 	pair = dict_key_value_pair(domain->u.dict, counter->u.val);
-	sublist_set_to_full_list(&stack[var].u.sublist, pair);
+	stack[var].type = LIST;
+	stack[var].u.list = pair;
     }
     counter->u.val++;
     cur_frame->pc += 2;
@@ -490,6 +490,7 @@ void op_message(void)
     int arg_start, result, ind;
     Data *target;
     long message, dbref;
+    Frob *frob;
 
     ind = cur_frame->opcodes[cur_frame->pc++];
     message = object_get_ident(cur_frame->method->object, ind);
@@ -500,16 +501,12 @@ void op_message(void)
     if (target->type == DBREF) {
 	dbref = target->u.dbref;
     } else if (target->type == FROB) {
-	/* Convert frob to rep and pass as first argument. */
-	dbref = target->u.frob.class;
-	target->type = target->u.frob.rep_type;
-	if (target->u.frob.rep_type == LIST) {
-	    sublist_set_to_full_list(&target->u.sublist,
-				     target->u.frob.rep.list);
-	} else {
-	    target->u.dict = target->u.frob.rep.dict;
-	}
+	/* Convert the frob to its rep and pass as first argument. */
+	frob = target->u.frob;
+	dbref = frob->class;
+	*target = frob->rep;
 	arg_start--;
+	TFREE(frob, 1);
     } else {
 	throw(type_id, "Target (%D) is not a dbref or frob.", target);
 	return;
@@ -547,21 +544,15 @@ void op_expr_message(void)
     if (target->type == DBREF) {
 	dbref = target->u.dbref;
     } else if (target->type == FROB) {
-	dbref = target->u.frob.class;
+	dbref = target->u.frob->class;
 
 	/* Pass frob rep as first argument (where the message data is now). */
 	data_discard(message_data);
-	message_data->type = target->u.frob.rep_type;
-	if (target->u.frob.rep_type == LIST) {
-	    sublist_set_to_full_list(&target->u.sublist,
-				     target->u.frob.rep.list);
-	} else {
-	    message_data->u.dict = target->u.frob.rep.dict;
-	}
+	*message_data = target->u.frob->rep;
 	arg_start--;
 
-	/* Replace frob with dummy so that the rep doesn't get discarded an
-	 * extra time when the frame returns. */
+	/* Discard the frob and replace it with a dummy value. */
+	TFREE(target->u.frob, 1);
 	target->type = INTEGER;
 	target->u.val = 0;
     } else {
@@ -588,15 +579,18 @@ void op_list(void)
 {
     int start, len;
     List *list;
+    Data *d;
 
-    /* Transfers stack reference counts to list. */
     start = arg_starts[--arg_pos];
     len = stack_pos - start;
+
+    /* Move the elements into a list. */
     list = list_new(len);
-    MEMCPY(list->el, &stack[start], len);
+    d = list_empty_spaces(list, len);
+    MEMCPY(d, &stack[start], len);
+    stack_pos = start;
 
     /* Push the list onto the stack where elements began. */
-    stack_pos = start;
     push_list(list);
     list_discard(list);
 }
@@ -605,16 +599,19 @@ void op_dict(void)
 {
     int start, len;
     List *list;
+    Data *d;
     Dict *dict;
 
-    /* Transfers stack reference counts to list. */
     start = arg_starts[--arg_pos];
     len = stack_pos - start;
+
+    /* Move the elements into a list. */
     list = list_new(len);
-    MEMCPY(list->el, &stack[start], len);
+    d = list_empty_spaces(list, len);
+    MEMCPY(d, &stack[start], len);
     stack_pos = start;
 
-    /* Construct a mapping from the list. */
+    /* Construct a dictionary from the list. */
     dict = dict_from_slices(list);
     list_discard(list);
     if (!dict) {
@@ -659,12 +656,9 @@ void op_frob(void)
 	throw(type_id, "Rep (%D) is not a list or dictionary.", rep);
     } else {
 	class->type = FROB;
-	class->u.frob.class = class->u.dbref;
-	class->u.frob.rep_type = rep->type;
-	if (rep->type == LIST)
-	    class->u.frob.rep.list = list_from_sublist(&rep->u.sublist);
-	else
-	    class->u.frob.rep.dict = dict_dup(rep->u.dict);
+	class->u.frob = TMALLOC(Frob, 1);
+	class->u.frob->class = class->u.dbref;
+	data_dup(&class->u.frob->rep, rep);
 	pop(1);
     }
 }
@@ -698,7 +692,7 @@ void op_index(void)
     }
 
     /* It's not a dictionary.  Make sure ind is within bounds. */
-    len = (d->type == LIST) ? d->u.sublist.span : d->u.substr.span;
+    len = (d->type == LIST) ? list_length(d->u.list) : string_length(d->u.str);
     i = ind->u.val - 1;
     if (i < 0) {
 	throw(range_id, "Index (%d) is less than one.", i + 1);
@@ -708,14 +702,12 @@ void op_index(void)
     } else {
 	/* Replace d with the element of d numbered by ind. */
 	if (d->type == LIST) {
-	    data_dup(&element, data_dptr(d) + i);
+	    data_dup(&element, list_elem(d->u.list, i));
 	    pop(2);
 	    stack[stack_pos] = element;
 	    stack_pos++;
 	} else {
-	    str = string_new(1);
-	    str->s[0] = *(data_sptr(d) + i);
-	    str->s[1] = 0;
+	    str = string_from_chars(string_chars(d->u.str) + i, 1);
 	    pop(2);
 	    push_string(str);
 	    string_discard(str);
@@ -747,22 +739,23 @@ void op_or(void)
 
 void op_splice(void)
 {
-    Sublist sl;
     int i;
+    List *list;
+    Data *d;
 
     if (stack[stack_pos - 1].type != LIST) {
 	throw(type_id, "%D is not a list.", &stack[stack_pos - 1]);
 	return;
     }
+    list = stack[stack_pos - 1].u.list;
 
     /* Splice the list onto the stack, overwriting the list. */
-    sl = stack[stack_pos - 1].u.sublist;
-    check_stack(sl.span - 1);
-    for (i = 0; i < sl.span; i++)
-	data_dup(&stack[stack_pos - 1 + i], &sl.list->el[sl.start + i]);
-    stack_pos += sl.span - 1;
+    check_stack(list_length(list) - 1);
+    for (d = list_first(list); d; d = list_next(list, d))
+	data_dup(&stack[stack_pos - 1 + i], d);
+    stack_pos += list_length(list) - 1;
 
-    list_discard(sl.list);
+    list_discard(list);
 }
 
 void op_critical(void)

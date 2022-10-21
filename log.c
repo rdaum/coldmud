@@ -67,7 +67,7 @@ void write_log(char *fmt, ...)
 
     fputs(timestr, stderr);
     fputs(": ", stderr);
-    fputs(str->s, stderr);
+    fputs(string_chars(str), stderr);
     fputc('\n', stderr);
 
     string_discard(str);

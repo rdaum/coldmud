@@ -161,6 +161,13 @@ void text_dump_read(FILE *fp)
 		p++;
 	    data_from_literal(&d, p);
 
+	    if (d.type == -1) {
+		write_log("ERROR: class %d name %I unparseable: %s", dbref,
+			  name, p);
+		d.type = INTEGER;
+		d.u.val = 0;
+	    }
+
 	    /* Create the variable. */
 	    object_put_var(obj, dbref, name, &d);
 
@@ -253,23 +260,20 @@ static Method *text_dump_get_method(FILE *fp, Object *obj, char *name)
 
     code = list_new(0);
     d.type = STRING;
-    while ((line = fgetstring(fp))) {
-	if (line->len == 1 && *line->s == '.') {
+    for (line = fgetstring(fp); line; line = fgetstring(fp)) {
+	if (string_length(line) == 1 && *string_chars(line) == '.') {
 	    /* End of the code.  Compile the method, display any error
 	     * messages we may have received, and return the method. */
 	    string_discard(line);
-	    method = compile(obj, code->el, code->len, &errors);
+	    method = compile(obj, code, &errors);
 	    list_discard(code);
-	    for (i = 0; i < errors->len; i++) {
-		write_log("#%l %s: %S", obj->dbref, name,
-			  data_sptr(&errors->el[i]),
-			  errors->el[i].u.substr.span);
-	    }
+	    for (i = 0; i < errors->len; i++)
+		write_log("%l %s: %S", obj->dbref, name, errors->el[i].u.str);
 	    list_discard(errors);
 	    return method;
 	}
 
-	substr_set_to_full_string(&d.u.substr, line);
+	d.u.str = line;
 	code = list_add(code, &d);
 	string_discard(line);
     }

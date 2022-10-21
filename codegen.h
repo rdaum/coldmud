@@ -2,8 +2,6 @@
 
 #ifndef CODEGEN_H
 #define CODEGEN_H
-#include "object.h"
-#include "memory.h"
 
 typedef struct prog		Prog;
 typedef struct arguments	Arguments;
@@ -14,6 +12,9 @@ typedef struct id_list		Id_list;
 typedef struct stmt_list	Stmt_list;
 typedef struct expr_list	Expr_list;
 typedef struct case_list	Case_list;
+
+#include "object.h"
+#include "memory.h"
 
 extern Pile *compiler_pile;
 

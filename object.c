@@ -39,10 +39,10 @@ struct search_params {
 
 struct {
     long stamp;
-    long dbref;
-    long name;
-    long after;
-    long loc;
+    Dbref dbref;
+    Ident name;
+    Dbref after;
+    Dbref loc;
 } method_cache[METHOD_CACHE_SIZE];
 
 static void object_update_parents(Object *object,
@@ -177,9 +177,8 @@ void object_free(Object *object)
 void object_destroy(Object *object)
 {
     List *children;
+    Data *d, this;
     Object *kid;
-    int i;
-    Data d;
 
     /* Invalidate the method cache. */
     cur_stamp++;
@@ -191,11 +190,12 @@ void object_destroy(Object *object)
      * Also, check if any kid hits zero parents, and reparent it to our
      * parents if it does. */
     children = object->children;
-    d.type = DBREF;
-    d.u.dbref = object->dbref;
-    for (i = 0; i < children->len; i++) {
-	kid = cache_retrieve(children->el[i].u.dbref);
-	kid->parents = list_delete_element(kid->parents, &d);
+
+    this.type = DBREF;
+    this.u.dbref = object->dbref;
+    for (d = list_first(children); d; d = list_next(children, d)) {
+	kid = cache_retrieve(d->u.dbref);
+	kid->parents = list_delete_element(kid->parents, &this);
 	if (!kid->parents->len) {
 	    list_discard(kid->parents);
 	    kid->parents = list_dup(object->parents);
@@ -216,19 +216,19 @@ void object_destroy(Object *object)
 static void object_update_parents(Object *object,
 				  List *(*list_op)(List *, Data *))
 {
-    int i;
     Object *p;
     List *parents;
-    Data d;
+    Data *d, this;
 
     /* Make a data structure for the children list. */
-    d.type = DBREF;
-    d.u.dbref = object->dbref;
+    this.type = DBREF;
+    this.u.dbref = object->dbref;
 
     parents = object->parents;
-    for (i = 0; i < parents->len; i++) {
-	p = cache_retrieve(parents->el[i].u.dbref);
-	p->children = (*list_op)(p->children, &d);
+
+    for (d = list_first(parents); d; d = list_next(parents, d)) {
+	p = cache_retrieve(d->u.dbref);
+	p->children = (*list_op)(p->children, &this);
 	p->dirty = 1;
 	cache_discard(p);
     }
@@ -237,23 +237,13 @@ static void object_update_parents(Object *object,
 List *object_ancestors(long dbref)
 {
     List *ancestors;
-    int i, len;
-    long id;
 
     /* Get the ancestor list, backwards. */
     ancestors = list_new(0);
     cur_search++;
     ancestors = object_ancestors_aux(dbref, ancestors);
 
-    /* Reverse the list. */
-    len = ancestors->len;
-    for (i = 0; i < len / 2; i++) {
-	id = ancestors->el[i].u.dbref;
-	ancestors->el[i].u.dbref = ancestors->el[len - i - 1].u.dbref;
-	ancestors->el[len - i - 1].u.dbref = id;
-    }
-
-    return ancestors;
+    return list_reverse(ancestors);
 }
 
 /* Modifies ancestors.  Returns a backwards list. */
@@ -261,8 +251,7 @@ static List *object_ancestors_aux(long dbref, List *ancestors)
 {
     Object *object;
     List *parents;
-    Data d;
-    int i;
+    Data *d, this;
 
     object = cache_retrieve(dbref);
     if (object->search == cur_search) {
@@ -275,13 +264,13 @@ static List *object_ancestors_aux(long dbref, List *ancestors)
     parents = list_dup(object->parents);
     cache_discard(object);
 
-    for (i = parents->len - 1; i >= 0; i--)
-	ancestors = object_ancestors_aux(parents->el[i].u.dbref, ancestors);
+    for (d = list_last(parents); d; d = list_prev(parents, d))
+	ancestors = object_ancestors_aux(d->u.dbref, ancestors);
     list_discard(parents);
 
-    d.type = DBREF;
-    d.u.dbref = dbref;
-    return list_add(ancestors, &d);
+    this.type = DBREF;
+    this.u.dbref = dbref;
+    return list_add(ancestors, &this);
 }
 
 int object_has_ancestor(long dbref, long ancestor)
@@ -296,7 +285,7 @@ static int object_has_ancestor_aux(long dbref, long ancestor)
 {
     Object *object;
     List *parents;
-    int i;
+    Data *d;
 
     object = cache_retrieve(dbref);
 
@@ -311,15 +300,15 @@ static int object_has_ancestor_aux(long dbref, long ancestor)
     parents = list_dup(object->parents);
     cache_discard(object);
 
-    for (i = 0; i < parents->len; i++) {
-	if (parents->el[i].u.dbref == ancestor) {
+    for (d = list_first(parents); d; d = list_next(parents, d)) {
+	if (d->u.dbref == ancestor) {
 	    list_discard(parents);
 	    return 1;
 	}
     }
 
-    for (i = 0; i < parents->len; i++) {
-	if (object_has_ancestor_aux(parents->el[i].u.dbref, ancestor)) {
+    for (d = list_first(parents); d; d = list_next(parents, d)) {
+	if (object_has_ancestor_aux(d->u.dbref, ancestor)) {
 	    list_discard(parents);
 	    return 1;
 	}
@@ -329,20 +318,20 @@ static int object_has_ancestor_aux(long dbref, long ancestor)
     return 0;
 }
 
-int object_change_parents(Object *object, Sublist *parents)
+int object_change_parents(Object *object, List *parents)
 {
-    int i;
-    long pdbref;
+    Dbref parent;
+    Data *d;
 
     /* Make sure that all parents are valid objects, and that they don't create
      * any cycles.  If something is wrong, return the index of the parent that
      * caused the problem. */
-    for (i = parents->start; i < parents->start + parents->span; i++) {
-	if (parents->list->el[i].type != DBREF)
-	    return i;
-	pdbref = parents->list->el[i].u.dbref;
-	if (!cache_check(pdbref) || object_has_ancestor(pdbref, object->dbref))
-	    return i;
+    for (d = list_first(parents); d; d = list_next(parents, d)) {
+	if (d->type != DBREF)
+	    return d - list_first(parents);
+	parent = d->u.dbref;
+	if (!cache_check(parent) || object_has_ancestor(parent, object->dbref))
+	    return d - list_first(parents);
     }
 
     /* Invalidate the method cache. */
@@ -355,14 +344,14 @@ int object_change_parents(Object *object, Sublist *parents)
 
     /* Set the object's parents list to a copy of the new list, and tell all
      * our new parents that we're a kid. */
-    object->parents = list_from_sublist(parents);
+    object->parents = list_dup(parents);
     object_update_parents(object, list_add);
 
     /* Return -1, meaning that all the parents were okay. */
     return -1;
 }
 
-int object_add_string(Object *object, String *string)
+int object_add_string(Object *object, String *str)
 {
     int i, blank = -1;
 
@@ -373,7 +362,7 @@ int object_add_string(Object *object, String *string)
     for (i = 0; i < object->num_strings; i++) {
 	if (!object->strings[i].str) {
 	    blank = i;
-	} else if (strcmp(string->s, object->strings[i].str->s) == 0) {
+	} else if (string_cmp(str, object->strings[i].str) == 0) {
 	    object->strings[i].refs++;
 	    return i;
 	}
@@ -381,7 +370,7 @@ int object_add_string(Object *object, String *string)
 
     /* Fill in a blank if we found one. */
     if (blank != -1) {
-	object->strings[blank].str = string_dup(string);
+	object->strings[blank].str = string_dup(str);
 	object->strings[blank].refs = 1;
 	return blank;
     }
@@ -394,7 +383,7 @@ int object_add_string(Object *object, String *string)
     }
 
     /* Add the string to the end of the table. */
-    object->strings[i].str = string_dup(string);
+    object->strings[i].str = string_dup(str);
     object->strings[i].refs = 1;
     object->num_strings++;
 
@@ -649,7 +638,7 @@ Method *object_find_method(long dbref, long name)
     Object *object;
     Method *method, *local_method;
     List *parents;
-    int i;
+    Data *d;
 
     /* Look for cached value. */
     method = method_cache_check(dbref, name, -1);
@@ -661,8 +650,8 @@ Method *object_find_method(long dbref, long name)
     cache_discard(object);
 
     /* If the object has only one parent, call this function recursively. */
-    if (parents->len == 1) {
-	method = object_find_method(parents->el[0].u.dbref, name);
+    if (list_length(parents) == 1) {
+	method = object_find_method(list_elem(parents, 0)->u.dbref, name);
     } else {
 	/* We've hit a bulge; resort to the reverse depth-first search. */
 	cur_search++;
@@ -670,8 +659,8 @@ Method *object_find_method(long dbref, long name)
 	params.stop_at = -1;
 	params.done = 0;
 	params.last_method_found = NULL;
-	for (i = parents->len - 1; i >= 0 && !params.done; i--)
-	    search_object(parents->el[i].u.dbref, &params);
+	for (d = list_last(parents); d; d = list_prev(parents, d))
+	    search_object(d->u.dbref, &params);
 	method = params.last_method_found;
     }
 
@@ -703,8 +692,9 @@ Method *object_find_next_method(long dbref, long name, long after)
     Search_params params;
     Object *object;
     Method *method;
+    List *parents;
+    Data *d;
     long parent;
-    int i;
 
     /* Check cache. */
     method = method_cache_check(dbref, name, after);
@@ -712,10 +702,11 @@ Method *object_find_next_method(long dbref, long name, long after)
 	return method;
 
     object = cache_retrieve(dbref);
+    parents = object->parents;
 
-    if (object->parents->len == 1) {
+    if (list_length(parents) == 1) {
 	/* Object has only one parent; search recursively. */
-	parent = object->parents->el[0].u.dbref;
+	parent = list_elem(parents, 0)->u.dbref;
 	cache_discard(object);
 	if (dbref == after)
 	    method = object_find_method(parent, name);
@@ -728,8 +719,8 @@ Method *object_find_next_method(long dbref, long name, long after)
 	params.stop_at = (dbref == after) ? -1 : after;
 	params.done = 0;
 	params.last_method_found = NULL;
-	for (i = object->parents->len - 1; i >= 0 && !params.done; i--)
-	    search_object(object->parents->el[i].u.dbref, &params);
+	for (d = list_last(parents); d; d = list_prev(parents, d))
+	    search_object(d->u.dbref, &params);
 
 	cache_discard(object);
 	method = params.last_method_found;
@@ -750,7 +741,7 @@ static void search_object(long dbref, Search_params *params)
     Object *object;
     Method *method;
     List *parents;
-    int i;
+    Data *d;
 
     object = cache_retrieve(dbref);
 
@@ -767,8 +758,8 @@ static void search_object(long dbref, Search_params *params)
     cache_discard(object);
 
     /* Traverse the parents list backwards. */
-    for (i = parents->len - 1; i >= 0 && !params->done; i--)
-	search_object(parents->el[i].u.dbref, params);
+    for (d = list_last(parents); d; d = list_prev(parents, d))
+	search_object(d->u.dbref, params);
     list_discard(object->parents);
 
     /* If the search is done, don't visit this object. */
@@ -1036,7 +1027,7 @@ void object_text_dump(long dbref, FILE *fp)
 {
     Object *obj;
     List *parents;
-    int i;
+    Data *d;
 
     obj = cache_retrieve(dbref);
 
@@ -1053,8 +1044,8 @@ void object_text_dump(long dbref, FILE *fp)
     cache_discard(obj);
 
     /* Dump any parents which haven't already been dumped. */
-    for (i = 0; i < parents->len; i++)
-	object_text_dump(parents->el[i].u.dbref, fp);
+    for (d = list_first(parents); d; d = list_next(parents, d))
+	object_text_dump(d->u.dbref, fp);
 
     /* Now discard the parents list and retrieve the object again. */
     list_discard(parents);
@@ -1069,16 +1060,18 @@ void object_text_dump(long dbref, FILE *fp)
 static void object_text_dump_aux(Object *obj, FILE *fp)
 {
     String *str;
-    List *code;
-    int i, j;
+    List *code, *parents;
+    Data *d;
+    int i;
     Var *var;
 
     /* Output parents. */
-    for (i = 0; i < obj->parents->len; i++)
-	fformat(fp, "parent #%l\n", obj->parents->el[i].u.dbref);
+    parents = obj->parents;
+    for (d = list_first(parents); d; d = list_next(parents, d))
+	fformat(fp, "parent #%l\n", d->u.dbref);
 
     /* Output creation command. */
-    fformat(fp, "object #%l\n", obj->dbref);
+    fformat(fp, "object #%l\n\n", obj->dbref);
 
     /* Output commands to set obj variables. */
     for (i = 0; i < obj->vars.size; i++) {
@@ -1086,9 +1079,11 @@ static void object_text_dump_aux(Object *obj, FILE *fp)
 	if (var->name == -1)
 	    continue;
 	str = data_to_literal(&var->val);
-	fformat(fp, "var %d %I %s\n", var->class, var->name, str->s);
+	fformat(fp, "var %d %I %S\n", var->class, var->name, str);
 	string_discard(str);
     }
+
+    putc('\n', fp);
 
     /* Output method definitions. */
     for (i = 0; i < obj->methods.size; i++) {
@@ -1096,12 +1091,13 @@ static void object_text_dump_aux(Object *obj, FILE *fp)
 	    continue;
 	fformat(fp, "method %I\n", obj->methods.tab[i].m->name);
 	code = decompile(obj->methods.tab[i].m, obj, 4, 1);
-	for (j = 0; j < code->len; j++) {
-	    fputs(code->el[j].u.substr.str->s, fp);
+	for (d = list_first(code); d; d = list_next(code, d)) {
+	    fputs("    ", fp);
+	    fputs(string_chars(d->u.str), fp);
 	    putc('\n', fp);
 	}
 	list_discard(code);
-	fputs(".\n", fp);
+	fputs(".\n\n", fp);
     }
 }
 

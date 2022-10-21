@@ -14,8 +14,8 @@
 static char *string_token(char *s, int len, int *token_len);
 static char *identifier_token(char *s, int len, int *token_len);
 
-static Data *code;
-static int num_lines, cur_line, cur_pos;
+static List *code;
+static cur_line, cur_pos;
 
 /* Words with same first letters must be together. */
 static struct {
@@ -84,10 +84,9 @@ void init_token(void)
     }
 }
 
-void lex_start(Data *code_arg, int lines)
+void lex_start(List *code_list)
 {
-    code = code_arg;
-    num_lines = lines;
+    code = code_list;
     cur_line = cur_pos = 0;
 }
 
@@ -104,14 +103,18 @@ int is_valid_ident(char *s)
 
 int yylex(void)
 {
+    Data *d;
+    String *line;
     char *s = NULL, *word;
     int len = 0, i, j, start, type;
 
     /* Find the beginning of the next token. */
-    while (cur_line < num_lines) {
+    while (cur_line < list_length(code)) {
 	/* Fetch text and length of current line. */
-	s = data_sptr(&code[cur_line]);
-	len = code[cur_line].u.substr.span;
+	d = list_elem(code, cur_line);
+	line = d->u.str;
+	s = string_chars(line);
+	len = string_length(line);
 
 	/* Scan over line for a non-space character. */
 	while (cur_pos < len && isspace(s[cur_pos]))
@@ -125,7 +128,7 @@ int yylex(void)
 	cur_line++;
 	cur_pos = 0;
     }
-    if (cur_line == num_lines) {
+    if (!d) {
 	return 0;
     } else {
 	s += cur_pos;
@@ -182,9 +185,9 @@ int yylex(void)
     }
 
     /* Check if it's an object literal, symbol, or error code. */
-    if ((*s == '$' || *s == '\'' || *s == '~') && len > 1) {
+    if ((*s == '$' || *s == '\'' || *s == '~')) {
 	type = ((*s == '$') ? NAME : ((*s == '\'') ? SYMBOL : ERROR));
-	if (s[1] == '"') {
+	if (len > 1 && s[1] == '"') {
 	    yylval.s = string_token(s + 1, len - 1, &i);
 	    cur_pos += i + 1;
 	    return type;

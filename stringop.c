@@ -8,13 +8,9 @@
 #include "execute.h"
 #include "cmstring.h"
 #include "data.h"
-#include "util.h"
 #include "match.h"
 #include "ident.h"
-
-static int do_match(char *s, int slen, char *m, int mlen, char *t, int tlen);
-
-static char *regexp_error;
+#include "util.h"
 
 void op_strlen(void)
 {
@@ -26,14 +22,14 @@ void op_strlen(void)
 	return;
 
     /* Replace the argument with its length. */
-    len = args[0].u.substr.span;
+    len = string_length(args[0].u.str);
     pop(1);
     push_int(len);
 }
 
 void op_substr(void)
 {
-    int num_args, start, span;
+    int num_args, start, len, string_len;
     Data *args;
 
     /* Accept a string for the initial string, an integer specifying the start
@@ -42,20 +38,23 @@ void op_substr(void)
     if (!func_init_2_or_3(&args, &num_args, STRING, INTEGER, INTEGER))
 	return;
 
+    string_len = string_length(args[0].u.str);
     start = args[1].u.val - 1;
-    span = (num_args == 3) ? args[2].u.val : args[0].u.substr.span - start;
+    len = (num_args == 3) ? args[2].u.val : string_len - start;
+
+    /* Make sure range is in bounds. */
     if (start < 0) {
 	throw(range_id, "Start (%d) is less than one.", start + 1);
-    } else if (span < 0) {
-	throw(range_id, "Span (%d) is less than zero.", span);
-    } else if (start + span > args[0].u.substr.span) {
+    } else if (len < 0) {
+	throw(range_id, "Length (%d) is less than zero.", len);
+    } else if (start + len > string_len) {
 	throw(range_id,
 	      "The substring extends to %d, past the end of the string (%d).",
-	      start + span, args[0].u.substr.span);
+	      start + len, string_len);
     } else {
 	/* Replace first argument with substring, and pop other arguments. */
-	args[0].u.substr.start += start;
-	args[0].u.substr.span = span;
+	anticipate_assignment();
+	args[0].u.str = string_substring(args[0].u.str, start, len);
 	pop(num_args - 1);
     }
 }
@@ -65,7 +64,7 @@ void op_explode(void)
     int num_args, sep_len, len, want_blanks;
     Data *args, d;
     List *exploded;
-    char *sep, *s, *p, *word_start;
+    char *sep, *s, *p, *q;
     String *word;
 
     /* Accept a string to explode and an optional string for the word
@@ -73,53 +72,37 @@ void op_explode(void)
     if (!func_init_1_to_3(&args, &num_args, STRING, STRING, 0))
 	return;
 
-    if (num_args >= 2 && args[1].u.substr.span == 0) {
-	throw(range_id, "The separator string is empty.");
-	return;
-    }
-
     want_blanks = (num_args == 3) ? data_true(&args[2]) : 0;
     if (num_args >= 2) {
-	sep = data_sptr(&args[1]);
-	sep_len = args[1].u.substr.span;
+	sep = string_chars(args[1].u.str);
+	sep_len = string_length(args[1].u.str);
     } else {
 	sep = " ";
 	sep_len = 1;
     }
-    s = data_sptr(&args[0]);
-    len = args[0].u.substr.span;
+
+    s = string_chars(args[0].u.str);
+    len = string_length(args[0].u.str);
 
     exploded = list_new(0);
-    word_start = p = s;
-    while (p + sep_len <= s + len) {
-	/* Look for first character of sep starting from p. */
-	p = memchr(p, *sep, (s + len) - (p + sep_len - 1));
-	if (!p)
-	    break;
-
-	/* Keep going if we don't match all of the separator. */
-	if (strnccmp(p + 1, sep + 1, sep_len - 1) != 0) {
-	    p++;
-	    continue;
-	}
-
-	/* We found a word separator. */
-	if (want_blanks || p > word_start) {
+    p = s;
+    for (q = strcstr(p, sep); q; q = strcstr(p, sep)) {
+	if (want_blanks || q > p) {
 	    /* Add the word. */
-	    word = string_from_chars(word_start, p - word_start);
+	    word = string_from_chars(p, q - p);
 	    d.type = STRING;
-	    substr_set_to_full_string(&d.u.substr, word);
+	    d.u.str = word;
 	    exploded = list_add(exploded, &d);
 	    string_discard(word);
 	}
-	word_start = p = p + sep_len;
+	p = q + sep_len;
     }
 
-    if (want_blanks || word_start < s + len) {
+    if (*p || want_blanks) {
 	/* Add the last word. */
-	word = string_from_chars(word_start, s + len - word_start);
+	word = string_from_chars(p, len - (p - s));
 	d.type = STRING;
-	substr_set_to_full_string(&d.u.substr, word);
+	d.u.str = word;
 	exploded = list_add(exploded, &d);
 	string_discard(word);
     }
@@ -132,44 +115,31 @@ void op_explode(void)
 
 void op_strsub(void)
 {
-    int slen, rlen, len, i, start;
+    int len, search_len, replace_len;
     Data *args;
-    char *sstr, *rstr, *s;
+    char *search, *replace, *s, *p, *q;
     String *subbed;
 
     /* Accept a base string, a search string, and a replacement string. */
     if (!func_init_3(&args, STRING, STRING, STRING))
 	return;
 
-    s = data_sptr(&args[0]);
-    len = args[0].u.substr.span;
-    sstr = data_sptr(&args[1]);
-    slen = args[1].u.substr.span;
-    rstr = data_sptr(&args[2]);
-    rlen = args[2].u.substr.span;
+    s = string_chars(args[0].u.str);
+    len = string_length(args[0].u.str);
+    search = string_chars(args[1].u.str);
+    search_len = string_length(args[1].u.str);
+    replace = string_chars(args[2].u.str);
+    replace_len = string_length(args[2].u.str);
 
-    subbed = string_empty(slen);
-    start = 0;
-    while (1) {
-	/* Look for first character of sstr in s. */
-	for (i = start; i + slen <= len && s[i] != *sstr; i++);
-
-	/* Stop if we hit the end of the string. */
-	if (i + slen > len)
-	    break;
-
-	if (strnccmp(&s[i], sstr, slen) == 0) {
-	    /* We found the search string. */
-	    subbed = string_add(subbed, &s[start], i - start);
-	    subbed = string_add(subbed, rstr, rlen);
-	    start = i + slen;
-	} else {
-	    subbed = string_add(subbed, &s[start], i + 1 - start);
-	    start = i + 1;
-	}
+    subbed = string_new(search_len);
+    p = s;
+    for (q = strcstr(p, search); q; q = strcstr(p, search)) {
+	subbed = string_add_chars(subbed, p, q - p);
+	subbed = string_add_chars(subbed, replace, replace_len);
+	p = q + search_len;
     }
 
-    subbed = string_add(subbed, &s[start], len - start);
+    subbed = string_add_chars(subbed, p, len - (p - s));
 
     /* Pop the arguments and push the new string onto the stack. */
     pop(3);
@@ -181,107 +151,76 @@ void op_strsub(void)
  * length).  The optional third argument gives the fill character. */
 void op_pad(void)
 {
-    int num_args, len, padding;
+    int num_args, len, padding, filler_len;
     Data *args;
-    char fill;
-    Substring *substr;
+    char *filler;
     String *padded;
 
     if (!func_init_2_or_3(&args, &num_args, STRING, INTEGER, STRING))
 	return;
-    if (num_args == 3 && args[2].u.substr.span != 1) {
-	throw(type_id, "The third argument (%D) is not one character.",
-	      &args[2]);
-	return;
+
+    if (num_args == 3) {
+	filler = string_chars(args[2].u.str);
+	filler_len = string_length(args[2].u.str);
+    } else {
+	filler = " ";
+	filler_len = 1;
     }
+
+    len = (args[1].u.val > 0) ? args[1].u.val : -args[1].u.val;
+    padding = len - string_length(args[0].u.str);
 
     /* Construct the padded string. */
     anticipate_assignment();
-    substr = &args[0].u.substr;
-    len = (args[1].u.val > 0) ? args[1].u.val : -args[1].u.val;
-    padding = len - args[0].u.substr.span;
-    fill = (num_args == 3) ? *data_sptr(&args[2]) : ' ';
-    if (padding <= 0) {
-	substr->span = len;
+    padded = args[0].u.str;
+    if (padding == 0) {
+	/* Do nothing.  Easiest case. */
+    } else if (padding < 0) {
+	/* We're shortening the string.  Almost as easy. */
+	padded = string_truncate(padded, len);
     } else if (args[1].u.val > 0) {
-	substring_truncate(substr);
-	substr->str = string_extend(substr->str, substr->start + len);
-	memset(&substr->str->s[substr->start + substr->span], fill, padding);
-	substr->span = len;
-	substr->str->len = substr->start + len;
-	substr->str->s[substr->start + len] = 0;
+	/* We're lengthening the string on the right. */
+	padded = string_add_padding(padded, filler, filler_len, padding);
     } else {
-	padded = string_of_char(fill, padding);
-	padded = string_add(padded, &substr->str->s[substr->start],
-			    substr->span);
-	string_discard(substr->str);
-	substr_set_to_full_string(substr, padded);
+	/* We're lengthening the string on the left. */
+	padded = string_new(padding + args[0].u.str->len);
+	padded = string_add_padding(padded, filler, filler_len, padding);
+	padded = string_add(padded, args[0].u.str);
+	string_discard(args[0].u.str);
     }
+    args[0].u.str = padded;
 
     /* Discard all but the first argument. */
     pop(num_args - 1);
 }
 
-static int do_match(char *s, int slen, char *m, int mlen, char *t, int tlen)
-{
-    int pos;
-
-    /* Obviously, no match if slen is less than mlen. */
-    if (slen < mlen)
-	return 0;
-
-    /* Check for a match at the beginning of the string. */
-    if (strnccmp(s, m, mlen) == 0)
-	return 1;
-
-    /* Start checking after one token's length. */
-    pos = tlen;
-    while (1) {
-	/* Look for the first character in m. */
-	while (pos + mlen <= slen && s[pos] != *m)
-	    pos++;
-
-	/* No match if we couldn't find *m for pos <= slen - mlen. */
-	if (pos + mlen > slen)
-	    return 0;
-
-	/* Only check against m if we're just after a word-separator. */
-	if (strnccmp(&s[pos - slen], t, tlen) == 0) {
-	    /* Match against m. */
-	    if (strnccmp(&s[pos], m, mlen) == 0) {
-		/* We have a match.  Return 1. */
-		return 1;
-	    }
-	}
-
-	/* It wasn't a match.  Continue at pos + 1. */
-	pos++;
-    }
-
-    /* We never found a match; return 0. */
-    return 0;
-}
-
 void op_match_begin(void)
 {
-    int num_args, tlen, result;
     Data *args;
-    char *token;
+    int sep_len, search_len;
+    char *sep, *search, *s, *p;
 
-    /* Accept a string to search in, a string to search for, and an optional
-     * string giving the word separator. */
-    if (!func_init_2_or_3(&args, &num_args, STRING, STRING, STRING))
+    /* Accept a base string, a search string, and a replacement string. */
+    if (!func_init_3(&args, STRING, STRING, STRING))
 	return;
 
-    token = (num_args == 3) ? data_sptr(&args[2]) : " ";
-    tlen = (num_args == 3) ? args[2].u.substr.span : 1;
+    s = string_chars(args[0].u.str);
+    sep = string_chars(args[1].u.str);
+    sep_len = string_length(args[1].u.str);
+    search = string_chars(args[2].u.str);
+    search_len = string_length(args[2].u.str);
 
-    result = do_match(data_sptr(&args[0]), args[0].u.substr.span,
-		      data_sptr(&args[1]), args[1].u.substr.span,
-		      token, tlen);
+    for (p = strcstr(s, sep); p; p = strcstr(p + 1, sep)) {
+	/* We found a separator; see if it's followed by search. */
+	if (strnccmp(p + sep_len, search, search_len) == 0) {
+	    pop(3);
+	    push_int(1);
+	    return;
+	}
+    }
 
-    pop(num_args);
-    push_int(result);
+    pop(3);
+    push_int(0);
 }
 
 /* Match against a command template. */
@@ -289,21 +228,21 @@ void op_match_template(void)
 {
     Data *args;
     List *fields;
+    char *template, *str;
 
     /* Accept a string for the template and a string to match against. */
     if (!func_init_2(&args, STRING, STRING))
 	return;
 
-    /* Make sure strings we pass to match_template() are null-terminated. */
-    substring_truncate(&args[0].u.substr);
-    substring_truncate(&args[1].u.substr);
-    fields = match_template(data_sptr(&args[0]), data_sptr(&args[1]));
+    template = string_chars(args[0].u.str);
+    str = string_chars(args[1].u.str);
+
+    fields = match_template(template, str);
 
     pop(2);
     if (fields) {
-	stack[stack_pos].type = LIST;
-	sublist_set_to_full_list(&stack[stack_pos].u.sublist, fields);
-	stack_pos++;
+	push_list(fields);
+	list_discard(fields);
     } else {
 	push_int(0);
     }
@@ -314,39 +253,35 @@ void op_match_pattern(void)
 {
     Data *args;
     List *fields;
-    Substring tmp;
-    int i;
+    char *pattern, *str;
 
     /* Accept a string for the pattern and a string to match against. */
     if (!func_init_2(&args, STRING, STRING))
 	return;
 
-    /* Make sure strings we pass to match_pattern() are null-terminated. */
-    substring_truncate(&args[0].u.substr);
-    substring_truncate(&args[1].u.substr);
-    fields = match_pattern(data_sptr(&args[0]), data_sptr(&args[1]));
+    pattern = string_chars(args[0].u.str);
+    str = string_chars(args[1].u.str);
+
+    fields = match_pattern(pattern, str);
 
     pop(2);
-    if (fields) {
-	/* fields is backwards.  Reverse it. */
-	for (i = 0; i * 2 < fields->len; i++) {
-	    tmp = fields->el[i].u.substr;
-	    fields->el[i].u.substr = fields->el[fields->len - 1 - i].u.substr;
-	    fields->el[fields->len - 1 - i].u.substr = tmp;
-	}
-	stack[stack_pos].type = LIST;
-	sublist_set_to_full_list(&stack[stack_pos].u.sublist, fields);
-	stack_pos++;
-    } else {
+    if (!fields) {
 	push_int(0);
+	return;
     }
+
+    /* fields is backwards.  Reverse it. */
+    fields = list_reverse(fields);
+
+    push_list(fields);
+    list_discard(fields);
 }
 
 void op_match_regexp(void)
 {
-    Data *args;
+    Data *args, d;
     regexp *reg;
-    List *fields = NULL, *elemlist;
+    List *fields, *elemlist;
     int num_args, case_flag, i;
     char *s;
 
@@ -355,43 +290,37 @@ void op_match_regexp(void)
 
     case_flag = (num_args == 3) ? data_true(&args[2]) : 0;
 
-    /* Get the cached regexp, if there is one, or compile it. */
-    substring_truncate(&args[0].u.substr);
-    substring_truncate(&args[1].u.substr);
-    if (args[0].u.substr.start == 0 && args[0].u.substr.str->reg)
-	reg = args[0].u.substr.str->reg;
-    else
-	reg = regcomp(data_sptr(&args[0]));
-
+    reg = string_regexp(args[0].u.str);
     if (!reg) {
-	throw(regexp_id, "%s", regexp_error);
+	throw(regexp_id, "%s", regerror(NULL));
 	return;
     }
 
     /* Execute the regexp. */
-    s = data_sptr(&args[1]);
+    s = string_chars(args[1].u.str);
     if (regexec(reg, s, case_flag)) {
 	/* Build the list of fields. */
 	fields = list_new(NSUBEXP);
 	for (i = 0; i < NSUBEXP; i++) {
 	    elemlist = list_new(2);
-	    elemlist->el[0].type = elemlist->el[1].type = INTEGER;
+
+	    d.type = INTEGER;
 	    if (reg->startp[i]) {
-		elemlist->el[0].u.val = reg->startp[i] - s + 1;
-		elemlist->el[1].u.val = reg->endp[i] - reg->startp[i];
+		d.u.val = 0;
+		elemlist = list_add(elemlist, &d);
+		elemlist = list_add(elemlist, &d);
 	    } else {
-		elemlist->el[0].u.val = elemlist->el[1].u.val = 0;
+		d.u.val = reg->startp[i] - s + 1;
+		elemlist = list_add(elemlist, &d);
+		d.u.val = reg->endp[i] - reg->startp[i];
+		elemlist = list_add(elemlist, &d);
 	    }
-	    fields->el[i].type = LIST;
-	    sublist_set_to_full_list(&fields->el[i].u.sublist, elemlist);
+
+	    d.type = LIST;
+	    d.u.list = elemlist;
+	    fields = list_add(fields, &d);
 	}
     }
-
-    /* Store the regexp if possible. */
-    if (args[0].u.substr.start == 0)
-	args[0].u.substr.str->reg = reg;
-    else
-	free(reg);
 
     pop(num_args);
     if (fields) {
@@ -402,100 +331,69 @@ void op_match_regexp(void)
     }
 }
 
-void regerror(char *msg)
-{
-    regexp_error = msg;
-}
-
 /* Encrypt a string. */
 void op_crypt(void)
 {
-    int num_args, len;
+    int num_args;
     Data *args;
-    char *s, save, *encrypted, salt[3];
+    char *s, *encrypted;
     String *str;
 
     /* Accept a string to encrypt and an optional salt. */
     if (!func_init_1_or_2(&args, &num_args, STRING, STRING))
 	return;
+    if (num_args == 2 && string_length(args[1].u.str) != 2) {
+	throw(salt_id, "Salt (%S) is not two characters.", args[1].u.str);
+	return;
+    }
 
-    /* Temporarily convert args[0] to a null-terminated string. */
-    s = data_sptr(&args[0]);
-    len = args[0].u.substr.span;
-    save = s[len];
-    s[len] = 0;
+    s = string_chars(args[0].u.str);
 
     if (num_args == 2) {
-	salt[0] = *data_sptr(&args[1]);
-	salt[1] = *(data_sptr(&args[1]) + 1);
-	salt[2] = 0;
-	encrypted = crypt_string(s, salt);
+	encrypted = crypt_string(s, string_chars(args[1].u.str));
     } else {
 	encrypted = crypt_string(s, NULL);
     }
 
-    /* Restore the character we clobbered. */
-    s[len] = save;
-
     pop(num_args);
-    stack[stack_pos].type = STRING;
     str = string_from_chars(encrypted, strlen(encrypted));
-    substr_set_to_full_string(&stack[stack_pos].u.substr, str);
-    stack_pos++;
+    push_string(str);
+    string_discard(str);
 }
 
 void op_uppercase(void)
 {
     Data *args;
-    Substring *substr;
-    char *s;
 
     /* Accept a string to uppercase. */
     if (!func_init_1(&args, STRING))
 	return;
 
-    /* Uppercase all the characters in the argument. */
-    substr = &args[0].u.substr;
-    substring_truncate(substr);
-    for (s = data_sptr(&args[0]); *s; s++)
-	*s = UCASE(*s);
+    args[0].u.str = string_uppercase(args[0].u.str);
 }
 
 void op_lowercase(void)
 {
     Data *args;
-    Substring *substr;
-    char *s;
 
     /* Accept a string to uppercase. */
     if (!func_init_1(&args, STRING))
 	return;
 
-    /* Uppercase all the characters in the argument. */
-    substr = &args[0].u.substr;
-    substring_truncate(substr);
-    for (s = data_sptr(&args[0]); *s; s++)
-	*s = LCASE(*s);
+    args[0].u.str = string_lowercase(args[0].u.str);
 }
 
 void op_strcmp(void)
 {
     Data *args;
-    int l1, l2, l, val;
+    int val;
 
     /* Accept two strings to compare. */
     if (!func_init_2(&args, STRING, STRING))
 	return;
 
     /* Compare the strings case-sensitively. */
-    l1 = args[0].u.substr.span;
-    l2 = args[1].u.substr.span;
-    l = (l1 < l2) ? l1 : l2;
-    val = strncmp(data_sptr(&args[0]), data_sptr(&args[1]), l);
-    if (!val && l1 > l2)
-	val = data_sptr(&args[0])[l2];
-    else if (!val && l1 < l2)
-	val = data_sptr(&args[1])[l1];
+    val = strcmp(string_chars(args[0].u.str), string_chars(args[1].u.str));
     pop(2);
     push_int(val);
 }

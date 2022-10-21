@@ -2,11 +2,12 @@
 
 #ifndef MEMORY_H
 #define MEMORY_H
+
+typedef struct pile Pile;
+
 #include <sys/types.h>
 #include <stdlib.h>
 #include <string.h>
-
-typedef struct pile Pile;
 
 void *emalloc(size_t size);
 void *erealloc(void *ptr, size_t size);

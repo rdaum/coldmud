@@ -17,25 +17,26 @@
 #define MALLOC_DELTA 8
 #define INIT_TAB_SIZE (512 - MALLOC_DELTA)
 
-typedef struct ident Ident;
+typedef struct ident_entry Ident_entry;
 
-struct ident {
+struct ident_entry {
     char *s;
     int refs;
     long next;
 };
 
-static Ident *tab;
+static Ident_entry *tab;
 static long *hashtab;
 static long tab_size, blanks;
 
-long perm_id, type_id, div_id, integer_id, string_id, dbref_id, list_id;
-long symbol_id, error_id, frob_id, methodnf_id, methoderr_id, parent_id;
-long maxdepth_id, objnf_id, numargs_id, range_id, paramnf_id, file_id;
-long ticks_id, connect_id, disconnect_id, startup_id, parse_id, socket_id;
-long bind_id, servnf_id, paramexists_id, dictionary_id, keynf_id, address_id;
-long refused_id, net_id, timeout_id, other_id, failed_id, heartbeat_id;
-long regexp_id, buffer_id, namenf_id;
+Ident perm_id, type_id, div_id, integer_id, string_id, dbref_id, list_id;
+Ident symbol_id, error_id, frob_id, methodnf_id, methoderr_id, parent_id;
+Ident maxdepth_id, objnf_id, numargs_id, range_id, paramnf_id, file_id;
+Ident ticks_id, connect_id, disconnect_id, startup_id, parse_id, socket_id;
+Ident bind_id, servnf_id, paramexists_id, dictionary_id, keynf_id, address_id;
+Ident refused_id, net_id, timeout_id, other_id, failed_id, heartbeat_id;
+Ident regexp_id, buffer_id, namenf_id, salt_id, function_id, opcode_id;
+Ident method_id, interpreter_id;
 
 void init_ident(void)
 {
@@ -43,7 +44,7 @@ void init_ident(void)
 
     tab_size = INIT_TAB_SIZE;
 
-    tab = EMALLOC(Ident, tab_size);
+    tab = EMALLOC(Ident_entry, tab_size);
     hashtab = EMALLOC(long, tab_size);
 
     for (i = 0; i < tab_size; i++) {
@@ -95,9 +96,14 @@ void init_ident(void)
     regexp_id = ident_get("regexp");
     buffer_id = ident_get("buffer");
     namenf_id = ident_get("namenf");
+    salt_id = ident_get("salt");
+    function_id = ident_get("function");
+    opcode_id = ident_get("opcode");
+    method_id = ident_get("method");
+    interpreter_id = ident_get("interpreter");
 }
 
-long ident_get(char *s)
+Ident ident_get(char *s)
 {
     unsigned long hval = hash(s);
     long ind, new_size, i;
@@ -120,7 +126,7 @@ long ident_get(char *s)
 
 	/* Allocate new space for table. */
 	new_size = tab_size * 2 + MALLOC_DELTA;
-	tab = EREALLOC(tab, Ident, new_size);
+	tab = EREALLOC(tab, Ident_entry, new_size);
 	hashtab = EREALLOC(hashtab, long, new_size);
 
 	/* Make new string of blanks. */
@@ -157,7 +163,7 @@ long ident_get(char *s)
     return ind;
 }
 
-void ident_discard(long id)
+void ident_discard(Ident id)
 {
     long ind, *p;
 
@@ -183,7 +189,7 @@ void ident_discard(long id)
     }
 }
 
-long ident_dup(long id)
+Ident ident_dup(Ident id)
 {
     tab[id].refs++;
 #ifdef IDENT_DEBUG
@@ -192,7 +198,7 @@ long ident_dup(long id)
     return id;
 }
 
-char *ident_name(long id)
+char *ident_name(Ident id)
 {
     return tab[id].s;
 }

@@ -115,8 +115,6 @@ void op_union(void);
 void op_dict_keys(void);
 void op_dict_add(void);
 void op_dict_del(void);
-void op_dict_add_elem(void);
-void op_dict_del_elem(void);
 void op_dict_contains(void);
 
 /* Buffer manipulation (bufferop.c). */
@@ -149,8 +147,6 @@ void op_task_id();
 /* Error handling operators (errorop.c). */
 void op_error_func(void);
 void op_traceback(void);
-void op_error_str(void);
-void op_error_arg(void);
 void op_throw(void);
 void op_rethrow(void);
 

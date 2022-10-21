@@ -9,5 +9,9 @@ void pack_object(Object *obj, FILE *fp);
 void unpack_object(Object *obj, FILE *fp);
 int size_object(Object *obj);
 
+void write_long(long n, FILE *fp);
+long read_long(FILE *fp);
+int size_long(long n);
+
 #endif
 

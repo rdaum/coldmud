@@ -106,7 +106,7 @@ void handle_io_events(long sec)
 	serv->client_socket = -1;
 	str = string_from_chars(serv->client_addr, strlen(serv->client_addr));
 	d1.type = STRING;
-	substr_set_to_full_string(&d1.u.substr, str);
+	d1.u.str = str;
 	d2.type = INTEGER;
 	d2.u.val = serv->client_port;
 	task(conn, conn->dbref, connect_id, 2, &d1, &d2);
@@ -288,7 +288,7 @@ static void server_discard(Server *serv)
     close(serv->server_socket);
 }
 
-long make_connection(char *addr, int port, long dbref)
+long make_connection(char *addr, int port, Dbref receiver)
 {
     Pending *new;
     int socket;
@@ -300,7 +300,7 @@ long make_connection(char *addr, int port, long dbref)
     new = TMALLOC(Pending, 1);
     new->fd = socket;
     new->task_id = task_id;
-    new->dbref = dbref;
+    new->dbref = receiver;
     new->finished = 0;
     new->error = result;
     new->next = pendings;

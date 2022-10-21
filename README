@@ -9,11 +9,11 @@ AIX:			make aix
 Solaris:		make solaris
 Linux:			make linux
 HP-UX:			make hpux
-SysVr4:			make sysvr4
+SysVr4:			make svr4
 
 On other systems, try 'make coldmud'.
 
-The 'make univel' target is for a SysVr4 system with ucb includes and
+The 'make svr4' target is for a SysVr4 system with ucb includes and
 libraries in /usr/ucbinclude and /usr/ucblib.  If your ucb includes
 are libraries are in the regular directories, use "make solaris".
 
@@ -158,9 +158,10 @@ memmove() is undefined (link time).
 		{
 		    int i;
 
-		    list = prepare_to_modify(list, list->len + 1);
-		    for (i = list->len - 1; i >= pos; i++)
-			list->el[i + 1] = list->el[i];
+		    pos += list->start;
+		    list = prepare_to_modify(list, list->start, list->len + 1);
+		    for (i = list->len - 1; i > pos; i++)
+			list->el[i] = list->el[i - 1];
 		    data_dup(&list->el[pos], elem);
 		    list->len++;
 		    return list;

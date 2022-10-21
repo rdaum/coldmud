@@ -36,7 +36,7 @@ void op_class(void)
 	return;
 
     /* Replace argument with class. */
-    class = args[0].u.frob.class;
+    class = args[0].u.frob->class;
     pop(1);
     push_dbref(class);
 }
@@ -51,7 +51,7 @@ void op_toint(void)
 	return;
 
     if (args[0].type == STRING) {
-	val = atoln(data_sptr(&args[0]), args[0].u.substr.span);
+	val = atol(string_chars(args[0].u.str));
     } else if (args[0].type == DBREF) {
 	val = args[0].u.dbref;
     } else {
@@ -115,8 +115,7 @@ void op_tosym(void)
     if (!func_init_1(&args, STRING))
 	return;
 
-    substring_truncate(&args[0].u.substr);
-    sym = ident_get(data_sptr(&args[0]));
+    sym = ident_get(string_chars(args[0].u.str));
     pop(1);
     push_symbol(sym);
 }
@@ -130,8 +129,7 @@ void op_toerr(void)
     if (!func_init_1(&args, STRING))
 	return;
 
-    substring_truncate(&args[0].u.substr);
-    error = ident_get(data_sptr(&args[0]));
+    error = ident_get(string_chars(args[0].u.str));
     pop(1);
     push_error(error);
 }

@@ -41,22 +41,23 @@ void op_echo_file(void)
     char *fname;
     Buffer *buf;
     struct stat statbuf;
+    int len;
 
     /* Accept the name of a file to echo. */
     if (!func_init_1(&args, STRING))
 	return;
 
-    fname = TMALLOC(char, args[0].u.substr.span + 6);
-    memcpy(fname, "text/", 5);
-    memcpy(fname + 5, data_sptr(&args[0]), args[0].u.substr.span);
-    fname[args[0].u.substr.span + 5] = 0;
-
     /* Don't allow walking back up the directory tree. */
-    if (strstr(fname, "../")) {
-	tfree_chars(fname);
+    if (strstr(string_chars(args[0].u.str), "../")) {
 	throw(perm_id, "Filename %D is not legal.", &args[0]);
 	return;
     }
+
+    len = string_length(args[0].u.str);
+    fname = TMALLOC(char, len + 6);
+    memcpy(fname, "text/", 5);
+    memcpy(fname + 5, string_chars(args[0].u.str), len);
+    fname[len + 5] = 0;
 
     /* Stat the file to get its size. */
     if (stat(fname, &statbuf) < 0) {

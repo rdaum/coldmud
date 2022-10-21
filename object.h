@@ -1,9 +1,19 @@
 /* object.h: Declarations for objects. */
 
+/* The header ordering conventions break down here; we need to make sure data.h
+ * has finished, not just that the typedefs have been done. */
+
+#ifndef DID_DBREF_TYPEDEF
+typedef long Dbref;
+#define DID_DBREF_TYPEDEF
+#endif
+
+#include "data.h"
+
+#ifdef DATA_H_DONE
+
 #ifndef OBJECT_H
 #define OBJECT_H
-#include <stdio.h>
-#include "data.h"
 
 typedef struct object		Object;
 typedef struct string_entry	String_entry;
@@ -11,6 +21,11 @@ typedef struct ident_entry	Ident_entry;
 typedef struct var		Var;
 typedef struct method		Method;
 typedef struct error_list	Error_list;
+typedef int			Object_string;
+typedef int			Object_ident;
+
+#include <stdio.h>
+#include "data.h"
 
 struct object {
     List *parents;
@@ -50,7 +65,7 @@ struct object {
     int idents_size;
 
     /* Information for the cache. */
-    long dbref;
+    Dbref dbref;
     int refs;
     char dirty;			/* Flag: Object has been modified. */
     char dead;			/* Flag: Object has been destroyed. */
@@ -61,6 +76,12 @@ struct object {
     Object *next;
     Object *prev;
 };
+
+/* The object string and identifier tables simplify storage of strings and
+ * identifiers for methods.  When we want to free an object without destroying
+ * it, we don't need to scan the method code to determine what strings and
+ * identifiers to free, and we don't need to do any modification of method
+ * code to reflect a new identifier table when we reload the object. */
 
 /* We keep a ref count on object string entries because we have to know when
  * to delete it from the object.  As far as the string is concerned, all these
@@ -73,25 +94,25 @@ struct string_entry {
 
 /* Similar logic for identifier references. */
 struct ident_entry {
-    long id;
+    Ident id;
     int refs;
 };
 
 struct var {
-    long name;
-    long class;
+    Ident name;
+    Dbref class;
     Data val;
     int next;
 };
 
 struct method {
-    int name;
+    Ident name;
     Object *object;
     int num_args;
-    int *argnames;
-    long rest;
+    Object_ident *argnames;
+    Object_ident rest;
     int num_vars;
-    int *varnames;
+    Object_ident *varnames;
     int num_opcodes;
     long *opcodes;
     int num_error_lists;
@@ -111,7 +132,7 @@ void object_destroy(Object *object);
 
 void object_construct_ancprec(Object *object);
 
-int object_change_parents(Object *object, Sublist *parents);
+int object_change_parents(Object *object, List *parents);
 List *object_ancestors(long dbref);
 int object_has_ancestor(long dbref, long ancestor);
 void object_reconstruct_descendent_ancprec(long dbref);
@@ -140,6 +161,8 @@ Method *method_grab(Method *method);
 void method_discard(Method *method);
 
 void object_text_dump(long dbref, FILE *fp);
+
+#endif
 
 #endif
 

@@ -6,7 +6,7 @@
 #include "data.h"
 
 void init_token(void);
-void lex_start(Data *code_arg, int lines);
+void lex_start(List *code_lines);
 int yylex(void);
 int is_valid_ident(char *s);
 int cur_lineno(void);
