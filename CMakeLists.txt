@@ -2,7 +2,9 @@ cmake_minimum_required(VERSION 3.23)
 project(git)
 
 
-find_package(BISON)
+find_package(BISON REQUIRED)
+find_package(PkgConfig REQUIRED)
+pkg_check_modules(QDBM REQUIRED qdbm)
 
 set(PARSER_DIR "${CMAKE_CURRENT_BINARY_DIR}")
 
@@ -54,5 +56,5 @@ add_executable(coldmud
     ./src/token.c
     ./src/dbpack.c
 )
-target_include_directories(coldmud PRIVATE ${PARSER_DIR})
-target_link_libraries(coldmud qdbm crypt)
+target_include_directories(coldmud PRIVATE ${PARSER_DIR} ${QDBM_INCLUDE_DIRS})
+target_link_libraries(coldmud ${QDBM_LIBRARIES} crypt)
