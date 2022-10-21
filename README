@@ -1,0 +1,195 @@
+
+This file contains notes on building Coldmud on various platforms.
+
+Under Ultrix, AIX, Solaris, Linux, HP-UX, and SysVr4 systems, building
+is easy:
+
+Ultrix:			make ultrix
+AIX:			make aix
+Solaris:		make solaris
+Linux:			make linux
+HP-UX:			make hpux
+SysVr4:			make sysvr4
+
+On other systems, try 'make coldmud'.
+
+The 'make univel' target is for a SysVr4 system with ucb includes and
+libraries in /usr/ucbinclude and /usr/ucblib.  If your ucb includes
+are libraries are in the regular directories, use "make solaris".
+
+If your system is not one of the above, but is allegedly
+POSIX-conformant, has dbm libraries, and deals well with Berkeley
+networking code, then you will probably be able to get away with just
+typing 'make coldmud' and maybe adding a few libraries to the LIBS
+line.  If you have trouble, see if your system is covered specifically
+later on in this file.
+
+Here are more detailed notes in case things break:
+
+The code is ANSI, POSIX code, except for the following aspects:
+
+	* The files dbmchunk.c and net.c are not POSIX at all, and must
+	  be ported to platforms they are not compatible with.
+	* The file util.c makes a call to a library function crypt(),
+	  which is not POSIX.
+	* list.c, string.c, and memory.c make assumptions about memory
+	  that are not guaranteed by ANSI (it uses unit-length arrays at
+	  the end of structures, allocates extra space, and writes beyond
+	  the end of the arrays).  Fortunately, these assumptions are true
+	  of just about every system in practice.  The optimizations could
+	  be removed without too much effort on systems they cause trouble
+	  on.
+
+If you define BSD_FEATURES in config.h, adminop.c will use vfork()
+instead of fork(), improving performance of run_script() on many
+systems.
+
+The makefile assumes gcc and bison are installed.  If you have trouble
+with your system's default make rules, try using gmake instead.
+
+If you do not have gcc, you can try using cc instead; if it is an ANSI
+compiler, it should do fine.
+
+If you do not have bison, use yacc in place of bison -y.
+
+I refuse to obfuscate my header files or POSIX code with #ifdefs to
+make Coldmud compile more easily on antiquated operating systems;
+however, some advice for building on popular environments follows.
+
+
+BSD 4.3
+-------
+
+It's going to be difficult to build Coldmud under BSD 4.3.  If you're
+not familiar with building software on your antiquated operating
+system, then you may not be up to it.  Some of the advice in the SunOS
+4.1.x section may be helpful, but it won't be enough.  Include files
+like <unistd.h> and <stdlib.h> will be missing; you'll have to excise
+the #includes for those files in each file, and then fix any other
+compiler errors which occur.
+
+
+SUNOS 4.1.x
+-----------
+
+SunOS presents several problems, since it is not good at being either
+ANSI or POSIX.
+
+First, you need to be using gcc, and whoever administrates your
+machine needs to have run fixincludes.  If you haven't run
+fixincludes, then you're in roughly the same situation as with BSD
+4.3.
+
+If you have run fixincludes, then there are three problems:
+
+(1) RAND_MAX is undefined (compile time).
+
+	This is a problem in the following function in util.c:
+
+		long random_number(long n)
+		{
+		    long num = rand();
+
+		    if (RAND_MAX >> 8 >= n)
+			num >>= 8;
+		    return num % n;
+		}
+
+	Replace that with
+
+		long random_number(long n)
+		{
+		    long num = rand();
+
+		    if (n <= 256)
+			num >>= 8;
+		    return num % n;
+		}
+
+(2) memmove() is undefined (link time).
+
+	There are six calls to memmove(), through the macro
+	MEMMOVE(), two in io.c, two in list.c, one in dict.c, and one
+	in listop.c.  The two in io.c, the one in dict.c, the second
+	one in list.c, and the one in listop.c can be replaced with
+	MEMCPY.  The first call in in list.c in list_insert() has to
+	be unrolled:
+
+		List *list_insert(List *list, int pos, Data *elem)
+		{
+		    int i;
+
+		    list = prepare_to_modify(list, list->len + 1);
+		    for (i = list->len - 1; i >= pos; i++)
+			list->el[i + 1] = list->el[i];
+		    data_dup(&list->el[pos], elem);
+		    list->len++;
+		    return list;
+		}
+
+(3) strerror() is undefined (link time).
+
+	There are three calls to strerror(), in adminop.c.  At the
+	top of adminop.c, add the following lines:
+
+		extern char *sys_errlist[];
+		#define strerror(n) (sys_errlist[n])
+
+
+NEXTSTEP 3.1
+------------
+
+(If you're running NEXTSTEP 3.0 or earlier, you're on your own,
+although the following may help.  Also look at the SunOS 4.1.x notes.)
+
+POSIX support seems to be rather halfway in this version of NEXTSTEP.
+Coldmud will compile okay, but it fails to link, not finding waitpid,
+sigaction, or sigemptyset.
+
+waitpid() is used in run_script() in adminop.c:
+
+	    } else if (pid > 0) {
+		if (num_args == 3 && args[2].u.val) {
+		    if (waitpid(pid, &status, WNOHANG) == 0)
+			status = 0;
+		} else {
+		    waitpid(pid, &status, 0);
+		}
+	    } else {
+
+Replace that code with:
+
+	    } else if (pid > 0) {
+		if (num_args == 3 && args[2].u.val) {
+		    if (wait4(pid, &status, WNOHANG, NULL) == 0)
+			status = 0;
+		    else
+			status = WEXITSTATUS(status);
+		} else {
+		    wait4(pid, &status, 0, NULL);
+		    status = WEXITSTATUS(status);
+		}
+	    } else {
+
+sigaction() and sigemptyset() are used in sig.c:
+
+	void init_sig(void)
+	{
+	    struct sigaction act;
+
+	    sigemptyset(&act.sa_mask);
+	    act.sa_flags = 0;
+
+	    /* Ignore SIGPIPE, since we may write to a closed socket due to
+	     * unpreventable race conditions. */
+	    act.sa_handler = SIG_IGN;
+	    sigaction(SIGPIPE, &act, NULL);
+	}
+
+Replace that code with:
+
+	void init_sig(void)
+	{
+	    signal(SIGPIPE, SIG_IGN);
+	}
+
