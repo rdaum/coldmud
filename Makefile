@@ -3,7 +3,7 @@ YFLAGS = -d
 
 CC = gcc -Wall
 CFLAGS = -O6 -fomit-frame-pointer
-LDFLAGS = -O6 -fomit-frame-pointer
+LDFLAGS = -g
 LIBS =
 
 EXE = coldmud

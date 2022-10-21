@@ -141,7 +141,7 @@ void op_chparents(void)
 	    }
 	    throw(id, "The parent %D %s", d, reason);
 	} else {
-	    pop(1);
+	    pop(2);
 	    push_int(1);
 	}
     }
@@ -176,6 +176,7 @@ void op_destroy(void)
 	 * object_destroy(). */
 	obj->dead = 1;
 	cache_discard(obj);
+	pop(1);
 	push_int(1);
     }
 }
@@ -218,8 +219,10 @@ void op_conn_assign(void)
     } else if (cur_conn) {
 	ident_discard(cur_conn->dbref);
 	cur_conn->dbref = ident_dup(args[0].u.dbref);
+	pop(1);
 	push_int(1);
     } else {
+	pop(1);
 	push_int(0);
     }
 }

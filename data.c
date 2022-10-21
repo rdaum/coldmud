@@ -453,6 +453,7 @@ char *data_from_literal(Data *d, char *s)
 	    if (rep.type == DICT) {
 		d->type = FROB;
 		d->u.frob.class = class.u.dbref;
+		d->u.frob.rep = rep.u.dict;
 		return (*s) ? s + 1 : s;
 	    } else if (rep.type != -1) {
 		data_discard(&rep);
@@ -460,7 +461,7 @@ char *data_from_literal(Data *d, char *s)
 	} else if (class.type != -1) {
 	    data_discard(&class);
 	}
-	return s;
+	return (*s) ? s + 1 : s;
     } else {
 	return (*s) ? s + 1 : s;
     }
