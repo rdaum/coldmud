@@ -148,6 +148,7 @@ void text_dump_read(FILE *fp)
 	    if (method) {
 		name = ident_get(p);
 		object_add_method(obj, name, method);
+		method_discard(method);
 		ident_discard(name);
 	    }
 	}
@@ -175,6 +176,7 @@ static Method *text_dump_get_method(FILE *fp, Object *obj, char *name)
 	     * messages we may have received, and return the method. */
 	    string_discard(line);
 	    method = compile(obj, code->el, code->len, &errors);
+	    list_discard(code);
 	    for (i = 0; i < errors->len; i++) {
 		write_log("$%I %s: %S", obj->dbref, name,
 			  data_sptr(&errors->el[i]),

@@ -44,3 +44,11 @@ void op_caller(void)
 	push_dbref(cur_frame->caller);
 }
 
+void op_task_id(void)
+{
+    /* Accept no arguments, and push the task ID. */
+    if (!func_init_0())
+	return;
+    push_int(task_id);
+}
+

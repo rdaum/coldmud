@@ -35,7 +35,7 @@ long maxdepth_id, objnf_id, numargs_id, range_id, paramnf_id, file_id;
 long ticks_id, connect_id, disconnect_id, startup_id, parse_id, sys_id;
 long root_id, socket_id, bind_id, servnf_id, paramexists_id, dictionary_id;
 long keynf_id, address_id, refused_id, net_id, timeout_id, other_id, failed_id;
-long heartbeat_id;
+long heartbeat_id, regexp_id;
 
 void init_ident(void)
 {
@@ -94,6 +94,7 @@ void init_ident(void)
     other_id = ident_get("other");
     failed_id = ident_get("failed");
     heartbeat_id = ident_get("heartbeat");
+    regexp_id = ident_get("regexp");
 }
 
 long ident_get(char *s)

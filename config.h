@@ -8,8 +8,8 @@
 
 /* The version number. */
 #define VERSION_MAJOR	0
-#define VERSION_MINOR	8
-#define VERSION_BUGFIX	1
+#define VERSION_MINOR	9
+#define VERSION_BUGFIX	0
 
 /* Number of ticks a method gets before dying with an E_TICKS. */
 #define METHOD_TICKS		20000

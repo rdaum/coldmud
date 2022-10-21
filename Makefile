@@ -1,8 +1,8 @@
 YACC = bison -y
 YFLAGS = -d
 
-CC = gcc -Wall
-CFLAGS = -O6 -fomit-frame-pointer
+CC = gcc
+CFLAGS = -Wall -O6 -fomit-frame-pointer
 LDFLAGS = -g
 LIBS =
 
@@ -12,28 +12,28 @@ OBJS =	grammar.o adminop.o arithop.o cache.o codegen.o data.o dataop.o \
 	db.o dbpack.o decode.o dict.o dictop.o dump.o errorop.o execute.o \
 	ident.o io.o ioop.o list.o listop.o loc.o log.o main.o match.o \
 	memory.o methodop.o miscop.o net.o object.o objectop.o opcodes.o \
-	sig.o string.o stringop.o syntaxop.o token.o util.o
+	regexp.o sig.o string.o stringop.o syntaxop.o token.o util.o
 
 all:
 	@echo "Please read the file README."
 
 ultrix:
-	make $(EXE)
+	$(MAKE) $(EXE)
 
 aix:
-	make LIBS=-lbsd $(EXE)
+	$(MAKE) LIBS=-lbsd $(EXE)
 
 solaris:
-	make LIBS="-lsocket -lnsl -lelf" $(EXE)
+	$(MAKE) LIBS="-lsocket -lnsl -lelf" $(EXE)
 
 linux:
-	make LIBS="-ldbm" $(EXE)
+	$(MAKE) LIBS="-ldbm" $(EXE)
 
 hpux:
-	make LIBS="-ldbm" $(EXE)
+	$(MAKE) LIBS="-ldbm" $(EXE)
 
 sysvr4:
-	make LIBS="-lsocket -lnsl -lelf -L/usr/ucblib -lucb" LOCFLAGS="-I/usr/ucbinclude" $(EXE)
+	$(MAKE) LIBS="-lsocket -lnsl -lelf -L/usr/ucblib -lucb" LOCFLAGS="-I/usr/ucbinclude" $(EXE)
 
 $(EXE): $(OBJS)
 	$(CC) $(LDFLAGS) $(OBJS) $(LIBS) -o $(EXE)
@@ -42,7 +42,7 @@ x.tab.h: y.tab.h
 	-cmp -s x.tab.h y.tab.h || cp y.tab.h x.tab.h
 
 clean:
-	rm -f $(OBJS) [xy].tab.[ch] lex.yy.c $(EXE)
+	$(RM) -f $(OBJS) [xy].tab.[ch] lex.yy.c $(EXE)
 
 grammar.o : grammar.y grammar.h object.h data.h cmstring.h token.h codegen.h \
   memory.h util.h

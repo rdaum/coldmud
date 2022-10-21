@@ -2,6 +2,7 @@
 #define _POSIX_SOURCE
 
 #include <string.h>
+#include <stdlib.h>
 #include "x.tab.h"
 #include "operator.h"
 #include "execute.h"
@@ -12,6 +13,8 @@
 #include "ident.h"
 
 static int do_match(char *s, int slen, char *m, int mlen, char *t, int tlen);
+
+static char *regexp_error;
 
 void op_strlen(void)
 {
@@ -28,7 +31,7 @@ void op_strlen(void)
     push_int(len);
 }
 
-void op_substring(void)
+void op_substr(void)
 {
     int num_args, start, span;
     Data *args;
@@ -331,6 +334,69 @@ void op_match_pattern(void)
     } else {
 	push_int(0);
     }
+}
+
+void op_match_regexp(void)
+{
+    Data *args;
+    regexp *reg;
+    List *fields = NULL, *elemlist;
+    int i;
+    char *s;
+
+    if (!func_init_2(&args, STRING, STRING))
+	return;
+
+    /* Get the cached regexp, if there is one, or compile it. */
+    substring_truncate(&args[0].u.substr);
+    substring_truncate(&args[1].u.substr);
+    if (args[0].u.substr.start == 0 && args[0].u.substr.str->reg)
+	reg = args[0].u.substr.str->reg;
+    else
+	reg = regcomp(data_sptr(&args[0]));
+
+    if (!reg) {
+	throw(regexp_id, "%s", regexp_error);
+	return;
+    }
+
+    /* Execute the regexp. */
+    s = data_sptr(&args[1]);
+    if (regexec(reg, s)) {
+	/* Build the list of fields. */
+	fields = list_new(NSUBEXP);
+	for (i = 0; i < NSUBEXP; i++) {
+	    elemlist = list_new(2);
+	    elemlist->el[0].type = elemlist->el[1].type = INTEGER;
+	    if (reg->startp[i]) {
+		elemlist->el[0].u.val = reg->startp[i] - s + 1;
+		elemlist->el[1].u.val = reg->endp[i] - reg->startp[i];
+	    } else {
+		elemlist->el[0].u.val = elemlist->el[1].u.val = 0;
+	    }
+	    fields->el[i].type = LIST;
+	    sublist_set_to_full_list(&fields->el[i].u.sublist, elemlist);
+	}
+    }
+
+    /* Store the regexp if possible. */
+    if (args[0].u.substr.start == 0)
+	args[0].u.substr.str->reg = reg;
+    else
+	free(reg);
+
+    pop(2);
+    if (fields) {
+	push_list(fields);
+	list_discard(fields);
+    } else {
+	push_int(0);
+    }
+}
+
+void regerror(char *msg)
+{
+    regexp_error = msg;
 }
 
 /* Encrypt a string. */

@@ -147,6 +147,10 @@ int io_event_wait(long sec, Connection *connections, Server *servers,
 	    if (serv->client_socket < 0)
 		continue;
 
+	    /* Get address and local port of client. */
+	    strcpy(serv->client_addr, inet_ntoa(sin.sin_addr));
+	    serv->client_port = ntohs(sin.sin_port);
+
 	    /* Set the CLOEXEC flag on socket so that it will be closed for a
 	     * run_script() operation. */
 #ifdef FD_CLOEXEC

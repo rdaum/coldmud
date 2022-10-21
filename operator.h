@@ -87,13 +87,14 @@ void op_valid(void);
 
 /* Operations on strings (stringop.c). */
 void op_strlen(void);
-void op_substring(void);
+void op_substr(void);
 void op_explode(void);
 void op_strsub(void);
 void op_pad(void);
 void op_match_begin(void);
 void op_match_template(void);
 void op_match_pattern(void);
+void op_match_regexp(void);
 void op_crypt(void);
 void op_uppercase(void);
 void op_lowercase(void);
@@ -129,6 +130,7 @@ void op_this();
 void op_definer();
 void op_sender();
 void op_caller();
+void op_task_id();
 
 /* Error handling operators (errorop.c). */
 void op_error_func(void);

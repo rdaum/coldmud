@@ -100,6 +100,7 @@ int init_db(void)
     /* Allocate bitmap. */
     bitmap_blocks = ROUND_UP(LOGICAL_BLOCK(statbuf.st_size) + DB_BITBLOCK, 8);
     bitmap = EMALLOC(char, bitmap_blocks / 8);
+    memset(bitmap, 0, bitmap_blocks / 8);
 
     key = loc_first();
     while (key) {

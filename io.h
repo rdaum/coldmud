@@ -23,15 +23,18 @@ struct connection {
 
 struct server {
     int server_socket;
-    int client_socket;
     unsigned short port;
     long dbref;
     int dead;
+    int client_socket;
+    char client_addr[20];
+    unsigned short client_port;
     Server *next;
 };
 
 struct pending {
     int fd;
+    long task_id;
     long dbref;
     long error;
     int finished;
@@ -45,6 +48,7 @@ int boot(long dbref);
 int add_server(int port, long dbref);
 int remove_server(int port);
 long make_connection(char *addr, int port, long dbref);
+void flush_output(void);
 
 #endif
 

@@ -64,6 +64,7 @@ extern Data *stack;
 extern int stack_pos, stack_size;
 extern int *arg_starts, arg_pos, arg_size;
 extern String *numargs_str;
+extern long task_id;
 
 void init_execute(void);
 void task(Connection *conn, long dbref, long message, int num_args, ...);

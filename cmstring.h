@@ -2,13 +2,15 @@
 
 #ifndef STRING_H
 #define STRING_H
+#include "regexp.h"
 
 typedef struct string String;
 
 struct string {
     int len;
     int size;
-    int refs;
+    int refs; 
+    regexp *reg;
     char s[1];
 };
 

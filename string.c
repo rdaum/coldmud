@@ -36,6 +36,7 @@ String *string_new(int len)
     new->len = len;
     new->size = size;
     new->refs = 1;
+    new->reg = NULL;
     return new;
 }
 
@@ -148,8 +149,11 @@ String *string_extend(String *string, int len)
 
 void string_discard(String *string)
 {
-    if (!--string->refs)
+    if (!--string->refs) {
+	if (string->reg)
+	    free(string->reg);
 	free(string);
+    }
 }
 
 static String *prepare_to_modify(String *string, int len)
@@ -160,9 +164,14 @@ static String *prepare_to_modify(String *string, int len)
 	new = string_new(len);
 	new->len = string->len;
 	MEMCPY(new->s, string->s, char, string->len + 1);
+	new->reg = NULL;
 	string_discard(string);
 	return new;
     } else {
+	if (string->reg) {
+	    free(string->reg);
+	    string->reg = NULL;
+	}
 	return string;
     }
 }

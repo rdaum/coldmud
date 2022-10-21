@@ -54,6 +54,7 @@ struct object {
     int refs;
     char dirty;			/* Flag: Object has been modified. */
     char dead;			/* Flag: Object has been destroyed. */
+
     long search;		/* Last search to visit object. */
 
     /* Pointers to next and previous objects in cache chain. */

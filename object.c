@@ -109,6 +109,8 @@ Object *object_new(long dbref, List *parents)
     new->idents_size = IDENTS_STARTING_SIZE;
     new->num_idents = 0;
 
+    new->search = 0;
+
     /* Add this object to the children list of parents. */
     object_update_parents(new, list_add);
 
@@ -151,6 +153,13 @@ void object_free(Object *object)
 	    string_discard(object->strings[i].str);
     }
     free(object->strings);
+
+    /* Discard identifiers. */
+    for (i = 0; i < object->num_idents; i++) {
+	if (object->idents[i].id != NOT_AN_IDENT)
+	    ident_discard(object->idents[i].id);
+    }
+    free(object->idents);
 }
 
 /* Free everything on the object, update parents and descendents, etc.  The
@@ -268,6 +277,8 @@ static List *object_ancestors_aux(long dbref, List *ancestors)
 
 int object_has_ancestor(long dbref, long ancestor)
 {
+    if (dbref == ancestor)
+	return 1;
     cur_search++;
     return object_has_ancestor_aux(dbref, ancestor);
 }
@@ -299,7 +310,7 @@ static int object_has_ancestor_aux(long dbref, long ancestor)
     }
 
     for (i = 0; i < parents->len; i++) {
-	if (object_has_ancestor_aux(dbref, ancestor)) {
+	if (object_has_ancestor_aux(parents->el[i].u.dbref, ancestor)) {
 	    list_discard(parents);
 	    return 1;
 	}
@@ -450,7 +461,7 @@ void object_discard_ident(Object *object, int ind)
     object->idents[ind].refs--;
     if (!object->idents[ind].refs) {
 	ident_discard(object->idents[ind].id);
-	object->idents[ind].id = -1;
+	object->idents[ind].id = NOT_AN_IDENT;
     }
 
     object->dirty = 1;

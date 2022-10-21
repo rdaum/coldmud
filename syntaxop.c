@@ -489,8 +489,13 @@ void op_message(void)
     } else if (target->type == FROB) {
 	/* Convert frob to rep and pass as first argument. */
 	dbref = target->u.frob.class;
-	target->type = DICT;
-	target->u.dict = target->u.frob.rep;
+	target->type = target->u.frob.rep_type;
+	if (target->u.frob.rep_type == LIST) {
+	    sublist_set_to_full_list(&target->u.sublist,
+				     target->u.frob.rep.list);
+	} else {
+	    target->u.dict = target->u.frob.rep.dict;
+	}
 	arg_start--;
     } else {
 	throw(type_id, "Target (%D) is not a dbref or frob.", target);
@@ -534,8 +539,13 @@ void op_expr_message(void)
 
 	/* Pass frob rep as first argument (where the message data is now). */
 	data_discard(message_data);
-	message_data->type = DICT;
-	message_data->u.dict = target->u.frob.rep;
+	message_data->type = target->u.frob.rep_type;
+	if (target->u.frob.rep_type == LIST) {
+	    sublist_set_to_full_list(&target->u.sublist,
+				     target->u.frob.rep.list);
+	} else {
+	    message_data->u.dict = target->u.frob.rep.dict;
+	}
 	arg_start--;
 
 	/* Replace frob with dummy so that the rep doesn't get discarded an
@@ -612,12 +622,16 @@ void op_frob(void)
     rep = &stack[stack_pos - 1];
     if (class->type != DBREF) {
 	throw(type_id, "Class (%D) is not a dbref.", class);
-    } else if (rep->type != DICT) {
-	throw(type_id, "Representation (%D) is not a dictionary.", rep);
+    } else if (rep->type != LIST && rep->type != DICT) {
+	throw(type_id, "Rep (%D) is not a list or dictionary.", rep);
     } else {
 	class->type = FROB;
 	class->u.frob.class = class->u.dbref;
-	class->u.frob.rep = dict_dup(rep->u.dict);
+	class->u.frob.rep_type = rep->type;
+	if (rep->type == LIST)
+	    class->u.frob.rep.list = list_from_sublist(&rep->u.sublist);
+	else
+	    class->u.frob.rep.dict = dict_dup(rep->u.dict);
 	pop(1);
     }
 }

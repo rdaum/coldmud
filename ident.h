@@ -9,7 +9,7 @@ extern long numargs_id, range_id, paramnf_id, file_id, ticks_id, connect_id;
 extern long disconnect_id, parse_id, startup_id, sys_id, root_id, socket_id;
 extern long bind_id, servnf_id, paramexists_id, dictionary_id, keynf_id;
 extern long address_id, refused_id, net_id, timeout_id, other_id, failed_id;
-extern long heartbeat_id;
+extern long heartbeat_id, regexp_id;
 
 void init_ident(void);
 long ident_get(char *s);

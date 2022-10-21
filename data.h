@@ -26,7 +26,11 @@ struct sublist {
 
 struct frob {
     long class;
-    Dict *rep;
+    int rep_type;
+    union {
+	Dict *dict;
+	List *list;
+    } rep;
 };
 
 struct data {

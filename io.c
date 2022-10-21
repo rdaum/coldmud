@@ -82,7 +82,8 @@ void handle_io_events(long sec)
     Connection *conn;
     Server *serv;
     Pending *pend;
-    Data d;
+    String *str;
+    Data d1, d2;
 
     /* Call io_event_wait() to wait for something to happen.  The return value
      * is nonzero if an I/O event occurred.  If thre is a new connection, then
@@ -101,11 +102,17 @@ void handle_io_events(long sec)
 
     /* Look for new connections on the server sockets. */
     for (serv = servers; serv; serv = serv->next) {
-	if (serv->client_socket != -1) {
-	    conn = connection_add(serv->client_socket, serv->dbref);
-	    serv->client_socket = -1;
-	    task(conn, conn->dbref, connect_id, 0);
-	}
+	if (serv->client_socket == -1)
+	    continue;
+	conn = connection_add(serv->client_socket, serv->dbref);
+	serv->client_socket = -1;
+	str = string_from_chars(serv->client_addr, strlen(serv->client_addr));
+	d1.type = STRING;
+	substr_set_to_full_string(&d1.u.substr, str);
+	d2.type = INTEGER;
+	d2.u.val = serv->client_port;
+	task(conn, conn->dbref, connect_id, 2, &d1, &d2);
+	string_discard(str);
     }
 
     /* Look for pending connections succeeding or failing. */
@@ -113,12 +120,16 @@ void handle_io_events(long sec)
 	if (pend->finished) {
 	    if (pend->error == NOT_AN_IDENT) {
 		conn = connection_add(pend->fd, pend->dbref);
-		task(conn, conn->dbref, connect_id, 0);
+		d1.type = INTEGER;
+		d1.u.val = pend->task_id;
+		task(conn, conn->dbref, connect_id, 1, &d1);
 	    } else {
 		close(pend->fd);
-		d.type = ERROR;
-		d.u.error = pend->error;
-		task(NULL, pend->dbref, failed_id, 1, &d);
+		d1.type = INTEGER;
+		d1.u.val = pend->task_id;
+		d2.type = ERROR;
+		d2.u.error = pend->error;
+		task(NULL, pend->dbref, failed_id, 2, &d1, &d2);
 	    }
 	}
     }
@@ -353,11 +364,33 @@ long make_connection(char *addr, int port, long dbref)
 	return result;
     new = TMALLOC(Pending, 1);
     new->fd = socket;
+    new->task_id = task_id;
     new->dbref = dbref;
     new->finished = 0;
     new->error = result;
     new->next = pendings;
     pendings = new;
     return NOT_AN_IDENT;
+}
+
+/* Write out everything in connections' write buffers.  Called by main()
+ * before exiting; does not modify the write buffers to reflect writing. */
+void flush_output(void)
+{
+    Connection *conn;
+    char *s;
+    int len, r;
+
+    for (conn = connections; conn; conn = conn->next) {
+	s = conn->write_buf->s;
+	len = conn->write_buf->len;
+	while (len) {
+	    r = write(conn->fd, s, len);
+	    if (r <= 0)
+		break;
+	    len -= r;
+	    s += r;
+	}
+    }
 }
 

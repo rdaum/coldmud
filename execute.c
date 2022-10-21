@@ -38,6 +38,7 @@ Connection *cur_conn;
 Data *stack;
 int stack_pos, stack_size;
 int *arg_starts, arg_pos, arg_size;
+long task_id;
 
 void init_execute(void)
 {
@@ -77,6 +78,7 @@ void task(Connection *conn, long dbref, long message, int num_args, ...)
 	execute();
 	if (stack_pos != 0)
 	    panic("Stack not empty after interpretation.");
+	task_id++;
     } else {
 	pop(stack_pos);
     }

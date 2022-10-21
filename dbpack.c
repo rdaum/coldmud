@@ -112,7 +112,13 @@ static void pack_data(Data *data, FILE *fp)
 
       case FROB:
 	write_ident(data->u.frob.class, fp);
-	pack_dict(data->u.frob.rep, fp);
+	write_long(data->u.frob.rep_type, fp);
+	if (data->u.frob.rep_type == LIST) {
+	    pack_list(data->u.frob.rep.list->el, data->u.frob.rep.list->len,
+		      fp);
+	} else {
+	    pack_dict(data->u.frob.rep.dict, fp);
+	}
 	break;
 
       case DICT:
@@ -130,12 +136,12 @@ static void pack_vars(Object *obj, FILE *fp)
 
     for (i = 0; i < obj->vars.size; i++) {
 	write_long(obj->vars.hashtab[i], fp);
-	if (obj->vars.tab[i].name != -1) {
+	if (obj->vars.tab[i].name != NOT_AN_IDENT) {
 	    write_ident(obj->vars.tab[i].name, fp);
 	    write_ident(obj->vars.tab[i].class, fp);
 	    pack_data(&obj->vars.tab[i].val, fp);
 	} else {
-	    write_long(-1, fp);
+	    write_long(NOT_AN_IDENT, fp);
 	}
 	write_long(obj->vars.tab[i].next, fp);
     }
@@ -153,8 +159,8 @@ static void pack_methods(Object *obj, FILE *fp)
 	if (obj->methods.tab[i].m) {
 	    pack_method(obj->methods.tab[i].m, fp);
 	} else {
-	    /* Method begins with length of name, which is never -1. */
-	    write_long(-1, fp);
+	    /* Method begins with name identifier; write NOT_AN_IDENT. */
+	    write_long(NOT_AN_IDENT, fp);
 	}
 	write_long(obj->methods.tab[i].next, fp);
     }
@@ -215,11 +221,11 @@ static void pack_idents(Object *obj, FILE *fp)
     write_long(obj->idents_size, fp);
     write_long(obj->num_idents, fp);
     for (i = 0; i < obj->num_idents; i++) {
-	if (obj->idents[i].id != -1) {
+	if (obj->idents[i].id != NOT_AN_IDENT) {
 	    write_ident(obj->idents[i].id, fp);
 	    write_long(obj->idents[i].refs, fp);
 	} else {
-	    write_long(-1, fp);
+	    write_long(NOT_AN_IDENT, fp);
 	}
     }
 }
@@ -305,7 +311,11 @@ static void unpack_data(Data *data, FILE *fp)
 
       case FROB:
 	data->u.frob.class = read_ident(fp);
-	data->u.frob.rep = unpack_dict(fp);
+	data->u.frob.rep_type = read_long(fp);
+	if (data->u.frob.rep_type == LIST)
+	    data->u.frob.rep.list = unpack_list(fp);
+	else
+	    data->u.frob.rep.dict = unpack_dict(fp);
 	break;
 
       case DICT:
@@ -327,7 +337,7 @@ static void unpack_vars(Object *obj, FILE *fp)
     for (i = 0; i < obj->vars.size; i++) {
 	obj->vars.hashtab[i] = read_long(fp);
 	obj->vars.tab[i].name = read_ident(fp);
-	if (obj->vars.tab[i].name != -1) {
+	if (obj->vars.tab[i].name != NOT_AN_IDENT) {
 	    obj->vars.tab[i].class = read_ident(fp);
 	    unpack_data(&obj->vars.tab[i].val, fp);
 	}
@@ -361,7 +371,7 @@ static Method *unpack_method(FILE *fp)
 
     /* Read in the name.  If this is -1, it was a marker for a blank entry. */
     name = read_ident(fp);
-    if (name == -1)
+    if (name == NOT_AN_IDENT)
 	return NULL;
 
     method = EMALLOC(Method, 1);
@@ -435,7 +445,7 @@ static void unpack_idents(Object *obj, FILE *fp)
     obj->idents = EMALLOC(Ident_entry, obj->idents_size);
     for (i = 0; i < obj->num_idents; i++) {
 	obj->idents[i].id = read_ident(fp);
-	if (obj->idents[i].id != -1)
+	if (obj->idents[i].id != NOT_AN_IDENT)
 	    obj->idents[i].refs = read_long(fp);
     }
 }
@@ -512,7 +522,13 @@ static int size_data(Data *data)
 
       case FROB:
 	size += size_ident(data->u.frob.class);
-	size += size_dict(data->u.frob.rep);
+	size += size_long(data->u.frob.rep_type);
+	if (data->u.frob.rep_type == LIST) {
+	    size += size_list(data->u.frob.rep.list->el,
+			      data->u.frob.rep.list->len);
+	} else {
+	    size += size_dict(data->u.frob.rep.dict);
+	}
 	break;
 
       case DICT:
@@ -532,12 +548,12 @@ static int size_vars(Object *obj)
 
     for (i = 0; i < obj->vars.size; i++) {
 	size += size_long(obj->vars.hashtab[i]);
-	if (obj->vars.tab[i].name != -1) {
+	if (obj->vars.tab[i].name != NOT_AN_IDENT) {
 	    size += size_ident(obj->vars.tab[i].name);
 	    size += size_ident(obj->vars.tab[i].class);
 	    size += size_data(&obj->vars.tab[i].val);
 	} else {
-	    size += size_long(-1);
+	    size += size_long(NOT_AN_IDENT);
 	}
 	size += size_long(obj->vars.tab[i].next);
     }
@@ -557,7 +573,7 @@ static int size_methods(Object *obj)
 	if (obj->methods.tab[i].m)
 	    size += size_method(obj->methods.tab[i].m);
 	else
-	    size += size_long(-1);
+	    size += size_long(NOT_AN_IDENT);
 	size += size_long(obj->methods.tab[i].next);
     }
 
@@ -622,11 +638,11 @@ static int size_idents(Object *obj)
     size += size_long(obj->idents_size);
     size += size_long(obj->num_idents);
     for (i = 0; i < obj->num_idents; i++) {
-	if (obj->idents[i].id != -1) {
+	if (obj->idents[i].id != NOT_AN_IDENT) {
 	    size += size_ident(obj->idents[i].id);
 	    size += size_long(obj->idents[i].refs);
 	} else {
-	    size += size_long(-1);
+	    size += size_long(NOT_AN_IDENT);
 	}
     }
 
@@ -655,8 +671,8 @@ static long read_ident(FILE *fp)
 
     /* If the length is -1, it's not really an identifier, but a -1 signalling
      * a blank variable or method. */
-    if (len == -1)
-	return -1;
+    if (len == NOT_AN_IDENT)
+	return NOT_AN_IDENT;
 
     /* Otherwise, it's an identifier.  Read it into temporary storage. */
     s = TMALLOC(char, len + 1);

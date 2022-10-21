@@ -38,10 +38,11 @@ int main(int argc, char **argv)
     initialize(argc, argv);
     main_loop();
 
-    /* We get this far after a C-- shutdown().  Sync the cache and exit
-     * normally. */
+    /* We get this far after a C-- shutdown().  Sync the cache, flush output
+     * buffers, and exit normally. */
     cache_sync();
     db_close();
+    flush_output();
     return 0;
 }
 

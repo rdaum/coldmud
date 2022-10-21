@@ -99,13 +99,14 @@ static Op_info op_info[] = {
 
     /* Operations on strings (stringop.c). */
     { STRLEN,		"strlen",	op_strlen,	0,	0 },
-    { SUBSTRING,	"substring",	op_substring,	0,	0 },
+    { SUBSTR,		"substr",	op_substr,	0,	0 },
     { EXPLODE,		"explode",	op_explode,	0,	0 },
     { STRSUB,		"strsub",	op_strsub,	0,	0 },
     { PAD,		"pad",		op_pad,		0,	0 },
     { MATCH_BEGIN,	"match_begin",	op_match_begin,	0,	0 },
     { MATCH_TEMPLATE,	"match_template",op_match_template,0,	0 },
     { MATCH_PATTERN,	"match_pattern",op_match_pattern,0,	0 },
+    { MATCH_REGEXP,	"match_regexp",	op_match_regexp,0,	0 },
     { CRYPT,		"crypt",	op_crypt,	0,	0 },
     { UPPERCASE,	"uppercase",	op_uppercase,	0,	0 },
     { LOWERCASE,	"lowercase",	op_lowercase,	0,	0 },
@@ -141,6 +142,7 @@ static Op_info op_info[] = {
     { DEFINER,		"definer",	op_definer,	0,	0 },
     { SENDER,		"sender",	op_sender,	0,	0 },
     { CALLER,		"caller",	op_caller,	0,	0 },
+    { TASK_ID,		"task_id",	op_task_id,	0,	0 },
 
     /* Error handling operations (errorop.c). */
     { ERROR_FUNC,	"error",	op_error_func,	0,	0 },

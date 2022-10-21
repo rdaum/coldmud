@@ -24,6 +24,7 @@
 #define FULL_MASK	0xffffffffUL
 
 static int sublist_cmp(Sublist *s1, Sublist *s2);
+static String *data_add_list_literal_to_str(String *str, Data *data, int len);
 
 /* Effects: Returns 0 if and only if d1 and d2 are equal according to C--
  *	    conventions.  If d1 and d2 are of the same type and are integers or
@@ -68,8 +69,14 @@ int data_cmp(Data *d1, Data *d2)
 	    return (d1->u.error != d2->u.error);
 
 	  case FROB:
-	    return !(d1->u.frob.class == d2->u.frob.class &&
-		     dict_cmp(d1->u.frob.rep, d2->u.frob.rep) == 0);
+	    if (d1->u.frob.class != d2->u.frob.class)
+		return 1;
+	    else if (d1->u.frob.rep_type != d2->u.frob.rep_type)
+		return 1;
+	    else if (d1->u.frob.rep_type == LIST)
+		return list_cmp(d1->u.frob.rep.list, d2->u.frob.rep.list);
+	    else
+		return dict_cmp(d1->u.frob.rep.dict, d2->u.frob.rep.dict);
 
 	  case DICT:
 	    return dict_cmp(d1->u.dict, d2->u.dict);
@@ -146,7 +153,10 @@ unsigned long data_hash(Data *d)
 	return hash(ident_name(d->u.error));
 
       case FROB:
-	values = d->u.frob.rep->values;
+	if (d->u.frob.rep_type == LIST)
+	    values = d->u.frob.rep.list;
+	else
+	    values = d->u.frob.rep.dict->values;
 	if (values->len)
 	    return d->u.frob.class + data_hash(&values->el[values->len - 1]);
 	else
@@ -201,7 +211,11 @@ void data_dup(Data *dest, Data *src)
 
       case FROB:
 	dest->u.frob.class = ident_dup(src->u.frob.class);
-	dest->u.frob.rep = dict_dup(src->u.frob.rep);
+	dest->u.frob.rep_type = src->u.frob.rep_type;
+	if (dest->u.frob.rep_type == LIST)
+	    dest->u.frob.rep.list = list_dup(src->u.frob.rep.list);
+	else
+	    dest->u.frob.rep.dict = dict_dup(src->u.frob.rep.dict);
 	break;
 
       case DICT:
@@ -239,7 +253,10 @@ void data_discard(Data *data)
 
       case FROB:
 	ident_discard(data->u.frob.class);
-	dict_discard(data->u.frob.rep);
+	if (data->u.frob.rep_type == LIST)
+	    list_discard(data->u.frob.rep.list);
+	else
+	    dict_discard(data->u.frob.rep.dict);
 	break;
 
       case DICT:
@@ -306,7 +323,6 @@ String *data_to_literal(Data *data)
 String *data_add_literal_to_str(String *str, Data *data)
 {
     char *s;
-    int i;
     Number_buf nbuf;
 
     switch(data->type) {
@@ -327,13 +343,8 @@ String *data_add_literal_to_str(String *str, Data *data)
 	    return string_add_unparsed(str, s, strlen(s));
 
       case LIST:
-	str = string_addc(str, '[');
-	for (i = 0; i < data->u.sublist.span; i++) {
-	    str = data_add_literal_to_str(str, data_dptr(data) + i);
-	    if (i < data->u.sublist.span - 1)
-		str = string_add(str, ", ", 2);
-	}
-	return string_addc(str, ']');
+	return data_add_list_literal_to_str(str, data_dptr(data),
+					    data->u.sublist.span);
 
       case SYMBOL:
 	str = string_addc(str, '\'');
@@ -359,7 +370,12 @@ String *data_add_literal_to_str(String *str, Data *data)
 	else
 	    str = string_add_unparsed(str, s, strlen(s));
 	str = string_add(str, ", ", 2);
-	str = dict_add_literal_to_str(str, data->u.frob.rep);
+	if (data->u.frob.rep_type == LIST) {
+	    str = data_add_list_literal_to_str(str, data->u.frob.rep.list->el,
+					       data->u.frob.rep.list->len);
+	} else {
+	    str = dict_add_literal_to_str(str, data->u.frob.rep.dict);
+	}
 	return string_addc(str, '>');
 
       case DICT:
@@ -368,6 +384,19 @@ String *data_add_literal_to_str(String *str, Data *data)
       default:
 	return str;
     }
+}
+
+static String *data_add_list_literal_to_str(String *str, Data *data, int len)
+{
+    int i;
+
+    str = string_addc(str, '[');
+    for (i = 0; i < len; i++) {
+	str = data_add_literal_to_str(str, &data[i]);
+	if (i < len - 1)
+	    str = string_add(str, ", ", 2);
+    }
+    return string_addc(str, ']');
 }
 
 char *data_from_literal(Data *d, char *s)
@@ -450,13 +479,18 @@ char *data_from_literal(Data *d, char *s)
 	    while (isspace(*s))
 		s++;
 	    s = data_from_literal(&rep, s);
-	    if (rep.type == DICT) {
-		d->type = FROB;
-		d->u.frob.class = class.u.dbref;
-		d->u.frob.rep = rep.u.dict;
-		return (*s) ? s + 1 : s;
-	    } else if (rep.type != -1) {
-		data_discard(&rep);
+	    d->type = FROB;
+	    d->u.frob.class = class.u.dbref;
+	    d->u.frob.rep_type = rep.type;
+	    if (rep.type == LIST) {
+		d->u.frob.rep.list = rep.u.sublist.list;
+	    } else if (rep.type == DICT) {
+		d->u.frob.rep.dict = rep.u.dict;
+	    } else {
+		if (rep.type != -1)
+		    data_discard(&rep);
+		ident_discard(class.u.dbref);
+		d->type = -1;
 	    }
 	} else if (class.type != -1) {
 	    data_discard(&class);
@@ -543,9 +577,15 @@ void substring_truncate(Substring *substr)
 
     if (substr->str->refs == 1) {
 	/* Since we own the string, then we can just throw away anything past
-	 * the end of the substring. */
-	substr->str->len = substr->start + substr->span;
-	substr->str->s[substr->str->len] = 0;
+	 * the end of the substring.  This invalidates the regexp, though. */
+	if (substr->start + substr->span != substr->str->len) {
+	    if (substr->str->reg) {
+		free(substr->str->reg);
+		substr->str->reg = NULL;
+	    }
+	    substr->str->len = substr->start + substr->span;
+	    substr->str->s[substr->str->len] = 0;
+	}
     } else {
 	/* Make a copy of the string containing just the substring. */
 	str = string_from_chars(substr->str->s + substr->start, substr->span);
