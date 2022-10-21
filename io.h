@@ -3,6 +3,7 @@
 #ifndef IO_H
 #define IO_H
 #include "cmstring.h"
+#include "data.h"
 
 typedef struct connection Connection;
 typedef struct server Server;
@@ -10,8 +11,7 @@ typedef struct pending Pending;
 
 struct connection {
     int fd;			/* File descriptor for input and output. */
-    String *read_buf;		/* Buffer for network input. */
-    String *write_buf;		/* Buffer for network output. */
+    Buffer *write_buf;		/* Buffer for network output. */
     long dbref;			/* The player, usually. */
     struct {
 	char readable;		/* Connection has new data pending. */
@@ -43,7 +43,7 @@ struct pending {
 
 void flush_defunct(void);
 void handle_io_events(long sec);
-void tell(long dbref, char *s, int len);
+void tell(long dbref, Buffer *buf);
 int boot(long dbref);
 int add_server(int port, long dbref);
 int remove_server(int port);

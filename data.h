@@ -4,13 +4,17 @@
 #define DATA_H
 #include "cmstring.h"
 
+/* Buffer contents must be between 0 and 255 inclusive, even if an unsigned
+ * char can hold other values. */
+#define OCTET_VALUE(n) (((unsigned long) (n)) & ((1 << 8) - 1))
+
 typedef struct substring	Substring;
 typedef struct sublist		Sublist;
 typedef struct frob		Frob;
 typedef struct data		Data;
 typedef struct list		List;
 typedef struct dict		Dict;
-typedef struct dict_chain	Dict_chain;
+typedef struct buffer 		Buffer;
 
 struct substring {
     String *str;
@@ -41,6 +45,7 @@ struct data {
 	Sublist sublist;
 	Frob frob;
 	Dict *dict;
+	Buffer *buffer;
     } u;
 };
 
@@ -60,6 +65,12 @@ struct dict {
     int refs;
 };
 
+struct buffer {
+    int len;
+    int refs;
+    unsigned char s[1];
+};
+
 /* data.c */
 int data_cmp(Data *d1, Data *d2);
 int data_true(Data *data);
@@ -71,6 +82,7 @@ String *data_to_literal(Data *data);
 String *data_add_literal_to_str(String *str, Data *data);
 char *data_from_literal(Data *d, char *s);
 long data_type_id(int type);
+int sublist_search(Sublist *sublist, Data *data);
 void sublist_truncate(Sublist *sublist);
 void substring_truncate(Substring *substr);
 char *data_sptr(Data *data);
@@ -109,6 +121,19 @@ int dict_contains(Dict *dict, Data *key);
 List *dict_keys(Dict *dict);
 List *dict_key_value_pair(Dict *mapping, int i);
 String *dict_add_literal_to_str(String *str, Dict *dict);
+
+/* buffer.h */
+Buffer *buffer_new(int len);
+Buffer *buffer_dup(Buffer *buf);
+void buffer_discard(Buffer *buf);
+Buffer *buffer_append(Buffer *buf1, Buffer *buf2);
+int buffer_retrieve(Buffer *buf, int pos);
+Buffer *buffer_replace(Buffer *buf, int pos, unsigned int c);
+Buffer *buffer_add(Buffer *buf, unsigned int c);
+int buffer_len(Buffer *buf);
+Buffer *buffer_truncate(Buffer *buf, int len);
+List *buffer_to_strings(Buffer *buf, Buffer *sep);
+Buffer *buffer_from_strings(Data *d, int n, Buffer *sep);
 
 #endif
 

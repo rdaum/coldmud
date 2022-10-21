@@ -11,6 +11,7 @@
 #include "util.h"
 #include "config.h"
 #include "ident.h"
+#include "lookup.h"
 
 static void find_extreme(int which);
 
@@ -41,7 +42,7 @@ void op_random(void)
 	return;
 
     /* Replace argument on stack with a random number. */
-    args[0].u.val = random_number(args[0].u.val);
+    args[0].u.val = random_number(args[0].u.val) + 1;
 }
 
 void op_time(void)
@@ -132,5 +133,22 @@ void op_abs(void)
 
     if (args[0].u.val < 0)
 	args[0].u.val = -args[0].u.val;
+}
+
+void op_get_name(void)
+{
+    Data *args;
+    long dbref;
+
+    if (!func_init_1(&args, SYMBOL))
+	return;
+
+    if (!lookup_retrieve_name(args[0].u.symbol, &dbref)) {
+	throw(namenf_id, "Can't find object name %I.", args[0].u.symbol);
+	return;
+    }
+
+    pop(1);
+    push_dbref(dbref);
 }
 

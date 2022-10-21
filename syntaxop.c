@@ -11,6 +11,7 @@
 #include "ident.h"
 #include "cache.h"
 #include "cmstring.h"
+#include "lookup.h"
 
 void op_comment(void)
 {
@@ -387,10 +388,9 @@ void op_string(void)
 
 void op_dbref(void)
 {
-    int ind, id;
+    int id;
 
-    ind = cur_frame->opcodes[cur_frame->pc++];
-    id = object_get_ident(cur_frame->method->object, ind);
+    id = cur_frame->opcodes[cur_frame->pc++];
     push_dbref(id);
 }
 
@@ -410,6 +410,19 @@ void op_error(void)
     ind = cur_frame->opcodes[cur_frame->pc++];
     id = object_get_ident(cur_frame->method->object, ind);
     push_error(id);
+}
+
+void op_name(void)
+{
+    int ind, id;
+    long dbref;
+
+    ind = cur_frame->opcodes[cur_frame->pc++];
+    id = object_get_ident(cur_frame->method->object, ind);
+    if (lookup_retrieve_name(id, &dbref))
+	push_dbref(dbref);
+    else
+	throw(namenf_id, "Can't find object name %I.", id);
 }
 
 void op_get_local(void)
@@ -485,7 +498,7 @@ void op_message(void)
     target = &stack[arg_start - 1];
 
     if (target->type == DBREF) {
-	dbref = ident_dup(target->u.dbref);
+	dbref = target->u.dbref;
     } else if (target->type == FROB) {
 	/* Convert frob to rep and pass as first argument. */
 	dbref = target->u.frob.class;
@@ -504,14 +517,13 @@ void op_message(void)
 
     /* Attempt to send the message. */
     result = send_message(dbref, message, target - stack, arg_start);
-    ident_discard(dbref);
 
     if (result == numargs_id)
 	interp_error(result, numargs_str);
     else if (result == objnf_id)
-	throw(result, "Target ($%I) not found.", dbref);
+	throw(result, "Target (#%l) not found.", dbref);
     else if (result == methodnf_id)
-	throw(result, "Method %s not found.", ident_name(message));
+	throw(result, "Method %I not found.", message);
     else if (result == maxdepth_id)
 	throw(result, "Maximum call depth exceeded.");
 }
@@ -533,7 +545,7 @@ void op_expr_message(void)
     message = ident_dup(message_data->u.symbol);
 
     if (target->type == DBREF) {
-	dbref = ident_dup(target->u.dbref);
+	dbref = target->u.dbref;
     } else if (target->type == FROB) {
 	dbref = target->u.frob.class;
 
@@ -560,15 +572,14 @@ void op_expr_message(void)
 
     /* Attempt to send the message. */
     result = send_message(dbref, message, target - stack, arg_start);
-    ident_discard(dbref);
     ident_discard(message);
 
     if (result == numargs_id)
 	interp_error(result, numargs_str);
     else if (result == objnf_id)
-	throw(result, "Target ($%I) not found.", dbref);
+	throw(result, "Target (#%l) not found.", dbref);
     else if (result == methodnf_id)
-	throw(result, "Method %s not found.", ident_name(message));
+	throw(result, "Method %I not found.", message);
     else if (result == maxdepth_id)
 	throw(result, "Maximum call depth exceeded.");
 }
@@ -582,7 +593,7 @@ void op_list(void)
     start = arg_starts[--arg_pos];
     len = stack_pos - start;
     list = list_new(len);
-    MEMCPY(list->el, &stack[start], Data, len);
+    MEMCPY(list->el, &stack[start], len);
 
     /* Push the list onto the stack where elements began. */
     stack_pos = start;
@@ -600,7 +611,7 @@ void op_dict(void)
     start = arg_starts[--arg_pos];
     len = stack_pos - start;
     list = list_new(len);
-    MEMCPY(list->el, &stack[start], Data, len);
+    MEMCPY(list->el, &stack[start], len);
     stack_pos = start;
 
     /* Construct a mapping from the list. */
@@ -612,6 +623,28 @@ void op_dict(void)
 	push_dict(dict);
 	dict_discard(dict);
     }
+}
+
+void op_buffer(void)
+{
+    int start, len, i;
+    Buffer *buf;
+
+    start = arg_starts[--arg_pos];
+    len = stack_pos - start;
+    for (i = 0; i < len; i++) {
+	if (stack[start + i].type != INTEGER) {
+	    throw(type_id, "Element %d (%D) is not an integer.", i + 1,
+		  &stack[start + i]);
+	    return;
+	}
+    }
+    buf = buffer_new(len);
+    for (i = 0; i < len; i++)
+	buf->s[i] = ((unsigned long) stack[start + i].u.val) % (1 << 8);
+    stack_pos = start;
+    push_buffer(buf);
+    buffer_discard(buf);
 }
 
 void op_frob(void)
@@ -641,7 +674,6 @@ void op_index(void)
     Data *d, *ind, element;
     int i, len;
     String *str;
-    long result;
 
     d = &stack[stack_pos - 2];
     ind = &stack[stack_pos - 1];
@@ -655,8 +687,7 @@ void op_index(void)
 
     if (d->type == DICT) {
 	/* Get the value corresponding to a key. */
-	result = dict_find(d->u.dict, ind, &element);
-	if (result == keynf_id) {
+	if (dict_find(d->u.dict, ind, &element) == keynf_id) {
 	    throw(keynf_id, "Key (%D) is not in the dictionary.", ind);
 	} else {
 	    pop(1);

@@ -36,10 +36,9 @@ void op_class(void)
 	return;
 
     /* Replace argument with class. */
-    class = ident_dup(args[0].u.frob.class);
+    class = args[0].u.frob.class;
     pop(1);
     push_dbref(class);
-    ident_discard(class);
 }
 
 void op_toint(void)
@@ -47,11 +46,18 @@ void op_toint(void)
     Data *args;
     long val;
 
-    /* Accept a string to convert into an integer. */
-    if (!func_init_1(&args, STRING))
+    /* Accept a string or integer to convert into an integer. */
+    if (!func_init_1(&args, 0))
 	return;
 
-    val = atoln(data_sptr(&args[0]), args[0].u.substr.span);
+    if (args[0].type == STRING) {
+	val = atoln(data_sptr(&args[0]), args[0].u.substr.span);
+    } else if (args[0].type == DBREF) {
+	val = args[0].u.dbref;
+    } else {
+	throw(type_id, "The first argument (%D) is not an integer or string.",
+	      &args[0]);
+    }
     pop(1);
     push_int(val);
 }
@@ -91,16 +97,13 @@ void op_toliteral(void)
 void op_todbref(void)
 {
     Data *args;
-    long dbref;
 
-    /* Accept one string argument to convert to a dbref. */
-    if (!func_init_1(&args, STRING))
+    /* Accept an integer to convert into a dbref. */
+    if (!func_init_1(&args, INTEGER))
 	return;
 
-    substring_truncate(&args[0].u.substr);
-    dbref = ident_get(data_sptr(&args[0]));
-    pop(1);
-    push_dbref(dbref);
+    args[0].u.dbref = args[0].u.val;
+    args[0].type = DBREF;
 }
 
 void op_tosym(void)

@@ -23,11 +23,20 @@
  * precedence is structured in regular expressions.  Serious changes in
  * regular-expression syntax might require a total rethink.
  */
-/* Slightly modified; search for "GBH". */
+/* Modified by GBH to do case-insensitive matching. */
 #include <stdio.h>
-#include <string.h>		/* GBH */
+#include <string.h>
 #include "regexp.h"
 #include "regmagic.h"
+#include "util.h"
+
+/* Declarations for case-insensitive matching. */
+static int case_matters;
+#define STRCHR(s, c) ((case_matters) ? strchr(s, c) : strcchr(s, c))
+#define STRCMP(s1, s2) ((case_matters) ? strcmp(s1, s2) : strccmp(s1, s2))
+#define STRNCMP(s1, s2, n) ((case_matters) ? strncmp(s1, s2, n) \
+					   : strnccmp(s1, s2, n))
+#define CHAREQ(a, b) ((case_matters) ? ((a) == (b)) : LCASE(a) == LCASE(b))
 
 /*
  * The "internal use only" fields in regexp.h are present to pass info from
@@ -284,7 +293,7 @@ int *flagp;
 	register char *ret;
 	register char *br;
 	register char *ender;
-	register int parno = 0;		/* To shut up gdb -Wall.  --GBH */
+	register int parno = 0;
 	int flags;
 
 	*flagp = HASWIDTH;	/* Tentatively. */
@@ -701,12 +710,14 @@ STATIC char *regprop();
  - regexec - match a regexp against a string
  */
 int
-regexec(prog, string)
+regexec(prog, string, case_flag)
 register regexp *prog;
 register char *string;
+int case_flag;
 {
 	register char *s;
-	extern char *strchr();
+
+	case_matters = case_flag;
 
 	/* Be paranoid... */
 	if (prog == NULL || string == NULL) {
@@ -723,8 +734,8 @@ register char *string;
 	/* If there is a "must appear" string, look for it. */
 	if (prog->regmust != NULL) {
 		s = string;
-		while ((s = strchr(s, prog->regmust[0])) != NULL) {
-			if (strncmp(s, prog->regmust, prog->regmlen) == 0)
+		while ((s = STRCHR(s, prog->regmust[0])) != NULL) {
+			if (STRNCMP(s, prog->regmust, prog->regmlen) == 0)
 				break;	/* Found it. */
 			s++;
 		}
@@ -743,7 +754,7 @@ register char *string;
 	s = string;
 	if (prog->regstart != '\0')
 		/* We know what char it must start with. */
-		while ((s = strchr(s, prog->regstart)) != NULL) {
+		while ((s = STRCHR(s, prog->regstart)) != NULL) {
 			if (regtry(prog, s))
 				return(1);
 			s++;
@@ -839,21 +850,21 @@ char *prog;
 
 				opnd = OPERAND(scan);
 				/* Inline the first character, for speed. */
-				if (*opnd != *reginput)
+				if (!CHAREQ(*opnd, *reginput))
 					return(0);
 				len = strlen(opnd);
-				if (len > 1 && strncmp(opnd, reginput, len) != 0)
+				if (len > 1 && STRNCMP(opnd, reginput, len) != 0)
 					return(0);
 				reginput += len;
 			}
 			break;
 		case ANYOF:
-			if (*reginput == '\0' || strchr(OPERAND(scan), *reginput) == NULL)
+			if (*reginput == '\0' || STRCHR(OPERAND(scan), *reginput) == NULL)
 				return(0);
 			reginput++;
 			break;
 		case ANYBUT:
-			if (*reginput == '\0' || strchr(OPERAND(scan), *reginput) != NULL)
+			if (*reginput == '\0' || STRCHR(OPERAND(scan), *reginput) != NULL)
 				return(0);
 			reginput++;
 			break;
@@ -954,7 +965,7 @@ char *prog;
 				no = regrepeat(OPERAND(scan));
 				while (no >= min) {
 					/* If it could work, try it. */
-					if (nextch == '\0' || *reginput == nextch)
+					if (nextch == '\0' || CHAREQ(*reginput, nextch))
 						if (regmatch(next))
 							return(1);
 					/* Couldn't or didn't -- back up. */
@@ -1003,19 +1014,19 @@ char *p;
 		scan += count;
 		break;
 	case EXACTLY:
-		while (*opnd == *scan) {
+		while (CHAREQ(*opnd, *scan)) {
 			count++;
 			scan++;
 		}
 		break;
 	case ANYOF:
-		while (*scan != '\0' && strchr(opnd, *scan) != NULL) {
+		while (*scan != '\0' && STRCHR(opnd, *scan) != NULL) {
 			count++;
 			scan++;
 		}
 		break;
 	case ANYBUT:
-		while (*scan != '\0' && strchr(opnd, *scan) == NULL) {
+		while (*scan != '\0' && STRCHR(opnd, *scan) == NULL) {
 			count++;
 			scan++;
 		}

@@ -50,8 +50,8 @@ extern Pile *compiler_pile;	/* We free this pile after compilation. */
 
 /* The following tokens are terminals for the parser. */
 
-%token	<num>	INTEGER
-%token	<s>	COMMENT STRING DBREF SYMBOL IDENT ERROR
+%token	<num>	INTEGER DBREF
+%token	<s>	COMMENT STRING SYMBOL NAME IDENT ERROR
 %token		DISALLOW_OVERRIDES ARG VAR
 %token		IF FOR IN UPTO WHILE SWITCH CASE DEFAULT
 %token		BREAK CONTINUE RETURN
@@ -68,7 +68,7 @@ extern Pile *compiler_pile;	/* We free this pile after compilation. */
 %left	'+' '-'
 %left	'*' '/' '%'
 %left	'!'
-%left	'[' ']' START_DICT
+%left	'[' ']' START_DICT START_BUFFER
 %left	'.'
 
 /* Declarations to shut up shift/reduce conflicts. */
@@ -84,25 +84,28 @@ extern Pile *compiler_pile;	/* We free this pile after compilation. */
 
 %token NOOP EXPR COMPOUND ASSIGN IF_ELSE FOR_RANGE FOR_LIST END RETURN_EXPR
 %token CASE_VALUE CASE_RANGE LAST_CASE_VALUE LAST_CASE_RANGE END_CASE RANGE
-%token FUNCTION_CALL MESSAGE EXPR_MESSAGE LIST DICT FROB INDEX UNARY BINARY
-%token CONDITIONAL SPLICE NEG SPLICE_ADD POP START_ARGS ZERO ONE SET_LOCAL
-%token SET_OBJ_VAR GET_LOCAL GET_OBJ_VAR CATCH_END HANDLER_END CRITICAL
-%token CRITICAL_END PROPAGATE PROPAGATE_END JUMP
+%token FUNCTION_CALL MESSAGE EXPR_MESSAGE LIST DICT BUFFER FROB INDEX UNARY
+%token BINARY CONDITIONAL SPLICE NEG SPLICE_ADD POP START_ARGS ZERO ONE
+%token SET_LOCAL SET_OBJ_VAR GET_LOCAL GET_OBJ_VAR CATCH_END HANDLER_END
+%token CRITICAL CRITICAL_END PROPAGATE PROPAGATE_END JUMP
 
 %token TYPE CLASS TOINT TOSTR TOLITERAL TODBREF TOSYM TOERR VALID
 %token STRLEN SUBSTR EXPLODE STRSUB PAD MATCH_BEGIN MATCH_TEMPLATE
 %token MATCH_PATTERN MATCH_REGEXP CRYPT UPPERCASE LOWERCASE STRCMP
 %token LISTLEN SUBLIST INSERT REPLACE DELETE SETADD SETREMOVE UNION
-%token DICT_KEYS DICT_ADD DICT_DEL DICT_CONTAINS
-%token VERSION RANDOM TIME CTIME MIN MAX ABS
+%token DICT_KEYS DICT_ADD DICT_DEL DICT_ADD_ELEM DICT_DEL_ELEM DICT_CONTAINS
+%token BUFFER_LEN BUFFER_RETRIEVE BUFFER_APPEND BUFFER_REPLACE BUFFER_ADD
+%token BUFFER_TRUNCATE BUFFER_TO_STRINGS BUFFER_FROM_STRINGS
+%token VERSION RANDOM TIME CTIME MIN MAX ABS GET_NAME
 %token THIS DEFINER SENDER CALLER TASK_ID
-%token ERROR_FUNC TRACEBACK ERROR_ARG THROW RETHROW
+%token ERROR_FUNC TRACEBACK ERROR_STR ERROR_ARG THROW RETHROW
 %token ECHO_FUNC ECHO_FILE DISCONNECT
 %token ADD_PARAMETER PARAMETERS DEL_PARAMETER SET_VAR GET_VAR RMVAR COMPILE
 %token METHODS FIND_METHOD FIND_NEXT_METHOD LIST_METHOD DEL_METHOD PARENTS
 %token CHILDREN ANCESTORS HAS_ANCESTOR SIZE
 %token CREATE CHPARENTS DESTROY LOG CONN_ASSIGN BINARY_DUMP TEXT_DUMP
-%token RUN_SCRIPT SHUTDOWN BIND UNBIND CONNECT SET_HEARTBEAT_FREQ DATA
+%token RUN_SCRIPT SHUTDOWN BIND UNBIND CONNECT SET_HEARTBEAT_FREQ DATA SET_NAME
+%token DEL_NAME DB_TOP
 
 /* Reserved for future use. */
 %token FORK ATOMIC NON_ATOMIC
@@ -200,6 +203,7 @@ expr	: INTEGER			{ $$ = integer_expr($1); }
 	| DBREF				{ $$ = dbref_expr($1); }
 	| SYMBOL			{ $$ = symbol_expr($1); }
 	| ERROR				{ $$ = error_expr($1); }
+	| NAME				{ $$ = name_expr($1); }
 	| IDENT				{ $$ = var_expr($1); }
 	| IDENT '(' args ')'		{ $$ = function_call_expr($1, $3); }
 	| PASS '(' args ')'		{ $$ = pass_expr($3); }
@@ -211,6 +215,7 @@ expr	: INTEGER			{ $$ = integer_expr($1); }
 				{ $$ = expr_message_expr(NULL, $3, $6); }
 	| '[' args ']'			{ $$ = list_expr($2); }
 	| START_DICT args ']'		{ $$ = dict_expr($2); }
+	| START_BUFFER args ']'		{ $$ = buffer_expr($2); }
 	| '<' expr ',' expr '>'		{ $$ = frob_expr($2, $4); }
 	| expr '[' expr ']'		{ $$ = index_expr($1, $3); }
 	| '!' expr			{ $$ = unary_expr('!', $2); }

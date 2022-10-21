@@ -21,7 +21,7 @@ typedef struct ident Ident;
 
 struct ident {
     char *s;
-    long refs;
+    int refs;
     long next;
 };
 
@@ -32,14 +32,14 @@ static long tab_size, blanks;
 long perm_id, type_id, div_id, integer_id, string_id, dbref_id, list_id;
 long symbol_id, error_id, frob_id, methodnf_id, methoderr_id, parent_id;
 long maxdepth_id, objnf_id, numargs_id, range_id, paramnf_id, file_id;
-long ticks_id, connect_id, disconnect_id, startup_id, parse_id, sys_id;
-long root_id, socket_id, bind_id, servnf_id, paramexists_id, dictionary_id;
-long keynf_id, address_id, refused_id, net_id, timeout_id, other_id, failed_id;
-long heartbeat_id, regexp_id;
+long ticks_id, connect_id, disconnect_id, startup_id, parse_id, socket_id;
+long bind_id, servnf_id, paramexists_id, dictionary_id, keynf_id, address_id;
+long refused_id, net_id, timeout_id, other_id, failed_id, heartbeat_id;
+long regexp_id, buffer_id, namenf_id;
 
 void init_ident(void)
 {
-    unsigned long i;
+    long i;
 
     tab_size = INIT_TAB_SIZE;
 
@@ -79,8 +79,6 @@ void init_ident(void)
     disconnect_id = ident_get("disconnect");
     parse_id = ident_get("parse");
     startup_id = ident_get("startup");
-    sys_id = ident_get("sys");
-    root_id = ident_get("root");
     socket_id = ident_get("socket");
     bind_id = ident_get("bind");
     servnf_id = ident_get("servnf");
@@ -95,11 +93,14 @@ void init_ident(void)
     failed_id = ident_get("failed");
     heartbeat_id = ident_get("heartbeat");
     regexp_id = ident_get("regexp");
+    buffer_id = ident_get("buffer");
+    namenf_id = ident_get("namenf");
 }
 
 long ident_get(char *s)
 {
-    unsigned long hval = hash(s), ind, new_size, i;
+    unsigned long hval = hash(s);
+    long ind, new_size, i;
 
     /* Look for an existing identifier. */
     ind = hashtab[hval % tab_size];
@@ -158,7 +159,7 @@ long ident_get(char *s)
 
 void ident_discard(long id)
 {
-    unsigned long ind, *p;
+    long ind, *p;
 
     tab[id].refs--;
 #ifdef IDENT_DEBUG

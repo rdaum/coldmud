@@ -13,6 +13,7 @@ int cache_check(long dbref);
 void cache_sync(void);
 Object *cache_first(void);
 Object *cache_next(void);
+void cache_sanity_check(void);
 
 #endif
 

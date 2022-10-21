@@ -2,6 +2,7 @@
 
 #define _POSIX_SOURCE
 
+#include <stdio.h>
 #include "x.tab.h"
 #include "data.h"
 #include "memory.h"
@@ -18,7 +19,7 @@ static void double_hashtab_size(Dict *dict);
 Dict *dict_new(List *keys, List *values)
 {
     Dict *new;
-    int i;
+    int i, j;
 
     /* Construct a new dictionary. */
     new = EMALLOC(Dict, 1);
@@ -38,15 +39,22 @@ Dict *dict_new(List *keys, List *values)
 	new->hashtab[i] = -1;
     }
 
-    /* Insert the keys into the hash table. */
-    for (i = 0; i < new->keys->len; i++) {
-	if (search(new, &keys->el[i]) != -1) {
-	    new->keys = list_delete(new->keys, i);
-	    new->values = list_delete(new->values, i);
-	} else {
-	    insert_key(new, i);
+    /* Insert the keys into the hash table, eliminating duplicates. */
+    i = j = 0;
+    while (i < new->keys->len) {
+	if (i != j) {
+	    new->keys->el[j] = new->keys->el[i];
+	    new->values->el[j] = new->values->el[i];
 	}
+	if (search(new, &keys->el[i]) == -1) {
+	    insert_key(new, j++);
+	} else {
+	    data_discard(&new->keys->el[i]);
+	    data_discard(&new->values->el[i]);
+	}
+	i++;
     }
+    new->keys->len = new->values->len = j;
 
     new->refs = 1;
     return new;
@@ -146,39 +154,38 @@ Dict *dict_add(Dict *dict, Data *key, Data *value)
     return dict;
 }
 
+/* Error-checking is the caller's responsibility; this routine assumes that it
+ * will find the key in the dictionary. */
 Dict *dict_del(Dict *dict, Data *key)
 {
     int ind, *ip, i = -1, j;
 
+    dict = prepare_to_modify(dict);
+
     /* Search for a pointer to the key, either in the hash table entry or in
      * the chain links. */
     ind = data_hash(key) % dict->hashtab_size;
-    for (ip = &dict->hashtab[ind]; *ip != -1; ip = &dict->links[*ip]) {
+    for (ip = &dict->hashtab[ind];; ip = &dict->links[*ip]) {
 	i = *ip;
 	if (data_cmp(&dict->keys->el[i], key) == 0)
 	    break;
     }
 
-    /* If *ip is -1, we didn't find the key; return NULL. */
-    if (*ip == -1)
-	return NULL;
-
-    /* We found the key; duplicate the dictionary, if necessary, and delete the
-     * elements from the keys and values lists. */
-    dict = prepare_to_modify(dict);
+    /* Delete the element from the keys and values lists. */
     dict->keys = list_delete(dict->keys, i);
     dict->values = list_delete(dict->values, i);
 
     /* Replace the pointer to the key index with the next link. */
     *ip = dict->links[i];
 
-    /* Copy the links beyond ip backward. */
-    MEMMOVE(dict->links + i, dict->links + i + 1, int, dict->keys->len - i);
+    /* Copy the links beyond i backward. */
+    MEMMOVE(dict->links + i, dict->links + i + 1, dict->keys->len - i);
     dict->links[dict->keys->len - 1] = -1;
 
-    /* Since we've renumbered all the elements, we have to check all the links
-     * and hash table entries.  If they're greater than i, decrement them.
-     * Skip this step if the element we removed was the last one. */
+    /* Since we've renumbered all the elements beyond i, we have to check
+     * all the links and hash table entries.  If they're greater than i,
+     * decrement them.  Skip this step if the element we removed was the last
+     * one. */
     if (i < dict->keys->len) {
 	for (j = 0; j < dict->keys->len; j++) {
 	    if (dict->links[j] > i)
@@ -260,9 +267,9 @@ static Dict *prepare_to_modify(Dict *dict)
     new->values = list_dup(dict->values);
     new->hashtab_size = dict->hashtab_size;
     new->links = EMALLOC(int, new->hashtab_size);
-    MEMCPY(new->links, dict->links, int, new->hashtab_size);
+    MEMCPY(new->links, dict->links, new->hashtab_size);
     new->hashtab = EMALLOC(int, new->hashtab_size);
-    MEMCPY(new->hashtab, dict->hashtab, int, new->hashtab_size);
+    MEMCPY(new->hashtab, dict->hashtab, new->hashtab_size);
     dict->refs--;
     new->refs = 1;
     return new;

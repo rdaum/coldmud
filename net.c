@@ -26,7 +26,7 @@
 #include "ident.h"
 
 extern int socket(), bind(), listen(), getdtablesize(), select(), accept();
-extern int connect(), getpeername(), getsockopt();
+extern int connect(), getpeername(), getsockopt(), setsockopt();
 extern void bzero(), memset();
 
 static long translate_connect_error(int error);
@@ -38,7 +38,7 @@ long server_failure_reason;
 
 int get_server_socket(int port)
 {
-    int fd;
+    int fd, one;
 
     /* Create a socket. */
     fd = socket(AF_INET, SOCK_STREAM, 0);
@@ -46,6 +46,10 @@ int get_server_socket(int port)
 	server_failure_reason = socket_id;
 	return -1;
     }
+
+    /* Set SO_REUSEADDR option to avoid restart problems. */
+    one = 1;
+    setsockopt(fd, SOL_SOCKET, SO_REUSEADDR, (char *) &one, sizeof(int));
 
     /* Bind the socket to port. */
     sin.sin_family = AF_INET;

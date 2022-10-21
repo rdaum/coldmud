@@ -85,11 +85,9 @@ void task(Connection *conn, long dbref, long message, int num_args, ...)
 }
 
 /* Execute a task by evaluating a method on an object. */
-void task_eval(Connection *conn, Object *obj, Method *method)
+void task_method(Connection *conn, Object *obj, Method *method)
 {
     cur_conn = conn;
-    method->name = -1;
-    method->object = obj;
     frame_start(obj, method, NOT_AN_IDENT, NOT_AN_IDENT, 0, 0);
     execute();
 
@@ -110,7 +108,7 @@ long frame_start(Object *obj, Method *method, long sender, long caller,
 					method->rest == -1)) {
 	if (numargs_str)
 	    string_discard(numargs_str);
-	numargs_str = format("$%I.%s called with %s argument%s, requires %s%s",
+	numargs_str = format("#%l.%s called with %s argument%s, requires %s%s",
 			     obj->dbref, ident_name(method->name),
 			     english_integer(num_args, nbuf1),
 			     (num_args == 1) ? "" : "s",
@@ -127,7 +125,7 @@ long frame_start(Object *obj, Method *method, long sender, long caller,
     if (method->rest != -1) {
 	rest_start = arg_start + method->num_args;
 	rest = list_new(stack_pos - rest_start);
-	MEMCPY(rest->el, &stack[rest_start], Data, stack_pos - rest_start);
+	MEMCPY(rest->el, &stack[rest_start], stack_pos - rest_start);
 	stack_pos = rest_start;
 	push_list(rest);
 	list_discard(rest);
@@ -205,7 +203,6 @@ void frame_return(void)
 
 static void execute(void)
 {
-    static int debug = 0;
     int opcode;
 
     while (cur_frame) {
@@ -213,8 +210,6 @@ static void execute(void)
 	    out_of_ticks_error();
 	} else {
 	    opcode = cur_frame->opcodes[cur_frame->pc];
-	    if (debug)
-		write_log(op_table[opcode].name);
 	    cur_frame->last_opcode = opcode;
 	    cur_frame->pc++;
 	    (*op_table[opcode].func)();
@@ -223,7 +218,7 @@ static void execute(void)
 }
 
 /* Requires cur_frame->pc to be the current instruction.  Do NOT call this
- * function if there is any possibility of an error occurring before the
+ * function if there is any possibility of the assignment failing before the
  * current instruction finishes. */
 void anticipate_assignment(void)
 {
@@ -334,7 +329,7 @@ void push_dbref(long dbref)
 {
     check_stack(1);
     stack[stack_pos].type = DBREF;
-    stack[stack_pos].u.dbref = ident_dup(dbref);
+    stack[stack_pos].u.dbref = dbref;
     stack_pos++;
 }
 
@@ -367,6 +362,14 @@ void push_error(long id)
     check_stack(1);
     stack[stack_pos].type = ERROR;
     stack[stack_pos].u.error = ident_dup(id);
+    stack_pos++;
+}
+
+void push_buffer(Buffer *buf)
+{
+    check_stack(1);
+    stack[stack_pos].type = BUFFER;
+    stack[stack_pos].u.buffer = buffer_dup(buf);
     stack_pos++;
 }
 
@@ -570,7 +573,7 @@ void user_error(long id, String *str, Data *arg)
     substr_set_to_full_string(&traceback->el[0].u.substr, errstr);
 
     /* Set second line to be source of error. */
-    errstr = format("Thrown by $%I.%s (defined $%I), line %d.",
+    errstr = format("Thrown by #%l.%s (defined #%l), line %d.",
 		    cur_frame->object->dbref, cur_method_name(),
 		    cur_frame->method->object->dbref,
 		    line_number(cur_frame->method, cur_frame->pc));
@@ -721,7 +724,7 @@ static List *traceback_add(List *traceback, long id)
     Data d;
     String *errstr;
 
-    errstr = format("~%I in $%I.%s (defined on $%I), line %d",
+    errstr = format("~%I in #%l.%s (defined on #%l), line %d",
 		    id, cur_frame->object->dbref, cur_method_name(),
 		    cur_frame->method->object->dbref,
 		    line_number(cur_frame->method, cur_frame->pc));

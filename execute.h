@@ -68,7 +68,7 @@ extern long task_id;
 
 void init_execute(void);
 void task(Connection *conn, long dbref, long message, int num_args, ...);
-void task_eval(Connection *conn, Object *obj, Method *method);
+void task_method(Connection *conn, Object *obj, Method *method);
 long frame_start(Object *obj, Method *method, long caller, long caller_definer,
 		 int stack_start, int arg_start);
 void frame_return(void);
@@ -84,6 +84,7 @@ void push_list(List *list);
 void push_symbol(long id);
 void push_error(long id);
 void push_dict(Dict *dict);
+void push_buffer(Buffer *buffer);
 int func_init_0();
 int func_init_1(Data **args, int type1);
 int func_init_2(Data **args, int type1, int type2);

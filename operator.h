@@ -34,9 +34,9 @@ void op_one(void);
 void op_integer(void);
 void op_string(void);
 void op_dbref(void);
-void op_nameref(void);
 void op_symbol(void);
 void op_error(void);
+void op_name(void);
 void op_get_local(void);
 void op_get_obj_var(void);
 void op_start_args(void);
@@ -45,6 +45,7 @@ void op_message(void);
 void op_expr_message(void);
 void op_list(void);
 void op_dict(void);
+void op_buffer(void);
 void op_frob(void);
 void op_index(void);
 void op_and(void);
@@ -114,7 +115,19 @@ void op_union(void);
 void op_dict_keys(void);
 void op_dict_add(void);
 void op_dict_del(void);
+void op_dict_add_elem(void);
+void op_dict_del_elem(void);
 void op_dict_contains(void);
+
+/* Buffer manipulation (bufferop.c). */
+void op_buffer_len(void);
+void op_buffer_retrieve(void);
+void op_buffer_append(void);
+void op_buffer_replace(void);
+void op_buffer_add(void);
+void op_buffer_truncate(void);
+void op_buffer_to_strings(void);
+void op_buffer_from_strings(void);
 
 /* Miscellaneous operations (miscop.c). */
 void op_version(void);
@@ -124,6 +137,7 @@ void op_ctime(void);
 void op_min(void);
 void op_max(void);
 void op_abs(void);
+void op_get_name(void);
 
 /* Current method information operations (methodop.c). */
 void op_this();
@@ -135,6 +149,7 @@ void op_task_id();
 /* Error handling operators (errorop.c). */
 void op_error_func(void);
 void op_traceback(void);
+void op_error_str(void);
 void op_error_arg(void);
 void op_throw(void);
 void op_rethrow(void);
@@ -177,6 +192,9 @@ void op_unbind(void);
 void op_connect(void);
 void op_set_heartbeat_freq(void);
 void op_data(void);
+void op_set_name(void);
+void op_del_name(void);
+void op_db_top(void);
 
 #endif
 

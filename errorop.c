@@ -31,6 +31,25 @@ void op_traceback(void)
     push_list(cur_frame->handler_info->traceback);
 }
 
+void op_error_str(void)
+{
+    String *str;
+
+    if (!func_init_0())
+	return;
+
+    if (!cur_frame->handler_info) {
+	throw(error_id, "Request for handler info outside handler.");
+	return;
+    }
+
+    str = cur_frame->handler_info->traceback->el[0].u.substr.str;
+    push_string(str);
+    stack[stack_pos - 1].u.substr.start = 7;
+    stack[stack_pos - 1].u.substr.span -= 7;
+    string_discard(str);
+}
+
 void op_error_arg(void)
 {
     if (!func_init_0())

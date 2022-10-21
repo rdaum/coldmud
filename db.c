@@ -12,7 +12,7 @@
 #include <string.h>
 #include <unistd.h>
 #include "db.h"
-#include "loc.h"
+#include "lookup.h"
 #include "object.h"
 #include "cache.h"
 #include "log.h"
@@ -20,6 +20,7 @@
 #include "dbpack.h"
 #include "memory.h"
 #include "config.h"
+#include "ident.h"
 
 #define NEEDED(n, b)		(((n) % (b)) ? (n) / (b) + 1 : (n) / (b))
 #define ROUND_UP(a, m)		(((a) - 1) + (m) - (((a) - 1) % (m)))
@@ -29,8 +30,13 @@
 #define	LOGICAL_BLOCK(off)	((off) / BLOCK_SIZE)
 #define	BLOCK_OFFSET(block)	((block) * BLOCK_SIZE)
 
+#ifdef S_IRUSR
 #define READ_WRITE		(S_IRUSR | S_IWUSR)
 #define READ_WRITE_EXECUTE	(S_IRUSR | S_IWUSR | S_IXUSR)
+#else
+#define READ_WRITE 0600
+#define READ_WRITE_EXECUTE 0700
+#endif
 
 static void db_mark(off_t start, int size);
 static void db_unmark(off_t start, int size);
@@ -48,15 +54,16 @@ static int bitmap_blocks = 0;
 
 static int db_clean;
 
-extern int cur_search;
+extern long cur_search, db_top;
 
 int init_db(void)
 {
     struct stat statbuf;
     FILE *fp;
-    char buf[80], *key;
+    char buf[80];
     off_t offset;
     int new = 1, size;
+    long dbref;
 
     /* Make sure "binary" exists and is a directory. */
     if (stat("binary", &statbuf) == -1) {
@@ -91,7 +98,7 @@ int init_db(void)
 	fail_to_start("Cannot open object database file.");
 
     /* Open hash table. */
-    loc_open("binary/index", new);
+    lookup_open("binary/index", new);
 
     /* Determine size of chunk file for allocation bitmap. */
     if (stat("binary/objects", &statbuf) < 0)
@@ -102,15 +109,18 @@ int init_db(void)
     bitmap = EMALLOC(char, bitmap_blocks / 8);
     memset(bitmap, 0, bitmap_blocks / 8);
 
-    key = loc_first();
-    while (key) {
-	if (!loc_retrieve(key, &offset, &size))
+    dbref = lookup_first_dbref();
+    while (dbref != NOT_AN_IDENT) {
+	if (!lookup_retrieve_dbref(dbref, &offset, &size))
 	    fail_to_start("Database index is inconsistent.");
+
+	if (dbref >= db_top)
+	    db_top = dbref + 1;
 
 	/* Mark blocks as busy in the bitmap. */
 	db_mark(LOGICAL_BLOCK(offset), size);
 
-	key = loc_next();
+	dbref = lookup_next_dbref();
     }
 
     /* If database is new, mark it as clean; otherwise, it was clean
@@ -200,13 +210,13 @@ static int db_alloc(int size)
     }
 }
 
-int db_get(Object *object, char *name)
+int db_get(Object *object, long dbref)
 {
     off_t offset;
     int size;
 
-    /* Get the object location for the name. */
-    if (!loc_retrieve(name, &offset, &size))
+    /* Get the object location for the dbref. */
+    if (!lookup_retrieve_dbref(dbref, &offset, &size))
 	return 0;
 
     /* seek to location */
@@ -217,14 +227,14 @@ int db_get(Object *object, char *name)
     return 1;
 }
 
-int db_put(Object *obj, char *name)
+int db_put(Object *obj, long dbref)
 {
     off_t old_offset, new_offset;
     int old_size, new_size = size_object(obj);
 
     db_is_dirty();
 
-    if (loc_retrieve(name, &old_offset, &old_size)) {
+    if (lookup_retrieve_dbref(dbref, &old_offset, &old_size)) {
 	if (NEEDED(new_size, BLOCK_SIZE) > NEEDED(old_size, BLOCK_SIZE)) {
 	    db_unmark(LOGICAL_BLOCK(old_offset), old_size);
 	    new_offset = BLOCK_OFFSET(db_alloc(new_size));
@@ -235,11 +245,11 @@ int db_put(Object *obj, char *name)
 	new_offset = BLOCK_OFFSET(db_alloc(new_size));
     }
 
-    if (!loc_store(name, new_offset, new_size))
+    if (!lookup_store_dbref(dbref, new_offset, new_size))
 	return 0;
 
     if (fseek(database_file, new_offset, SEEK_SET)) {
-	write_log("ERROR: Seek failed for %s.", name);
+	write_log("ERROR: Seek failed for %l.", dbref);
 	return 0;
     }
 
@@ -249,33 +259,35 @@ int db_put(Object *obj, char *name)
     return 1;
 }
 
-int db_check(char *name)
+int db_check(long dbref)
 {
     off_t offset;
     int size;
 
-    return loc_retrieve(name, &offset, &size);
+    return lookup_retrieve_dbref(dbref, &offset, &size);
 }
 
-int db_del(char *name)
+int db_del(long dbref)
 {
     off_t offset;
     int size;
 
     /* Get offset and size of key. */
-    if (!loc_retrieve(name, &offset, &size))
+    if (!lookup_retrieve_dbref(dbref, &offset, &size))
 	return 0;
 
     /* Remove key from location db. */
-    if (!loc_remove(name))
+    if (!lookup_remove_dbref(dbref))
 	return 0;
+
+    db_is_dirty();
 
     /* Mark free space in bitmap */
     db_unmark(LOGICAL_BLOCK(offset), size);
 
     /* Mark object dead in file */
     if (fseek(database_file, offset, SEEK_SET)) {
-	write_log("ERROR: Failed to seek to object %s", name);
+	write_log("ERROR: Failed to seek to object %l.", dbref);
 	return 0;
     }
 
@@ -287,7 +299,7 @@ int db_del(char *name)
 
 void db_close(void)
 {
-    loc_close();
+    lookup_close();
     fclose(database_file);
     free(bitmap);
     db_is_clean();
@@ -295,7 +307,7 @@ void db_close(void)
 
 void db_flush(void)
 {
-    loc_sync();
+    lookup_sync();
     db_is_clean();
 }
 
@@ -312,7 +324,7 @@ static void db_is_clean(void)
 	panic("Cannot create file 'clean'.");
 
     fformat(fp, "%d\n%d\n%d\n", VERSION_MAJOR, VERSION_MINOR, VERSION_BUGFIX);
-    fformat(fp, "%d\n", cur_search);
+    fformat(fp, "%l\n", cur_search);
     close_scratch_file(fp);
     db_clean = 1;
 }

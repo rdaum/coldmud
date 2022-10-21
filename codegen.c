@@ -283,7 +283,7 @@ Expr *string_expr(char *s)
     return new;
 }
 
-Expr *dbref_expr(char *dbref)
+Expr *dbref_expr(long dbref)
 {
     Expr *new = PMALLOC(compiler_pile, Expr, 1);
 
@@ -310,6 +310,16 @@ Expr *error_expr(char *error)
     new->type = ERROR;
     new->lineno = cur_lineno();
     new->u.error = error;
+    return new;
+}
+
+Expr *name_expr(char *name)
+{
+    Expr *new = PMALLOC(compiler_pile, Expr, 1);
+
+    new->type = NAME;
+    new->lineno = cur_lineno();
+    new->u.name = name;
     return new;
 }
 
@@ -383,6 +393,16 @@ Expr *dict_expr(Expr_list *args)
     Expr *new = PMALLOC(compiler_pile, Expr, 1);
 
     new->type = DICT;
+    new->lineno = cur_lineno();
+    new->u.args = args;
+    return new;
+}
+
+Expr *buffer_expr(Expr_list *args)
+{
+    Expr *new = PMALLOC(compiler_pile, Expr, 1);
+
+    new->type = BUFFER;
     new->lineno = cur_lineno();
     new->u.args = args;
     return new;
@@ -1023,7 +1043,7 @@ static void compile_expr(Expr *expr)
       case DBREF:
 
 	code(DBREF);
-	code_str(expr->u.dbref);
+	code(expr->u.dbref);
 
 	break;
 
@@ -1038,6 +1058,13 @@ static void compile_expr(Expr *expr)
 
 	code(ERROR);
 	code_str(expr->u.error);
+
+	break;
+
+      case NAME:
+
+	code(NAME);
+	code_str(expr->u.name);
 
 	break;
 
@@ -1137,6 +1164,14 @@ static void compile_expr(Expr *expr)
 	code(START_ARGS);
 	compile_expr_list(expr->u.args);
 	code(DICT);
+
+	break;
+
+      case BUFFER:
+
+	code(START_ARGS);
+	compile_expr_list(expr->u.args);
+	code(BUFFER);
 
 	break;
 

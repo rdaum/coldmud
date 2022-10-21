@@ -8,7 +8,7 @@
 
 /* The version number. */
 #define VERSION_MAJOR	0
-#define VERSION_MINOR	9
+#define VERSION_MINOR	10
 #define VERSION_BUGFIX	0
 
 /* Number of ticks a method gets before dying with an E_TICKS. */
@@ -26,6 +26,9 @@
 
 /* Maximum number of characters of a data value to display using format(). */
 #define MAX_DATA_DISPLAY 15
+
+#define SYSTEM_DBREF	0
+#define ROOT_DBREF	1
 
 #endif
 

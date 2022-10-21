@@ -298,17 +298,13 @@ void op_in(void)
 {
     Data *d1 = &stack[stack_pos - 2];
     Data *d2 = &stack[stack_pos - 1];
-    int i, c;
+    int pos, i, c;
     char *s;
 
     if (d2->type == LIST) {
-	for (i = 0; i < d2->u.sublist.span; i++) {
-	    if (data_cmp(data_dptr(d2) + i, d1) == 0)
-		break;
-	}
-	i = (i == d2->u.sublist.span) ? 0 : i + 1;
+	pos = sublist_search(&d2->u.sublist, d1);
 	pop(2);
-	push_int(i);
+	push_int(pos + 1);
 	return;
     }
 

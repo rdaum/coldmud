@@ -5,10 +5,10 @@
 #include "object.h"
 
 int init_db(void);
-int db_get(Object *object, char *name);
-int db_put(Object *object, char *name);
-int db_check(char *name);
-int db_del(char *name);
+int db_get(Object *object, long name);
+int db_put(Object *object, long name);
+int db_check(long name);
+int db_del(long name);
 char *db_traverse_first(void);
 char *db_traverse_next(void);
 int db_backup(char *out);

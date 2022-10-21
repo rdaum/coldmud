@@ -144,10 +144,9 @@ void op_delete(void)
 	sublist_truncate(sublist);
 	dptr = &sublist->list->el[sublist->start + pos];
 	data_discard(dptr);
-	MEMMOVE(dptr, dptr + 1, Data,
-		sublist->span - sublist->start - pos - 1);
-	sublist->span--;
+	MEMMOVE(dptr, dptr + 1, sublist->span - 1 - pos);
 	sublist->list->len--;
+	sublist->span--;
 
 	/* Pop the second argument. */
 	pop(1);
@@ -209,7 +208,7 @@ void op_setremove(void)
     sublist_truncate(sublist);
     d = &sublist->list->el[sublist->start + i];
     data_discard(d);
-    MEMCPY(d, d + 1, Data, sublist->span - sublist->start - i - 1);
+    MEMCPY(d, d + 1, sublist->span - sublist->start - i - 1);
     sublist->list->len--;
     sublist->span--;
 

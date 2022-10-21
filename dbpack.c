@@ -95,7 +95,7 @@ static void pack_data(Data *data, FILE *fp)
 	break;
 
       case DBREF:
-	write_ident(data->u.dbref, fp);
+	write_long(data->u.dbref, fp);
 	break;
 
       case LIST:
@@ -111,7 +111,7 @@ static void pack_data(Data *data, FILE *fp)
 	break;
 
       case FROB:
-	write_ident(data->u.frob.class, fp);
+	write_long(data->u.frob.class, fp);
 	write_long(data->u.frob.rep_type, fp);
 	if (data->u.frob.rep_type == LIST) {
 	    pack_list(data->u.frob.rep.list->el, data->u.frob.rep.list->len,
@@ -124,6 +124,15 @@ static void pack_data(Data *data, FILE *fp)
       case DICT:
 	pack_dict(data->u.dict, fp);
 	break;
+
+      case BUFFER: {
+	  int i;
+
+	  write_long(data->u.buffer->len, fp);
+	  for (i = 0; i < data->u.buffer->len; i++)
+	      write_long(data->u.buffer->s[i], fp);
+	  break;
+      }
     }
 }
 
@@ -294,7 +303,7 @@ static void unpack_data(Data *data, FILE *fp)
       }
 
       case DBREF:
-	data->u.dbref = read_ident(fp);
+	data->u.dbref = read_long(fp);
 	break;
 
       case LIST:
@@ -310,7 +319,7 @@ static void unpack_data(Data *data, FILE *fp)
 	break;
 
       case FROB:
-	data->u.frob.class = read_ident(fp);
+	data->u.frob.class = read_long(fp);
 	data->u.frob.rep_type = read_long(fp);
 	if (data->u.frob.rep_type == LIST)
 	    data->u.frob.rep.list = unpack_list(fp);
@@ -321,6 +330,16 @@ static void unpack_data(Data *data, FILE *fp)
       case DICT:
 	data->u.dict = unpack_dict(fp);
 	break;
+
+      case BUFFER: {
+	  int len, i;
+
+	  len = read_long(fp);
+	  data->u.buffer = buffer_new(len);
+	  for (i = 0; i < len; i++)
+	      data->u.buffer->s[i] = read_long(fp);
+	  break;
+      }
     }
 }
 
@@ -505,7 +524,7 @@ static int size_data(Data *data)
 	break;
 
       case DBREF:
-	size += size_ident(data->u.dbref);
+	size += size_long(data->u.dbref);
 	break;
 
       case LIST:
@@ -521,7 +540,7 @@ static int size_data(Data *data)
 	break;
 
       case FROB:
-	size += size_ident(data->u.frob.class);
+	size += size_long(data->u.frob.class);
 	size += size_long(data->u.frob.rep_type);
 	if (data->u.frob.rep_type == LIST) {
 	    size += size_list(data->u.frob.rep.list->el,
@@ -534,6 +553,15 @@ static int size_data(Data *data)
       case DICT:
 	size += size_dict(data->u.dict);
 	break;
+
+      case BUFFER: {
+	  int i;
+
+	  size += size_long(data->u.buffer->len);
+	  for (i = 0; i < data->u.buffer->len; i++)
+	      size += size_long(data->u.buffer->s[i]);
+	  break;
+      }
     }
 
     return size;

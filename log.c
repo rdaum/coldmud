@@ -3,6 +3,7 @@
 #define _POSIX_SOURCE
 
 #include <stdio.h>
+#include <sys/types.h>
 #include <time.h>
 #include <stdarg.h>
 #include "log.h"
@@ -13,7 +14,6 @@
 void panic(char *s)
 {
     static int panic_state = 0;
-
     char timestr[50];
     time_t timeval;
 

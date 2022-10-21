@@ -124,6 +124,16 @@ int strnccmp(char *s1, char *s2, int n)
     return (n >= 0) ? LCASE(*s1) - LCASE(*s2) : 0;
 }
 
+/* Look for c in s, ignoring case. */
+char *strcchr(char *s, int c)
+{
+    for (; *s; s++) {
+	if (LCASE(*s) == c)
+	    return s;
+    }
+    return (c) ? NULL : s;
+}
+
 /* A random number generator.  A lot of Unix rand() implementations don't
  * produce very random low bits, so we shift by eight bits if we can do that
  * without truncating the range. */
@@ -280,6 +290,7 @@ char *english_type(int type)
       case ERROR:	return "an error";
       case FROB:	return "a frob";
       case DICT:	return "a dictionary";
+      case BUFFER:	return "a buffer";
       default:		return "a mistake";
     }
 }

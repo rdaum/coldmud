@@ -26,8 +26,6 @@ static Connection *connection_add(int fd, long dbref);
 static void connection_discard(Connection *conn);
 static void pend_discard(Pending *pend);
 static void server_discard(Server *serv);
-static void handle_incoming_lines(Connection *conn);
-static void dispatch_line(Connection *conn, String *line);
 
 static Connection *connections;		/* List of client connections. */
 static Server *servers;			/* List of server sockets. */
@@ -135,15 +133,13 @@ void handle_io_events(long sec)
     }
 }
 
-void tell(long dbref, char *s, int len)
+void tell(long dbref, Buffer *buf)
 {
     Connection *conn;
 
     for (conn = connections; conn; conn = conn->next) {
-	if (conn->dbref == dbref && !conn->flags.dead) {
-	    conn->write_buf = string_add(conn->write_buf, s, len);
-	    conn->write_buf = string_add(conn->write_buf, "\r\n", 2);
-	}
+	if (conn->dbref == dbref && !conn->flags.dead)
+	    conn->write_buf = buffer_append(conn->write_buf, buf);
     }
 }
 
@@ -169,8 +165,7 @@ int add_server(int port, long dbref)
     /* Check if a server already exists for this port. */
     for (new = servers; new; new = new->next) {
 	if (new->port == port) {
-	    ident_discard(new->dbref);
-	    new->dbref = ident_dup(dbref);
+	    new->dbref = dbref;
 	    new->dead = 0;
 	    return 1;
 	}
@@ -185,7 +180,7 @@ int add_server(int port, long dbref)
     new->server_socket = server_socket;
     new->client_socket = -1;
     new->port = port;
-    new->dbref = ident_dup(dbref);
+    new->dbref = dbref;
     new->dead = 0;
     new->next = servers;
     servers = new;
@@ -209,19 +204,17 @@ int remove_server(int port)
 
 static void connection_read(Connection *conn)
 {
-    String *buf;
+    unsigned char temp[BUF_SIZE];
     int len;
+    Buffer *buf;
+    Data d;
 
-    conn->flags.readable = 0;
-
-    /* Make sure there's a significant amount of space in the read buffer. */
-    buf = conn->read_buf = string_extend(conn->read_buf, BUF_SIZE);
-
-    len = read(conn->fd, buf->s + buf->len, buf->size - buf->len - 1);
+    len = read(conn->fd, (char *) temp, BUF_SIZE);
     if (len < 0 && errno == EINTR) {
 	/* We were interrupted; deal with this next time around. */
 	return;
     }
+    conn->flags.readable = 0;
 
     if (len <= 0) {
 	/* The connection closed. */
@@ -230,27 +223,32 @@ static void connection_read(Connection *conn)
     }
 
     /* We successfully read some data.  Handle it. */
-    buf->len += len;
-    buf->s[buf->len] = 0;
-    handle_incoming_lines(conn);
+    buf = buffer_new(len);
+    MEMCPY(buf->s, temp, len);
+    d.type = BUFFER;
+    d.u.buffer = buf;
+    task(conn, conn->dbref, parse_id, 1, &d);
+    buffer_discard(buf);
 }
 
 static void connection_write(Connection *conn)
 {
-    String *buf = conn->write_buf;
-    int len;
+    Buffer *buf = conn->write_buf;
+    int r;
 
+    r = write(conn->fd, buf->s, buf->len);
     conn->flags.writable = 0;
 
-    len = write(conn->fd, buf->s, buf->len);
-    if (len <= 0) {
+    if (r <= 0) {
 	/* We lost the connection. */
 	conn->flags.dead = 1;
-    } else  {
-	conn->write_buf->len -= len;
-	MEMMOVE(buf->s, buf->s + len, char, buf->len);
-	buf->s[buf->len] = 0;
+	buf = buffer_truncate(buf, 0);
+    } else {
+	MEMMOVE(buf->s, buf->s + r, buf->len - r);
+	buf = buffer_truncate(buf, buf->len - r);
     }
+
+    conn->write_buf = buf;
 }
 
 static Connection *connection_add(int fd, long dbref)
@@ -259,9 +257,8 @@ static Connection *connection_add(int fd, long dbref)
 
     conn = EMALLOC(Connection, 1);
     conn->fd = fd;
-    conn->read_buf = string_empty(BUF_SIZE);
-    conn->write_buf = string_empty(BUF_SIZE);
-    conn->dbref = ident_dup(dbref);
+    conn->write_buf = buffer_new(0);
+    conn->dbref = dbref;
     conn->flags.readable = 0;
     conn->flags.writable = 0;
     conn->flags.dead = 0;
@@ -277,80 +274,18 @@ static void connection_discard(Connection *conn)
 
     /* Free the data associated with the connection. */
     close(conn->fd);
-    ident_discard(conn->dbref);
-    string_discard(conn->read_buf);
-    string_discard(conn->write_buf);
+    buffer_discard(conn->write_buf);
     free(conn);
 }
 
 static void pend_discard(Pending *pend)
 {
-    ident_discard(pend->dbref);
     free(pend);
 }
 
 static void server_discard(Server *serv)
 {
     close(serv->server_socket);
-    ident_discard(serv->dbref);
-}
-
-static void handle_incoming_lines(Connection *conn)
-{
-    char *s = conn->read_buf->s, *p, *q;
-    String *line;
-    int len;
-
-    /* Loop while there is a newline in the read buffer. */
-    len = conn->read_buf->len;
-    while ((p = memchr(s, '\n', len))) {
-
-	/* Decrement len by the number of characters in the line. */
-	len -= p + 1 - s;
-
-	/* Create a new string for the line; we will change the length after
-	 * we copy in all the printable characters. */
-	line = string_new(p - s);
-
-	/* Copy in all the printable characters from s to p. */
-	q = line->s;
-	while (s < p) {
-	    if (isprint(*s))
-		*q++ = *s;
-	    s++;
-	}
-
-	/* Null-terminate line, and set the length to the number of characters
-	 * we actually copied. */
-	*q = 0;
-	line->len = q - line->s;
-
-	/* Dispatch line. */
-	dispatch_line(conn, line);
-	string_discard(line);
-
-	/* Stop if the connection has disappeared out from under us. */
-	if (conn->flags.dead)
-	    return;
-
-	/* Increment s past the newline, and start again. */
-	s++;
-    }
-
-    /* Copy whatever is left back into read_buf. */
-    MEMMOVE(conn->read_buf->s, s, char, len + 1);
-    conn->read_buf->len = len;
-}
-
-/* Process a line. */
-static void dispatch_line(Connection *conn, String *line)
-{
-    Data d;
-
-    /* Run parse method on object with line as an argument. */
-    d.type = STRING;
-    substr_set_to_full_string(&d.u.substr, line);
-    task(conn, conn->dbref, parse_id, 1, &d);
 }
 
 long make_connection(char *addr, int port, long dbref)
@@ -378,7 +313,7 @@ long make_connection(char *addr, int port, long dbref)
 void flush_output(void)
 {
     Connection *conn;
-    char *s;
+    unsigned char *s;
     int len, r;
 
     for (conn = connections; conn; conn = conn->next) {

@@ -47,9 +47,10 @@ static Op_info op_info[] = {
     { ONE,		"ONE",		op_one,		0,	0 },
     { INTEGER,		"INTEGER",	op_integer,	INTEGER,0 },
     { STRING,		"STRING",	op_string,	STRING,	0 },
-    { DBREF,		"DBREF",	op_dbref,	IDENT,	0 },
+    { DBREF,		"DBREF",	op_dbref,	INTEGER,0 },
     { SYMBOL,		"SYMBOL",	op_symbol,	IDENT,	0 },
     { ERROR,		"ERROR",	op_error,	IDENT,	0 },
+    { NAME,		"NAME",		op_name,	IDENT,	0 },
     { GET_LOCAL,	"GET_LOCAL",	op_get_local,	VAR,	0 },
     { GET_OBJ_VAR,	"GET_OBJ_VAR",	op_get_obj_var,	IDENT,	0 },
     { START_ARGS,	"START_ARGS",	op_start_args,	0,	0 },
@@ -58,6 +59,7 @@ static Op_info op_info[] = {
     { EXPR_MESSAGE,	"EXPR_MESSAGE",	op_expr_message,0,	0 },
     { LIST,		"LIST",		op_list,	0,	0 },
     { DICT,		"DICT",		op_dict,	0,	0 },
+    { BUFFER,		"BUFFER",	op_buffer,	0,	0 },
     { FROB,		"FROB",		op_frob,	0,	0 },
     { INDEX,		"INDEX",	op_index,	0,	0 },
     { AND,		"AND",		op_and,		JUMP,	0 },
@@ -126,7 +128,19 @@ static Op_info op_info[] = {
     { DICT_KEYS,	"dict_keys",	op_dict_keys,	0,	0 },
     { DICT_ADD,		"dict_add",	op_dict_add,	0,	0 },
     { DICT_DEL,		"dict_del",	op_dict_del,	0,	0 },
+    { DICT_ADD_ELEM,	"dict_add_elem",op_dict_add_elem,0,	0 },
+    { DICT_DEL_ELEM,	"dict_del_elem",op_dict_del_elem,0,	0 },
     { DICT_CONTAINS,	"dict_contains",op_dict_contains,0,	0 },
+
+    /* Buffer manipulation (bufferop.c). */
+    { BUFFER_LEN,	"buffer_len",	op_buffer_len,	0,	0 },
+    { BUFFER_RETRIEVE,	"buffer_retrieve",op_buffer_retrieve,0,	0 },
+    { BUFFER_APPEND,	"buffer_append",op_buffer_append,0,	0 },
+    { BUFFER_REPLACE,	"buffer_replace",op_buffer_replace,0,	0 },
+    { BUFFER_ADD,	"buffer_add",	op_buffer_add,	0,	0 },
+    { BUFFER_TRUNCATE,	"buffer_truncate",op_buffer_truncate,0,	0 },
+    { BUFFER_TO_STRINGS,"buffer_to_strings",op_buffer_to_strings,0,0 },
+    { BUFFER_FROM_STRINGS,"buffer_from_strings",op_buffer_from_strings,0,0 },
 
     /* Miscellaneous operations (miscop.c). */
     { VERSION,		"version",	op_version,	0,	0 },
@@ -136,6 +150,7 @@ static Op_info op_info[] = {
     { MIN,		"min",		op_min,		0,	0 },
     { MAX,		"max",		op_max,		0,	0 },
     { ABS,		"abs",		op_abs,		0,	0 },
+    { GET_NAME,		"get_name",	op_get_name,	0,	0 },
 
     /* Current method information operations (methodop.c). */
     { THIS,		"this",		op_this,	0,	0 },
@@ -147,6 +162,7 @@ static Op_info op_info[] = {
     /* Error handling operations (errorop.c). */
     { ERROR_FUNC,	"error",	op_error_func,	0,	0 },
     { TRACEBACK,	"traceback",	op_traceback,	0,	0 },
+    { ERROR_STR,	"error_str",	op_error_str,	0,	0 },
     { ERROR_ARG,	"error_arg",	op_error_arg,	0,	0 },
     { THROW,		"throw",	op_throw,	0,	0 },
     { RETHROW,		"rethrow",	op_rethrow,	0,	0 },
@@ -188,7 +204,10 @@ static Op_info op_info[] = {
     { UNBIND,		"unbind",	op_unbind,	0,	0 },
     { CONNECT,		"connect",	op_connect,	0,	0 },
     { SET_HEARTBEAT_FREQ, "set_heartbeat_freq", op_set_heartbeat_freq, 0, 0 },
-    { DATA,		"data",		op_data,	0,	0 }
+    { DATA,		"data",		op_data,	0,	0 },
+    { SET_NAME,		"set_name",	op_set_name,	0,	0 },
+    { DEL_NAME,		"del_name",	op_del_name,	0,	0 },
+    { DB_TOP,		"db_top",	op_db_top,	0,	0 }
 
 };
 

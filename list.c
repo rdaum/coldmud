@@ -99,7 +99,7 @@ int list_cmp(List *l1, List *l2)
 List *list_insert(List *list, int pos, Data *elem)
 {
     list = prepare_to_modify(list, list->len + 1);
-    MEMMOVE(list->el + pos + 1, list->el + pos, Data, list->len - pos);
+    MEMMOVE(list->el + pos + 1, list->el + pos, list->len - pos);
     data_dup(&list->el[pos], elem);
     list->len++;
     return list;
@@ -126,7 +126,7 @@ List *list_delete(List *list, int pos)
 {
     list = prepare_to_modify(list, list->len - 1);
     data_discard(&list->el[pos]);
-    MEMMOVE(list->el + pos, list->el + pos + 1, Data, list->len - pos - 1);
+    MEMMOVE(list->el + pos, list->el + pos + 1, list->len - pos - 1);
     list->len--;
     return list;
 }

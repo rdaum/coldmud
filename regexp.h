@@ -4,6 +4,10 @@
  * Caveat:  this is V8 regexp(3) [actually, a reimplementation thereof],
  * not the System V one.
  */
+
+#ifndef REGEXP_H
+#define REGEXP_H
+
 #define NSUBEXP  10
 typedef struct regexp {
 	char *startp[NSUBEXP];
@@ -15,9 +19,10 @@ typedef struct regexp {
 	char program[1];	/* Unwarranted chumminess with compiler. */
 } regexp;
 
-/* Prototypes by GBH. */
 extern regexp *regcomp(char *exp);
-extern int regexec(regexp *prog, char *string);
+extern int regexec(regexp *prog, char *string, int case_flag);
 extern int regsub(regexp *prog, char *src, char *dest);
 extern void regerror(char *msg);
+
+#endif
 

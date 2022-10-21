@@ -25,6 +25,7 @@
 #include "ident.h"
 #include "cmstring.h"
 #include "token.h"
+#include "config.h"
 
 int running = 1;
 long heartbeat_freq = -1;
@@ -101,21 +102,21 @@ static void initialize(int argc, char **argv)
      * database. */
 
     /* Make sure there is a root object. */
-    obj = cache_retrieve(root_id);
+    obj = cache_retrieve(ROOT_DBREF);
     if (!obj) {
 	parents = list_new(0);
-	obj = object_new(root_id, parents);
+	obj = object_new(ROOT_DBREF, parents);
 	list_discard(parents);
     }
     cache_discard(obj);
 
-    /* Make sure there is a system object, and store it in system_object. */
-    obj = cache_retrieve(sys_id);
+    /* Make sure there is a system object. */
+    obj = cache_retrieve(SYSTEM_DBREF);
     if (!obj) {
 	parents = list_new(1);
 	parents->el[0].type = DBREF;
-	parents->el[0].u.dbref = root_id;
-	obj = object_new(sys_id, parents);
+	parents->el[0].u.dbref = ROOT_DBREF;
+	obj = object_new(SYSTEM_DBREF, parents);
 	list_discard(parents);
     }
     cache_discard(obj);
@@ -134,7 +135,7 @@ static void initialize(int argc, char **argv)
     /* Send a startup message to the system object. */
     d.type = LIST;
     sublist_set_to_full_list(&d.u.sublist, args);
-    task(NULL, sys_id, startup_id, 1, &d);
+    task(NULL, SYSTEM_DBREF, startup_id, 1, &d);
     list_discard(args);
 }
 
@@ -148,6 +149,9 @@ static void main_loop(void)
 	 * "disconnect"* message to the system object for each connection done
 	 * away with. */
 	flush_defunct();
+
+	/* Sanity check: make sure there are no objects in active chains. */
+	cache_sanity_check();
 
 	/* Find number of seconds before next heartbeat. */
 	if (heartbeat_freq == -1) {
@@ -167,7 +171,7 @@ static void main_loop(void)
 	    time(&t);
 	    if (t >= next_heartbeat) {
 		last_heartbeat = t;
-		task(NULL, sys_id, heartbeat_id, 0);
+		task(NULL, SYSTEM_DBREF, heartbeat_id, 0);
 	    }
 	}
     }

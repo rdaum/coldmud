@@ -14,14 +14,7 @@
 #include "memory.h"
 #include "token.h"
 #include "log.h"
-
-/* Multiplicative hashing constants.  These constants are *not* machine-
- * dependent.  ANSI guarantees us that longs are at least 32 bits.  In order
- * for the binary db format to be machine-independent, our hash routine must
- * produce the same result even if longs are, say, 64 bits. */
-#define MULTIPLIER	2654435769UL
-#define WORD_BITS	32
-#define FULL_MASK	0xffffffffUL
+#include "lookup.h"
 
 static int sublist_cmp(Sublist *s1, Sublist *s2);
 static String *data_add_list_literal_to_str(String *str, Data *data, int len);
@@ -36,54 +29,61 @@ int data_cmp(Data *d1, Data *d2)
 
     if (d1->type != d2->type) {
 	return 1;
-    } else {
-	switch (d1->type) {
+    }
 
-	  case INTEGER:
-	    return d1->u.val - d2->u.val;
+    switch (d1->type) {
 
-	  case STRING:
-	    l1 = d1->u.substr.span;
-	    l2 = d2->u.substr.span;
-	    l = (l1 < l2) ? l1 : l2;
-	    val = strnccmp(data_sptr(d1), data_sptr(d2), l);
-	    if (val)
-		return val;
-	    else if (l1 > l2)
-		return data_sptr(d1)[l2];
-	    else if (l1 < l2)
-		return -data_sptr(d2)[l1];
-	    else
-		return 0;
+      case INTEGER:
+	return d1->u.val - d2->u.val;
 
-	  case DBREF:
-	    return (d1->u.dbref != d2->u.dbref);
+      case STRING:
+	l1 = d1->u.substr.span;
+	l2 = d2->u.substr.span;
+	l = (l1 < l2) ? l1 : l2;
+	val = strnccmp(data_sptr(d1), data_sptr(d2), l);
+	if (val)
+	    return val;
+	else if (l1 > l2)
+	    return data_sptr(d1)[l2];
+	else if (l1 < l2)
+	    return -data_sptr(d2)[l1];
+	else
+	    return 0;
 
-	  case LIST:
-	    return sublist_cmp(&d1->u.sublist, &d2->u.sublist);
+      case DBREF:
+	return (d1->u.dbref != d2->u.dbref);
 
-	  case SYMBOL:
-	    return (d1->u.symbol != d2->u.symbol);
+      case LIST:
+	return sublist_cmp(&d1->u.sublist, &d2->u.sublist);
 
-	  case ERROR:
-	    return (d1->u.error != d2->u.error);
+      case SYMBOL:
+	return (d1->u.symbol != d2->u.symbol);
 
-	  case FROB:
-	    if (d1->u.frob.class != d2->u.frob.class)
-		return 1;
-	    else if (d1->u.frob.rep_type != d2->u.frob.rep_type)
-		return 1;
-	    else if (d1->u.frob.rep_type == LIST)
-		return list_cmp(d1->u.frob.rep.list, d2->u.frob.rep.list);
-	    else
-		return dict_cmp(d1->u.frob.rep.dict, d2->u.frob.rep.dict);
+      case ERROR:
+	return (d1->u.error != d2->u.error);
 
-	  case DICT:
-	    return dict_cmp(d1->u.dict, d2->u.dict);
-
-	  default:
+      case FROB:
+	if (d1->u.frob.class != d2->u.frob.class)
 	    return 1;
-	}
+	else if (d1->u.frob.rep_type != d2->u.frob.rep_type)
+	    return 1;
+	else if (d1->u.frob.rep_type == LIST)
+	    return list_cmp(d1->u.frob.rep.list, d2->u.frob.rep.list);
+	else
+	    return dict_cmp(d1->u.frob.rep.dict, d2->u.frob.rep.dict);
+
+      case DICT:
+	return dict_cmp(d1->u.dict, d2->u.dict);
+
+      case BUFFER:
+	if (d1->u.buffer == d2->u.buffer)
+	    return 0;
+	if (d1->u.buffer->len != d2->u.buffer->len)
+	    return 1;
+	return MEMCMP(d1->u.buffer->s, d2->u.buffer->s, d1->u.buffer->len);
+
+      default:
+	return 1;
     }
 }
 
@@ -117,6 +117,9 @@ int data_true(Data *data)
       case DICT:
 	return (data->u.dict->keys->len != 0);
 
+      case BUFFER:
+	return (data->u.buffer->len != 0);
+
       default:
 	return 0;
     }
@@ -137,7 +140,7 @@ unsigned long data_hash(Data *d)
 			 d->u.substr.span);
 
       case DBREF:
-	return hash(ident_name(d->u.dbref));
+	return d->u.dbref;
 
       case LIST:
 	sub = &d->u.sublist;
@@ -169,6 +172,12 @@ unsigned long data_hash(Data *d)
 	else
 	    return 200;
 
+      case BUFFER:
+	if (d->u.buffer->len)
+	    return d->u.buffer->s[0] + d->u.buffer->s[d->u.buffer->len - 1];
+	else
+	    return 300;
+
       default:
 	return -1;
     }
@@ -192,7 +201,7 @@ void data_dup(Data *dest, Data *src)
 	break;
 
       case DBREF:
-	dest->u.dbref = ident_dup(src->u.dbref);
+	dest->u.dbref = src->u.dbref;
 	break;
 
       case LIST:
@@ -210,7 +219,7 @@ void data_dup(Data *dest, Data *src)
 	break;
 
       case FROB:
-	dest->u.frob.class = ident_dup(src->u.frob.class);
+	dest->u.frob.class = src->u.frob.class;
 	dest->u.frob.rep_type = src->u.frob.rep_type;
 	if (dest->u.frob.rep_type == LIST)
 	    dest->u.frob.rep.list = list_dup(src->u.frob.rep.list);
@@ -220,6 +229,10 @@ void data_dup(Data *dest, Data *src)
 
       case DICT:
 	dest->u.dict = dict_dup(src->u.dict);
+	break;
+
+      case BUFFER:
+	dest->u.buffer = buffer_dup(src->u.buffer);
 	break;
     }
 }
@@ -235,10 +248,6 @@ void data_discard(Data *data)
 	string_discard(data->u.substr.str);
 	break;
 
-      case DBREF:
-	ident_discard(data->u.dbref);
-	break;
-
       case LIST:
 	list_discard(data->u.sublist.list);
 	break;
@@ -252,7 +261,6 @@ void data_discard(Data *data)
 	break;
 
       case FROB:
-	ident_discard(data->u.frob.class);
 	if (data->u.frob.rep_type == LIST)
 	    list_discard(data->u.frob.rep.list);
 	else
@@ -262,6 +270,9 @@ void data_discard(Data *data)
       case DICT:
 	dict_discard(data->u.dict);
 	break;
+
+      case BUFFER:
+	buffer_discard(data->u.buffer);
     }
 }
 
@@ -283,8 +294,8 @@ String *data_tostr(Data *data)
 	    return string_from_chars(data_sptr(data), data->u.substr.span);
 
       case DBREF:
-	s = ident_name(data->u.dbref);
-	return string_from_chars(s, strlen(s));
+	s = long_to_ascii(data->u.dbref, nbuf);
+	return string_add(string_from_chars("#", 1), s, strlen(s));
 
       case LIST:
 	return string_from_chars("<list>", 6);
@@ -301,7 +312,10 @@ String *data_tostr(Data *data)
 	return string_from_chars("<frob>", 6);
 
       case DICT:
-	return string_from_chars("<dict>", 9);
+	return string_from_chars("<dict>", 6);
+
+      case BUFFER:
+	return string_from_chars("<buffer>", 8);
 
       default:
 	panic("Unrecognized data type.");
@@ -324,6 +338,7 @@ String *data_add_literal_to_str(String *str, Data *data)
 {
     char *s;
     Number_buf nbuf;
+    int i;
 
     switch(data->type) {
 
@@ -335,12 +350,9 @@ String *data_add_literal_to_str(String *str, Data *data)
 	return string_add_unparsed(str, data_sptr(data), data->u.substr.span);
 
       case DBREF:
-	str = string_addc(str, '$');
-	s = ident_name(data->u.dbref);
-	if (is_valid_ident(s))
-	    return string_add(str, s, strlen(s));
-	else
-	    return string_add_unparsed(str, s, strlen(s));
+	s = long_to_ascii(data->u.dbref, nbuf);
+	str = string_addc(str, '#');
+	return string_add(str, s, strlen(s));
 
       case LIST:
 	return data_add_list_literal_to_str(str, data_dptr(data),
@@ -348,7 +360,7 @@ String *data_add_literal_to_str(String *str, Data *data)
 
       case SYMBOL:
 	str = string_addc(str, '\'');
-	s = ident_name(data->u.dbref);
+	s = ident_name(data->u.symbol);
 	if (is_valid_ident(s))
 	    return string_add(str, s, strlen(s));
 	else
@@ -356,19 +368,16 @@ String *data_add_literal_to_str(String *str, Data *data)
 
       case ERROR:
 	str = string_addc(str, '~');
-	s = ident_name(data->u.dbref);
+	s = ident_name(data->u.error);
 	if (is_valid_ident(s))
 	    return string_add(str, s, strlen(s));
 	else
 	    return string_add_unparsed(str, s, strlen(s));
 
       case FROB:
-	str = string_add(str, "<$", 2);
-	s = ident_name(data->u.frob.class);
-	if (is_valid_ident(s))
-	    str = string_add(str, s, strlen(s));
-	else
-	    str = string_add_unparsed(str, s, strlen(s));
+	str = string_add(str, "<#", 2);
+	s = long_to_ascii(data->u.frob.class, nbuf);
+	str = string_add(str, s, strlen(s));
 	str = string_add(str, ", ", 2);
 	if (data->u.frob.rep_type == LIST) {
 	    str = data_add_list_literal_to_str(str, data->u.frob.rep.list->el,
@@ -380,6 +389,16 @@ String *data_add_literal_to_str(String *str, Data *data)
 
       case DICT:
 	return dict_add_literal_to_str(str, data->u.dict);
+
+      case BUFFER:
+	str = string_add(str, "`[", 2);
+	for (i = 0; i < data->u.buffer->len; i++) {
+	    s = long_to_ascii(data->u.buffer->s[i], nbuf);
+	    str = string_add(str, s, strlen(s));
+	    if (i < data->u.buffer->len - 1)
+		str = string_add(str, ", ", 2);
+	}
+	return string_addc(str, ']');
 
       default:
 	return str;
@@ -403,6 +422,7 @@ char *data_from_literal(Data *d, char *s)
 {
     while (isspace(*s))
 	s++;
+
     d->type = -1;
 
     if (isdigit(*s)) {
@@ -414,10 +434,21 @@ char *data_from_literal(Data *d, char *s)
 	d->type = STRING;
 	substr_set_to_full_string(&d->u.substr, string_parse(&s));
 	return s;
-    } else if (*s == '$') {
-	s++;
+    } else if (*s == '#' && (isdigit(s[1]) || s[1] == '-')) {
 	d->type = DBREF;
-	d->u.dbref = parse_ident(&s);
+	d->u.dbref = atol(++s);
+	while (isdigit(*++s));
+	return s;
+    } else if (*s == '$') {
+	long name, dbref;
+
+	s++;
+	name = parse_ident(&s);
+	if (!lookup_retrieve_name(name, &dbref))
+	    dbref = -1;
+	ident_discard(name);
+	d->type = DBREF;
+	d->u.dbref = dbref;
 	return s;
     } else if (*s == '[') {
 	List *list;
@@ -438,7 +469,7 @@ char *data_from_literal(Data *d, char *s)
 	d->type = LIST;
 	sublist_set_to_full_list(&d->u.sublist, list);
 	return (*s) ? s + 1 : s;
-    } else if (*s == '#') {
+    } else if (*s == '#' && s[1] == '[') {
 	Data assocs;
 
 	/* Get associations. */
@@ -456,6 +487,40 @@ char *data_from_literal(Data *d, char *s)
 	data_discard(&assocs);
 	if (!d->u.dict)
 	    d->type = -1;
+	return s;
+    } else if (*s == '`' && s[1] == '[') {
+	Data nums;
+	List *l;
+	int i;
+	Buffer *buf;
+
+	/* Get the contents of the buffer. */
+	s = data_from_literal(&nums, s + 1);
+	if (nums.type != LIST) {
+	    if (nums.type != -1)
+		data_discard(&nums);
+	    d->type = -1;
+	    return s;
+	}
+
+	/* Verify that the numbers are numbers. */
+	l = nums.u.sublist.list;
+	for (i = 0; i < l->len; i++) {
+	    if (l->el[i].type != INTEGER) {
+		data_discard(&nums);
+		d->type = -1;
+		return s;
+	    }
+	}
+
+	/* Make a buffer from the numbers. */
+	buf = buffer_new(l->len);
+	for (i = 0; i < l->len; i++)
+	    buf->s[i] = l->el[i].u.val;
+
+	data_discard(&nums);
+	d->type = BUFFER;
+	d->u.buffer = buf;
 	return s;
     } else if (*s == '\'') {
 	s++;
@@ -489,7 +554,6 @@ char *data_from_literal(Data *d, char *s)
 	    } else {
 		if (rep.type != -1)
 		    data_discard(&rep);
-		ident_discard(class.u.dbref);
 		d->type = -1;
 	    }
 	} else if (class.type != -1) {
@@ -514,8 +578,22 @@ long data_type_id(int type)
       case ERROR:	return error_id;
       case FROB:	return frob_id;
       case DICT:	return dictionary_id;
+      case BUFFER:	return buffer_id;
       default:		panic("Unrecognized data type."); return 0;
     }
+}
+
+int sublist_search(Sublist *sublist, Data *data)
+{
+    Data *base;
+    int i;
+
+    base = sublist->list->el + sublist->start;
+    for (i = 0; i < sublist->span; i++) {
+	if (data_cmp(&base[i], data) == 0)
+	    return i;
+    }
+    return -1;
 }
 
 /* Effects: Returns 0 if the sublists s1 and s2 are equivalent, or 1 if not. */
@@ -554,8 +632,8 @@ void sublist_truncate(Sublist *sublist)
     List *list;
 
     if (sublist->list->refs == 1) {
-	/* Since we own the list, then we can just throw away anything past the
-	 * end of the sublist. */
+	/* Since we own the list, we can just throw away anything past the end
+	 * of the sublist. */
 	while (sublist->list->len > sublist->start + sublist->span)
 	    data_discard(&sublist->list->el[--sublist->list->len]);
     } else {

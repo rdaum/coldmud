@@ -23,6 +23,7 @@
 #include "ident.h"
 #include "memory.h"
 #include "net.h"
+#include "lookup.h"
 
 #ifdef BSD_FEATURES
 /* vfork() is not POSIX. */
@@ -30,7 +31,7 @@ extern pid_t vfork(void);
 #endif
 
 extern int running;
-extern long heartbeat_freq;
+extern long heartbeat_freq, db_top;
 
 /* All of the functions in this file are interpreter function operators, so
  * they require that the interpreter data (the globals in execute.c) be in a
@@ -46,27 +47,21 @@ void op_create(void)
     Object *obj;
     int i;
 
-    /* Accept a dbref of an object to create, and a list of parents. */
-    if (!func_init_2(&args, DBREF, LIST))
+    /* Accept a list of parents. */
+    if (!func_init_1(&args, LIST))
 	return;
 
-    if (cur_frame->object->dbref != sys_id) {
-	throw(perm_id, "Current object ($%I) is not the system object.",
+    if (cur_frame->object->dbref != SYSTEM_DBREF) {
+	throw(perm_id, "Current object (#%l) is not the system object.",
 	      cur_frame->object->dbref);
 	return;
     }
 
-    /* Check that dbref doesn't already exist. */
-    if (cache_check(args[0].u.dbref)) {
-	throw(perm_id, "Object $%I already exists.", args[0].u.dbref);
-	return;
-    }
-
     /* Get parents list from second argument. */
-    if (args[1].u.sublist.span == args[1].u.sublist.list->len)
-	parents = list_dup(args[1].u.sublist.list);
+    if (args[0].u.sublist.span == args[0].u.sublist.list->len)
+	parents = list_dup(args[0].u.sublist.list);
     else
-	parents = list_from_data(data_dptr(&args[1]), args[1].u.sublist.span);
+	parents = list_from_data(data_dptr(&args[0]), args[0].u.sublist.span);
 
     /* Verify that all parents are dbrefs. */
     for (i = 0; i < parents->len; i++) {
@@ -84,10 +79,10 @@ void op_create(void)
     }
 
     /* Create the new object. */
-    obj = object_new(args[0].u.dbref, parents);
+    obj = object_new(-1, parents);
     list_discard(parents);
 
-    pop(2);
+    pop(1);
     push_dbref(obj->dbref);
     cache_discard(obj);
 }
@@ -96,54 +91,52 @@ void op_chparents(void)
 {
     Data *args, *d;
     Object *obj;
-    int wrong, id;
-    char *reason;
+    int wrong;
 
     /* Accept a dbref and a list of parents to change to. */
     if (!func_init_2(&args, DBREF, LIST))
 	return;
 
-    if (cur_frame->object->dbref != sys_id) {
-	throw(perm_id, "Current object ($%I) is not the system object.",
+    if (cur_frame->object->dbref != SYSTEM_DBREF) {
+	throw(perm_id, "Current object (#%l) is not the system object.",
 	      cur_frame->object->dbref);
+	return;
+    }
+
+    if (args[0].u.dbref == ROOT_DBREF) {
+	throw(perm_id, "You cannot change the root object's parents.");
 	return;
     }
 
     obj = cache_retrieve(args[0].u.dbref);
     if (!obj) {
-	throw(objnf_id, "Object $%I not found.", args[0].u.dbref);
+	throw(objnf_id, "Object #%l not found.", args[0].u.dbref);
 	return;
     }
 
+    if (!args[1].u.sublist.span) {
+	throw(perm_id, "You must specify at least one parent.");
+	return;
+    }
 
-    if (cur_frame->object->dbref == root_id) {
-	throw(perm_id, "You can't change the root object's parents.");
-    } else if (!args[1].u.sublist.span) {
-	throw(perm_id, "You must have at least one parent.");
-    } else {
-	/* Call object_change_parents().  This will return the number of a
-	 * parent which was invalid, or -1 if they were all okay. */
-	wrong = object_change_parents(obj, &args[1].u.sublist);
-	if (wrong >= 0) {
-	    d = data_dptr(&args[0]) + wrong;
-	    if (d->type != DBREF) {
-		id = type_id;
-		reason = "is not a dbref.";
-	    } else if (d->u.dbref == cur_frame->object->dbref) {
-		id = parent_id;
-		reason = "is the same as the current object.";
-	    } else if (!cache_check(d->u.dbref)) {
-		id = objnf_id;
-		reason = "does not exist.";
-	    } else {
-		id = parent_id;
-		reason = "has the current object as an ancestor.";
-	    }
-	    throw(id, "The parent %D %s", d, reason);
+    /* Call object_change_parents().  This will return the number of a
+     * parent which was invalid, or -1 if they were all okay. */
+    wrong = object_change_parents(obj, &args[1].u.sublist);
+    if (wrong >= 0) {
+	d = data_dptr(&args[1]) + wrong;
+	if (d->type != DBREF) {
+	    throw(type_id, "New parent %D is not a dbref.", d);
+	} else if (d->u.dbref == args[0].u.dbref) {
+	    throw(parent_id, "New parent %D is the same as %D.", d, &args[0]);
+	} else if (!cache_check(d->u.dbref)) {
+	    throw(objnf_id, "New parent %D does not exist.", d);
 	} else {
-	    pop(2);
-	    push_int(1);
+	    throw(parent_id, "New parent %D is a descendent of %D.", d,
+		  &args[0]);
 	}
+    } else {
+	pop(2);
+	push_int(1);
     }
 
     cache_discard(obj);
@@ -158,17 +151,17 @@ void op_destroy(void)
     if (!func_init_1(&args, DBREF))
 	return;
 
-    if (cur_frame->object->dbref != sys_id) {
-	throw(perm_id, "Current object ($%I) is not the system object.",
+    if (cur_frame->object->dbref != SYSTEM_DBREF) {
+	throw(perm_id, "Current object (#%l) is not the system object.",
 	      cur_frame->object->dbref);
-    } else if (args[0].u.dbref == root_id) {
+    } else if (args[0].u.dbref == ROOT_DBREF) {
 	throw(perm_id, "You can't destroy the root object.");
-    } else if (args[0].u.dbref == sys_id) {
+    } else if (args[0].u.dbref == SYSTEM_DBREF) {
 	throw(perm_id, "You can't destroy the system object.");
     } else {
 	obj = cache_retrieve(args[0].u.dbref);
 	if (!obj) {
-	    throw(objnf_id, "Object $%I not found.", args[0].u.dbref);
+	    throw(objnf_id, "Object #%l not found.", args[0].u.dbref);
 	    return;
 	}
 	/* Set the object dead, so it will go away when nothing is holding onto
@@ -191,8 +184,8 @@ void op_log(void)
     if (!func_init_1(&args, STRING))
 	return;
 
-    if (cur_frame->object->dbref != sys_id) {
-	throw(perm_id, "Current object ($%I) is not the system object.",
+    if (cur_frame->object->dbref != SYSTEM_DBREF) {
+	throw(perm_id, "Current object (#%l) is not the system object.",
 	      cur_frame->object->dbref);
     } else {
 	write_log("> %S", data_sptr(&args[0]), args[0].u.substr.span);
@@ -213,12 +206,11 @@ void op_conn_assign(void)
     if (!func_init_1(&args, DBREF))
 	return;
 
-    if (cur_frame->object->dbref != sys_id) {
-	throw(perm_id, "Current object ($%I) is not the system object.",
+    if (cur_frame->object->dbref != SYSTEM_DBREF) {
+	throw(perm_id, "Current object (#%l) is not the system object.",
 	      cur_frame->object->dbref);
     } else if (cur_conn) {
-	ident_discard(cur_conn->dbref);
-	cur_conn->dbref = ident_dup(args[0].u.dbref);
+	cur_conn->dbref = args[0].u.dbref;
 	pop(1);
 	push_int(1);
     } else {
@@ -238,8 +230,8 @@ void op_binary_dump(void)
     if (!func_init_0())
 	return;
 
-    if (cur_frame->object->dbref != sys_id) {
-	throw(perm_id, "Current object ($%I) is not the system object.",
+    if (cur_frame->object->dbref != SYSTEM_DBREF) {
+	throw(perm_id, "Current object (#%l) is not the system object.",
 	      cur_frame->object->dbref);
     } else {
 	push_int(binary_dump());
@@ -260,8 +252,8 @@ void op_text_dump(void)
     if (!func_init_0())
 	return;
 
-    if (cur_frame->object->dbref != sys_id) {
-	throw(perm_id, "Current object ($%I) is not the system object.",
+    if (cur_frame->object->dbref != SYSTEM_DBREF) {
+	throw(perm_id, "Current object (#%l) is not the system object.",
 	      cur_frame->object->dbref);
     } else {
 	push_int(text_dump());
@@ -291,8 +283,8 @@ void op_run_script(void)
     }
 
     /* Restrict to system object. */
-    if (cur_frame->object->dbref != sys_id) {
-	throw(perm_id, "Current object ($%I) is not the system object.",
+    if (cur_frame->object->dbref != SYSTEM_DBREF) {
+	throw(perm_id, "Current object (#%l) is not the system object.",
 	      cur_frame->object->dbref);
 	return;
     }
@@ -362,8 +354,8 @@ void op_shutdown(void)
     if (!func_init_0())
 	return;
 
-    if (cur_frame->object->dbref != sys_id) {
-	throw(perm_id, "Current object ($%I) is not the system object.",
+    if (cur_frame->object->dbref != SYSTEM_DBREF) {
+	throw(perm_id, "Current object (#%l) is not the system object.",
 	      cur_frame->object->dbref);
     } else {
 	running = 0;
@@ -379,8 +371,8 @@ void op_bind(void)
     if (!func_init_2(&args, INTEGER, DBREF))
 	return;
 
-    if (cur_frame->object->dbref != sys_id) {
-	throw(perm_id, "Current object ($%I) is the system object.",
+    if (cur_frame->object->dbref != SYSTEM_DBREF) {
+	throw(perm_id, "Current object (#%l) is not the system object.",
 	      cur_frame->object->dbref);
 	return;
     }
@@ -401,8 +393,8 @@ void op_unbind(void)
     if (!func_init_1(&args, INTEGER))
 	return;
 
-    if (cur_frame->object->dbref != sys_id) {
-	throw(perm_id, "Current object ($%I) is the system object.",
+    if (cur_frame->object->dbref != SYSTEM_DBREF) {
+	throw(perm_id, "Current object (#%l) is not the system object.",
 	      cur_frame->object->dbref);
 	return;
     }
@@ -421,8 +413,8 @@ void op_connect(void)
     if (!func_init_3(&args, STRING, INTEGER, DBREF))
 	return;
 
-    if (cur_frame->object->dbref != sys_id) {
-	throw(perm_id, "Current object ($%I) is the system object.",
+    if (cur_frame->object->dbref != SYSTEM_DBREF) {
+	throw(perm_id, "Current object (#%l) is not the system object.",
 	      cur_frame->object->dbref);
 	return;
     }
@@ -444,8 +436,8 @@ void op_set_heartbeat_freq(void)
     if (!func_init_1(&args, INTEGER))
 	return;
 
-    if (cur_frame->object->dbref != sys_id) {
-	throw(perm_id, "Current object ($%I) is the system object.",
+    if (cur_frame->object->dbref != SYSTEM_DBREF) {
+	throw(perm_id, "Current object (#%l) is not the system object.",
 	      cur_frame->object->dbref);
 	return;
     }
@@ -466,15 +458,15 @@ void op_data(void)
     if (!func_init_1(&args, DBREF))
 	return;
 
-    if (cur_frame->object->dbref != sys_id) {
-	throw(perm_id, "Current object ($%I) is the system object.",
+    if (cur_frame->object->dbref != SYSTEM_DBREF) {
+	throw(perm_id, "Current object (#%l) is not the system object.",
 	      cur_frame->object->dbref);
 	return;
     }
 
     obj = cache_retrieve(args[0].u.dbref);
     if (!obj) {
-	throw(objnf_id, "No such object $%I", args[0].u.dbref);
+	throw(objnf_id, "No such object #%l", args[0].u.dbref);
 	return;
     }
 
@@ -501,8 +493,57 @@ void op_data(void)
 	dict_discard(value.u.dict);
     }
 
+    cache_discard(obj);
     pop(1);
     push_dict(dict);
     dict_discard(dict);
+}
+
+void op_set_name(void)
+{
+    Data *args;
+    int result;
+
+    if (!func_init_2(&args, SYMBOL, DBREF))
+	return;
+
+    if (cur_frame->object->dbref != SYSTEM_DBREF) {
+	throw(perm_id, "Current object (#%l) is not the system object.",
+	      cur_frame->object->dbref);
+	return;
+    }
+
+    result = lookup_store_name(args[0].u.symbol, args[1].u.dbref);
+    pop(2);
+    push_int(result);
+}
+
+void op_del_name(void)
+{
+    Data *args;
+
+    if (!func_init_1(&args, SYMBOL))
+	return;
+
+    if (cur_frame->object->dbref != SYSTEM_DBREF) {
+	throw(perm_id, "Current object (#%l) is not the system object.",
+	      cur_frame->object->dbref);
+	return;
+    }
+
+    if (!lookup_remove_name(args[0].u.symbol)) {
+	throw(namenf_id, "Can't find object name %I.", args[0].u.symbol);
+	return;
+    }
+
+    pop(1);
+    push_int(1);
+}
+
+void op_db_top(void)
+{
+    if (!func_init_0())
+	return;
+    push_int(db_top);
 }
 

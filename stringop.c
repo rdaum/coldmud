@@ -62,56 +62,62 @@ void op_substr(void)
 
 void op_explode(void)
 {
-    int num_args, tlen, len, i, start;
+    int num_args, sep_len, len, want_blanks;
     Data *args, d;
     List *exploded;
-    char *token, *s;
+    char *sep, *s, *p, *word_start;
     String *word;
 
     /* Accept a string to explode and an optional string for the word
      * separator. */
-    if (!func_init_1_or_2(&args, &num_args, STRING, STRING))
+    if (!func_init_1_to_3(&args, &num_args, STRING, STRING, 0))
 	return;
 
-    if (num_args == 2) {
-	token = data_sptr(&args[1]);
-	tlen = args[1].u.substr.span;
+    if (num_args >= 2 && args[1].u.substr.span == 0) {
+	throw(range_id, "The separator string is empty.");
+	return;
+    }
+
+    want_blanks = (num_args == 3) ? data_true(&args[2]) : 0;
+    if (num_args >= 2) {
+	sep = data_sptr(&args[1]);
+	sep_len = args[1].u.substr.span;
     } else {
-	token = " ";
-	tlen = 1;
+	sep = " ";
+	sep_len = 1;
     }
     s = data_sptr(&args[0]);
     len = args[0].u.substr.span;
 
     exploded = list_new(0);
-    start = 0;
-    while (1) {
-	/* Look for first character of token in s. */
-	for (i = start; i + tlen <= len && s[i] != *token; i++);
-
-	/* Stop if we hit the end of the string. */
-	if (i + tlen > len)
+    word_start = p = s;
+    while (p + sep_len <= s + len) {
+	/* Look for first character of sep starting from p. */
+	p = memchr(p, *sep, (s + len) - (p + sep_len - 1));
+	if (!p)
 	    break;
 
-	if (strnccmp(&s[i], token, tlen) == 0) {
-	    /* We found a word separator. */
-	    if (i > start) {
-		/* Only add word if it has nonzero length. */
-		word = string_from_chars(&s[start], i - start);
-		d.type = STRING;
-		substr_set_to_full_string(&d.u.substr, word);
-		exploded = list_add(exploded, &d);
-		string_discard(word);
-	    }
-	    start = i + tlen;
-	} else {
-	    start++;
+	/* Keep going if we don't match all of the separator. */
+	if (strnccmp(p + 1, sep + 1, sep_len - 1) != 0) {
+	    p++;
+	    continue;
 	}
+
+	/* We found a word separator. */
+	if (want_blanks || p > word_start) {
+	    /* Add the word. */
+	    word = string_from_chars(word_start, p - word_start);
+	    d.type = STRING;
+	    substr_set_to_full_string(&d.u.substr, word);
+	    exploded = list_add(exploded, &d);
+	    string_discard(word);
+	}
+	word_start = p = p + sep_len;
     }
 
-    /* Add the last word unless we're right at the end. */
-    if (start < len) {
-	word = string_from_chars(&s[start], len - start);
+    if (want_blanks || word_start < s + len) {
+	/* Add the last word. */
+	word = string_from_chars(word_start, s + len - word_start);
 	d.type = STRING;
 	substr_set_to_full_string(&d.u.substr, word);
 	exploded = list_add(exploded, &d);
@@ -341,11 +347,13 @@ void op_match_regexp(void)
     Data *args;
     regexp *reg;
     List *fields = NULL, *elemlist;
-    int i;
+    int num_args, case_flag, i;
     char *s;
 
-    if (!func_init_2(&args, STRING, STRING))
+    if (!func_init_2_or_3(&args, &num_args, STRING, STRING, 0))
 	return;
+
+    case_flag = (num_args == 3) ? data_true(&args[2]) : 0;
 
     /* Get the cached regexp, if there is one, or compile it. */
     substring_truncate(&args[0].u.substr);
@@ -362,7 +370,7 @@ void op_match_regexp(void)
 
     /* Execute the regexp. */
     s = data_sptr(&args[1]);
-    if (regexec(reg, s)) {
+    if (regexec(reg, s, case_flag)) {
 	/* Build the list of fields. */
 	fields = list_new(NSUBEXP);
 	for (i = 0; i < NSUBEXP; i++) {
@@ -385,7 +393,7 @@ void op_match_regexp(void)
     else
 	free(reg);
 
-    pop(2);
+    pop(num_args);
     if (fields) {
 	push_list(fields);
 	list_discard(fields);

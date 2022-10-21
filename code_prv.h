@@ -92,8 +92,8 @@ struct expr {
     int type;
     int lineno;
     union {
-	long num;
-	char *name, *dbref, *symbol, *error, *str;
+	long num, dbref;
+	char *name, *symbol, *error, *str;
 	Expr *expr;
 	Expr_list *args;
 

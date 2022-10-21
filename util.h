@@ -19,6 +19,7 @@ long atoln(char *s, int n);
 char *long_to_ascii(long num, Number_buf nbuf);
 int strccmp(char *s1, char *s2);
 int strnccmp(char *s1, char *s2, int n);
+char *strcchr(char *s, int c);
 long random_number(long n);
 char *crypt_string(char *key, char *salt);
 String *vformat(char *fmt, va_list arg);

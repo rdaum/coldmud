@@ -53,6 +53,7 @@ static struct {
     { "|)",			CRITRIGHT },
     { "||",			OR },
     { "#[",			START_DICT },
+    { "`[",			START_BUFFER },
     { "&&",			AND },
     { "==",			EQ },
     { "!=",			NE },
@@ -164,7 +165,7 @@ int yylex(void)
 
     /* Check if it's a number. */
     if (isdigit(*s)) {
-	/* Convert the to a number. */
+	/* Convert the string to a number. */
 	yylval.num = 0;
 	while (len && isdigit(*s)) {
 	    yylval.num = yylval.num * 10 + (*s - '0');
@@ -182,7 +183,7 @@ int yylex(void)
 
     /* Check if it's an object literal, symbol, or error code. */
     if ((*s == '$' || *s == '\'' || *s == '~') && len > 1) {
-	type = ((*s == '$') ? DBREF : ((*s == '\'') ? SYMBOL : ERROR));
+	type = ((*s == '$') ? NAME : ((*s == '\'') ? SYMBOL : ERROR));
 	if (s[1] == '"') {
 	    yylval.s = string_token(s + 1, len - 1, &i);
 	    cur_pos += i + 1;
@@ -198,11 +199,23 @@ int yylex(void)
     if (len >= 2 && *s == '/' && s[1] == '/') {
 	/* Copy in text after //, and move to next line. */
 	yylval.s = PMALLOC(compiler_pile, char, len - 1);
-	MEMCPY(yylval.s, s + 2, char, len - 2);
+	MEMCPY(yylval.s, s + 2, len - 2);
 	yylval.s[len - 2] = 0;
 	cur_line++;
 	cur_pos = 0;
 	return COMMENT;
+    }
+
+    /* Check if it's a dbref. */
+    if (len >= 2 && *s == '#' && isdigit(s[1])) {
+	/* Convert the string to a number. */
+	s++, cur_pos++, len--;
+	yylval.num = 0;
+	while (len && isdigit(*s)) {
+	    yylval.num = yylval.num * 10 + (*s - '0');
+	    s++, cur_pos++, len--;
+	}
+	return DBREF;
     }
 
     /* None of the above. */
@@ -252,7 +265,7 @@ static char *identifier_token(char *s, int len, int *token_len)
 
     /* Allocate space and copy. */
     p = PMALLOC(compiler_pile, char, count + 1);
-    MEMCPY(p, s, char, count);
+    MEMCPY(p, s, count);
     p[count] = 0;
 
     *token_len = count;

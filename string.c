@@ -4,6 +4,7 @@
 
 #define _POSIX_SOURCE
 
+#include <stdio.h>
 #include <string.h>
 #include "cmstring.h"
 #include "memory.h"
@@ -53,7 +54,7 @@ String *string_from_chars(char *s, int len)
 {
     String *new = string_new(len);
 
-    MEMCPY(new->s, s, char, len);
+    MEMCPY(new->s, s, len);
     new->s[len] = 0;
     return new;
 }
@@ -76,7 +77,7 @@ String *string_dup(String *string)
 String *string_add(String *string, char *s, int len)
 {
     string = prepare_to_modify(string, string->len + len);
-    MEMCPY(string->s + string->len, s, char, len);
+    MEMCPY(string->s + string->len, s, len);
     string->s[string->len + len] = 0;
     string->len += len;
     return string;
@@ -163,7 +164,7 @@ static String *prepare_to_modify(String *string, int len)
     if (string->refs > 1 || string->size < len) {
 	new = string_new(len);
 	new->len = string->len;
-	MEMCPY(new->s, string->s, char, string->len + 1);
+	MEMCPY(new->s, string->s, string->len + 1);
 	new->reg = NULL;
 	string_discard(string);
 	return new;

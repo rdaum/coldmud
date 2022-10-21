@@ -28,8 +28,9 @@ void pfree(Pile *pile);
     ((type *) trealloc(ptr, (old) * sizeof(*(ptr)), (new) * sizeof(type)))
 #define PMALLOC(pile, type, num) ((type *) pmalloc(pile, (num) * sizeof(type)))
 
-#define MEMCPY(a, b, t, l)	memcpy(a, b, (l) * sizeof(t))
-#define MEMMOVE(a, b, t, l)	memmove(a, b, (l) * sizeof(t))
+#define MEMCPY(a, b, l)		memcpy(a, b, (l) * sizeof(*(a)))
+#define MEMMOVE(a, b, l)	memmove(a, b, (l) * sizeof(*(a)))
+#define MEMCMP(a, b, l)		memcmp(a, b, (l) * sizeof(*(a)))
 
 #endif
 

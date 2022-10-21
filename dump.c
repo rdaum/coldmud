@@ -5,6 +5,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
+#include <unistd.h>
 #include "x.tab.h"
 #include "dump.h"
 #include "cache.h"
@@ -17,8 +18,10 @@
 #include "grammar.h"
 #include "db.h"
 #include "ident.h"
+#include "lookup.h"
 
 static Method *text_dump_get_method(FILE *fp, Object *obj, char *name);
+static long get_dbref(char **sptr);
 
 extern int cur_search;
 
@@ -36,13 +39,24 @@ int text_dump(void)
 {
     FILE *fp;
     Object *obj;
+    long name, dbref;
 
     /* Open the output file. */
-    fp = open_scratch_file("textdump", "w");
+    fp = open_scratch_file("textdump.new", "w");
     if (!fp)
 	return 0;
 
-    /* Now dump the database. */
+    /* Dump the names. */
+    name = lookup_first_name();
+    while (name != NOT_AN_IDENT) {
+	if (!lookup_retrieve_name(name, &dbref))
+	    panic("Name index is inconsistent.");
+	fformat(fp, "name %I %d\n", name, dbref);
+	ident_discard(name);
+	name = lookup_next_name();
+    }
+
+    /* Dump the objects. */
     cur_search++;
     for (obj = cache_first(); obj; obj = cache_next()) {
 	object_text_dump(obj->dbref, fp);
@@ -50,6 +64,10 @@ int text_dump(void)
     }
 
     close_scratch_file(fp);
+    unlink("textdump");
+    if (rename("textdump.new", "textdump") == -1)
+	return 0;
+
     return 1;
 }
 
@@ -60,7 +78,7 @@ void text_dump_read(FILE *fp)
     List *parents;
     Data d;
     long dbref = -1, name;
-    char *p;
+    char *p, *q;
     Method *method;
 
     /* Initialize parents to an empty list. */
@@ -68,34 +86,49 @@ void text_dump_read(FILE *fp)
 
     while ((line = fgetstring(fp))) {
 
+	/* Strip trailing spaces from the line. */
+	while (line->len && isspace(line->s[line->len - 1]))
+	    line->len--;
+	line->s[line->len] = 0;
+
+	/* Strip unprintables from the line. */
+	for (p = q = line->s; *p; p++, q++) {
+	    while (*p && !isprint(*p))
+		p++;
+	    *q = *p;
+	}
+	*q = 0;
+	line->len = q - line->s;
+
 	if (!strnccmp(line->s, "parent", 6) && isspace(line->s[6])) {
 	    for (p = line->s + 7; isspace(*p); p++);
 
 	    /* Add this parent to the parents list. */
-	    d.type = DBREF;
-	    d.u.dbref = ident_get(p);
-	    if (cache_check(d.u.dbref))
+	    q = p;
+	    dbref = get_dbref(&q);
+	    if (cache_check(dbref)) {
+		d.type = DBREF;
+		d.u.dbref = dbref;
 		parents = list_add(parents, &d);
-	    else
-		write_log("Invalid parent %s", ident_name(d.u.dbref));
-	    ident_discard(d.u.dbref);
+	    } else {
+		write_log("Parent %s does not exist.", p);
+	    }
 
 	} else if (!strnccmp(line->s, "object", 6) && isspace(line->s[6])) {
 	    for (p = line->s + 7; isspace(*p); p++);
+	    q = p;
+	    dbref = get_dbref(&q);
 
 	    /* If the parents list is empty, and this isn't "root", parent it
 	     * to root. */
-	    if (!parents->len && strcmp(p, "root") != 0) {
+	    if (!parents->len && dbref != ROOT_DBREF) {
 		write_log("Orphan object %s parented to root", p);
-		if (!cache_check(root_id))
+		if (!cache_check(ROOT_DBREF))
 		    fail_to_start("Root object not first in text dump.");
 		d.type = DBREF;
-		d.u.dbref = root_id;
+		d.u.dbref = ROOT_DBREF;
 		parents = list_add(parents, &d);
 	    }
-
-	    /* Get the dbref. */
-	    dbref = ident_get(p);
 
 	    /* Discard the old object if we had one.  Also see if dbref already
 	     * exists, and delete it if it does. */
@@ -116,7 +149,7 @@ void text_dump_read(FILE *fp)
 	    for (p = line->s + 4; isspace(*p); p++);
 
 	    /* Get variable owner. */
-	    dbref = parse_ident(&p);
+	    dbref = get_dbref(&p);
 
 	    /* Skip spaces and get variable name. */
 	    while (isspace(*p))
@@ -131,33 +164,83 @@ void text_dump_read(FILE *fp)
 	    /* Create the variable. */
 	    object_put_var(obj, dbref, name, &d);
 
-	    ident_discard(dbref);
 	    ident_discard(name);
 	    data_discard(&d);
 
 	} else if (!strccmp(line->s, "eval")) {
 	    method = text_dump_get_method(fp, obj, "<eval>");
 	    if (method) {
-		task_eval(NULL, obj, method);
+		method->name = NOT_AN_IDENT;
+		method->object = obj;
+		task_method(NULL, obj, method);
 		method_discard(method);
 	    }
 
 	} else if (!strnccmp(line->s, "method", 6) && isspace(line->s[6])) {
-	    for (p = line->s + 7; *p == ' '; p++);
-	    method = text_dump_get_method(fp, obj, p);
+	    for (p = line->s + 7; isspace(*p); p++);
+	    name = parse_ident(&p);
+	    method = text_dump_get_method(fp, obj, ident_name(name));
 	    if (method) {
-		name = ident_get(p);
 		object_add_method(obj, name, method);
 		method_discard(method);
-		ident_discard(name);
 	    }
+	    ident_discard(name);
+
+	} else if (!strnccmp(line->s, "name", 4) && isspace(line->s[4])) {
+	    /* Skip spaces and get name. */
+	    for (p = line->s + 5; isspace(*p); p++);
+	    name = parse_ident(&p);
+
+	    /* Skip spaces and get dbref. */
+	    while (isspace(*p))
+		p++;
+	    dbref = atol(p);
+
+	    /* Store the name. */
+	    if (!lookup_store_name(name, dbref))
+		fail_to_start("Can't store name--disk full?");
+
+	    ident_discard(name);
 	}
+
 	string_discard(line);
     }
 
     if (obj)
 	cache_discard(obj);
     list_discard(parents);
+}
+
+/* Get a dbref.  Use some intuition. */
+static long get_dbref(char **sptr)
+{
+    char *s = *sptr;
+    long dbref, name;
+    int result;
+
+    if (isdigit(*s)) {
+	/* Looks like the user wants to specify an object number. */
+	dbref = atol(s);
+	while (isdigit(*++s));
+	*sptr = s;
+	return dbref;
+    } else if (*s == '#') {
+	/* Looks like the user really wants to specify an object number. */
+	dbref = atol(s + 1);
+	while (isdigit(*++s));
+	*sptr = s;
+	return dbref;
+    } else {
+	/* It's a name.  If there's a dollar sign (which might be there to make
+	 * sure that it's not interpreted as a number), skip it. */
+	if (*s == '$')
+	    s++;
+	name = parse_ident(&s);
+	*sptr = s;
+	result = lookup_retrieve_name(name, &dbref);
+	ident_discard(name);
+	return (result) ? dbref : -1;
+    }
 }
 
 static Method *text_dump_get_method(FILE *fp, Object *obj, char *name)
@@ -178,7 +261,7 @@ static Method *text_dump_get_method(FILE *fp, Object *obj, char *name)
 	    method = compile(obj, code->el, code->len, &errors);
 	    list_discard(code);
 	    for (i = 0; i < errors->len; i++) {
-		write_log("$%I %s: %S", obj->dbref, name,
+		write_log("#%l %s: %S", obj->dbref, name,
 			  data_sptr(&errors->el[i]),
 			  errors->el[i].u.substr.span);
 	    }

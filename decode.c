@@ -33,7 +33,7 @@ struct context {
     Context *enclosure;
 };
 
-static int count_lines(int start, int end, int *flags);
+static int count_lines(int start, int end, unsigned *flags);
 static Stmt_list *decompile_stmt_list(int start, int end);
 static Stmt *decompile_stmt(int *pos_ptr);
 static Stmt *decompile_body(int start, int end);
@@ -131,7 +131,7 @@ int line_number(Method *method, int pc)
     return count + count_lines(0, pc, &flags);
 }
 
-static int count_lines(int start, int end, int *flags)
+static int count_lines(int start, int end, unsigned *flags)
 {
     int count = 0, last = -1, next;
 
@@ -765,10 +765,8 @@ static Expr_list *decompile_expressions_bounded(int *pos_ptr, int expr_end)
 	    break;
 
 	  case DBREF:
-	    s = ident_name(object_get_ident(the_object, the_opcodes[pos + 1]));
-	    stack = expr_list(dbref_expr(s), stack);
+	    stack = expr_list(dbref_expr(the_opcodes[pos + 1]), stack);
 	    pos += 2;
-	    break;
 
 	  case SYMBOL:
 	    s = ident_name(object_get_ident(the_object, the_opcodes[pos + 1]));
@@ -779,6 +777,12 @@ static Expr_list *decompile_expressions_bounded(int *pos_ptr, int expr_end)
 	  case ERROR:
 	    s = ident_name(object_get_ident(the_object, the_opcodes[pos + 1]));
 	    stack = expr_list(error_expr(s), stack);
+	    pos += 2;
+	    break;
+
+	  case NAME:
+	    s = ident_name(object_get_ident(the_object, the_opcodes[pos + 1]));
+	    stack = expr_list(name_expr(s), stack);
 	    pos += 2;
 	    break;
 
@@ -827,6 +831,11 @@ static Expr_list *decompile_expressions_bounded(int *pos_ptr, int expr_end)
 
 		case DICT:
 		  stack = expr_list(dict_expr(args), stack);
+		  pos++;
+		  break;
+
+		case BUFFER:
+		  stack = expr_list(buffer_expr(args), stack);
 		  pos++;
 		  break;
 
@@ -1296,16 +1305,16 @@ static String *unparse_expr(String *str, Expr *expr)
       case STRING:
 	return string_add_unparsed(str, expr->u.str, strlen(expr->u.str));
 
-      case DBREF:
-	s = expr->u.dbref;
-	str = string_addc(str, '$');
-	if (is_valid_ident(expr->u.dbref))
-	    return string_add(str, s, strlen(s));
-	else
-	    return string_add_unparsed(str, s, strlen(s));
+      case DBREF: {
+	  Number_buf nbuf;
+
+	  str = string_addc(str, '#');
+	  s = long_to_ascii(expr->u.dbref, nbuf);
+	  return string_add(str, s, strlen(s));
+      }
 
       case SYMBOL:
-	s = expr->u.dbref;
+	s = expr->u.symbol;
 	str = string_addc(str, '\'');
 	if (is_valid_ident(expr->u.symbol))
 	    return string_add(str, s, strlen(s));
@@ -1313,9 +1322,17 @@ static String *unparse_expr(String *str, Expr *expr)
 	    return string_add_unparsed(str, s, strlen(s));
 
       case ERROR:
-	s = expr->u.dbref;
+	s = expr->u.error;
 	str = string_addc(str, '~');
 	if (is_valid_ident(expr->u.error))
+	    return string_add(str, s, strlen(s));
+	else
+	    return string_add_unparsed(str, s, strlen(s));
+
+      case NAME:
+	s = expr->u.name;
+	str = string_addc(str, '$');
+	if (is_valid_ident(expr->u.name))
 	    return string_add(str, s, strlen(s));
 	else
 	    return string_add_unparsed(str, s, strlen(s));
@@ -1368,6 +1385,11 @@ static String *unparse_expr(String *str, Expr *expr)
 
       case DICT:
 	str = string_add(str, "#[", 2);
+	str = unparse_args(str, expr->u.args);
+	return string_addc(str, ']');
+
+      case BUFFER:
+	str = string_add(str, "`[", 2);
 	str = unparse_args(str, expr->u.args);
 	return string_addc(str, ']');
 

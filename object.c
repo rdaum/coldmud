@@ -59,17 +59,26 @@ static void method_delete_code_refs(Method *method);
 static void object_text_dump_aux(Object *obj, FILE *fp);
 
 /* Count for keeping track of of already-searched objects during searches. */
-int cur_search;
+long cur_search;
+
+/* Keeps track of dbref for next object in database. */
+long db_top;
 
 /* Validity count for method cache (incrementing this count invalidates all
  * cache entries. */
 static int cur_stamp = 1;
 
-/* Error-checking on parents is the job of the calling function. */
+/* Error-checking on parents is the job of the calling function.  Also, dire
+ * things may happen if an object numbered dbref already exists. */
 Object *object_new(long dbref, List *parents)
 {
     Object *new;
     int i;
+
+    if (dbref == -1)
+	dbref = db_top++;
+    else if (dbref >= db_top)
+	db_top = dbref + 1;
 
     new = cache_get_holder(dbref);
     new->parents = list_dup(parents);
@@ -332,8 +341,7 @@ int object_change_parents(Object *object, Sublist *parents)
 	if (parents->list->el[i].type != DBREF)
 	    return i;
 	pdbref = parents->list->el[i].u.dbref;
-	if (pdbref == object->dbref || !cache_check(pdbref)
-	    || object_has_ancestor(pdbref, object->dbref))
+	if (!cache_check(pdbref) || object_has_ancestor(pdbref, object->dbref))
 	    return i;
     }
 
@@ -493,7 +501,6 @@ long object_del_param(Object *object, long name)
 	var = &object->vars.tab[*indp];
 	if (var->name == name && var->class == object->dbref) {
 	    ident_discard(var->name);
-	    ident_discard(var->class);
 	    data_discard(&var->val);
 	    var->name = -1;
 
@@ -604,7 +611,7 @@ static Var *object_create_var(Object *object, long class, long name)
 
     /* Fill in new variable. */
     new->name = ident_dup(name);
-    new->class = ident_dup(class);
+    new->class = class;
     new->val.type = INTEGER;
     new->val.u.val = 0;
 
@@ -816,7 +823,7 @@ static Method *method_cache_check(long dbref, long name, long after)
     Object *object;
     int i;
 
-    i = (dbref * name + after) % METHOD_CACHE_SIZE;
+    i = (10 + dbref + (name << 4) + after) % METHOD_CACHE_SIZE;
     if (method_cache[i].stamp == cur_stamp && method_cache[i].dbref == dbref &&
 	method_cache[i].name == name && method_cache[i].after == after &&
 	method_cache[i].loc != -1) {
@@ -831,19 +838,14 @@ static void method_cache_set(long dbref, long name, long after, long loc)
 {
     int i;
 
-    i = (dbref * name + after) % METHOD_CACHE_SIZE;
-    if (method_cache[i].stamp != 0) {
-	ident_discard(method_cache[i].dbref);
+    i = (10 + dbref + (name << 4) + after) % METHOD_CACHE_SIZE;
+    if (method_cache[i].stamp != 0)
 	ident_discard(method_cache[i].name);
-	if (method_cache[i].after != -1)
-	    ident_discard(method_cache[i].after);
-	ident_discard(method_cache[i].loc);
-    }
     method_cache[i].stamp = cur_stamp;
-    method_cache[i].dbref = ident_dup(dbref);
+    method_cache[i].dbref = dbref;
     method_cache[i].name = ident_dup(name);
-    method_cache[i].after = (after == -1) ? -1 : ident_dup(after);
-    method_cache[i].loc = ident_dup(loc);
+    method_cache[i].after = after;
+    method_cache[i].loc = loc;
 }
 
 void object_add_method(Object *object, long name, Method *method)
@@ -1073,10 +1075,10 @@ static void object_text_dump_aux(Object *obj, FILE *fp)
 
     /* Output parents. */
     for (i = 0; i < obj->parents->len; i++)
-	fformat(fp, "parent %s\n", ident_name(obj->parents->el[i].u.dbref));
+	fformat(fp, "parent #%l\n", obj->parents->el[i].u.dbref);
 
     /* Output creation command. */
-    fformat(fp, "object %s\n", ident_name(obj->dbref));
+    fformat(fp, "object #%l\n", obj->dbref);
 
     /* Output commands to set obj variables. */
     for (i = 0; i < obj->vars.size; i++) {
@@ -1084,7 +1086,7 @@ static void object_text_dump_aux(Object *obj, FILE *fp)
 	if (var->name == -1)
 	    continue;
 	str = data_to_literal(&var->val);
-	fformat(fp, "var %I %I %s\n", var->class, var->name, str->s);
+	fformat(fp, "var %d %I %s\n", var->class, var->name, str->s);
 	string_discard(str);
     }
 
@@ -1092,7 +1094,7 @@ static void object_text_dump_aux(Object *obj, FILE *fp)
     for (i = 0; i < obj->methods.size; i++) {
 	if (!obj->methods.tab[i].m)
 	    continue;
-	fformat(fp, "method %s\n", ident_name(obj->methods.tab[i].m->name));
+	fformat(fp, "method %I\n", obj->methods.tab[i].m->name);
 	code = decompile(obj->methods.tab[i].m, obj, 4, 1);
 	for (j = 0; j < code->len; j++) {
 	    fputs(code->el[j].u.substr.str->s, fp);
