@@ -241,7 +241,6 @@ String *vformat(char *fmt, va_list arg)
 	fmt = p + 2;
     }
 
-    va_end(arg);
     return buf;
 }
 
@@ -375,5 +374,18 @@ static void claim_fd(int i)
     reserve_fds[i] = open("/dev/null", O_WRONLY);
     if (reserve_fds[i] == -1)
 	panic("Couldn't reset reserved fd.");
+}
+
+/* Return the smallest number N such that N >= size and N = 2^B - delta for
+ * some B >= min_bits. */
+int adjust_size(int size, int min_power, int delta)
+{
+    int b;
+
+    size += delta - 1;
+    b = min_power;
+    while ((size >> b) != 0)
+	b++;
+    return (1 << b) - delta;
 }
 

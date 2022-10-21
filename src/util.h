@@ -34,6 +34,7 @@ long parse_ident(char **sptr);
 FILE *open_scratch_file(char *name, char *type);
 void close_scratch_file(FILE *fp);
 void init_scratch_file(void);
+int adjust_size(int size, int min_power, int delta);
 
 extern char lowercase[128];
 extern char uppercase[128];

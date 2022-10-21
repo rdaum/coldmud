@@ -18,18 +18,47 @@ typedef struct data Data;
 #define OCTET_VALUE(n) (((unsigned long) (n)) & ((1 << 8) - 1))
 
 struct data {
-    int type;
+  private:
+    int type_tag;
     union {
-	long val;
+	long integer;
 	Dbref dbref;
 	Ident symbol;
         Ident error;
-	String *str;
-	List *list;
-	Frob *frob;
-	Dict *dict;
-	Buffer *buffer;
+	String str;
+	List list;
+	Frob frob;
+	Dict dict;
+	Buffer buffer;
     } u;
+
+  public:
+
+    /* Constructors and destructor. */
+    Data() { type_tag = 0; }
+    Data(long integer) { type_tag = INTEGER; u.integer = integer; }
+    Data(Dbref dbref) { type_tag = DBREF; u.dbref = dbref; }
+    Data(Ident symbol) { type_tag = SYMBOL; u.symbol = symbol; }
+    Data(Ident error) { type_tag = ERROR; u.error = error; }
+    Data(String string) { type_tag = STRING; u.string = string; }
+    Data(List list) { type_tag = LIST; u.list = list; }
+    Data(Frob frob) { type_tag = FROB; u.frob = frob; }
+    Data(Dict dict) { type_tag = DICT; u.dict = dict; }
+    Data(Buffer buffer) { type_tag = BUFFER; u.buffer = buffer; }
+    ~Data();
+
+    /* Observers. */
+    int type() { return type_tag; }
+    int is(int type) { return (type_tag == type); }
+    long& integer() { return u.integer; }
+    Dbref& dbref() { return u.dbref; }
+    Ident& symbol() { return u.symbol; }
+    Ident& error() { return u.error; }
+    String& string() { return u.str; }
+    List& list() { return u.list; }
+    Frob& frob() { return u.frob; }
+    Dict& dict() { return u.dict; }
+    Buffer& buffer() { return u.buffer; }
 };
 
 struct frob {
