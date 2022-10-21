@@ -1,0 +1,19 @@
+<TITLE>coldmud.info: text_dump</TITLE>
+Next: <A HREF="unbind.html">unbind</A><P>
+Prev: <A HREF="shutdown.html">shutdown</A><P>
+
+<H3>text_dump</H3>
+
+<PRE>
+text_dump()
+</PRE
+>
+This function writes a text database dump to the file <SAMP>textdump</SAMP>.
+<CODE>text_dump()</CODE> returns <CODE>1</CODE> if it is successful, or <CODE>0</CODE> if
+it cannot write the text dump.  <CODE>text_dump()</CODE> uses a temporary file
+<SAMP>textdump.new</SAMP> to avoid overwriting the old <SAMP>textdump</SAMP> until
+it has finished; thus, if there is a server or machine crash while the
+text dump is in progress, the partial text dump will be in
+<SAMP>textdump.new</SAMP>, and the old <SAMP>textdump</SAMP> will be unmodified.<P>
+
+

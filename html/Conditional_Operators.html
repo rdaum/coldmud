@@ -1,0 +1,27 @@
+<TITLE>coldmud.info: Conditional Operators</TITLE>
+Prev: <A HREF="Logic.html">Logic</A><P>
+
+<H4>Conditional Operators</H4>
+
+The <CODE>||</CODE> and <CODE>&&</CODE> operators act as logical or and and
+operators, respectively.  The expression <CODE>(a || b)</CODE> has the value
+of <CODE>a</CODE> if <CODE>a</CODE> is true, or the value of <CODE>b</CODE> if <CODE>a</CODE> is
+false.  The expression <CODE>(a && b)</CODE> has the value of <CODE>a</CODE> if
+<CODE>a</CODE> is false, and the value of <CODE>b</CODE> if <CODE>a</CODE> is true.
+<CODE>C--</CODE>'s logical operators are <EM>short-circuit operators</EM>,
+meaning that the right-hand argument is not evaluated if the left-hand
+argument is sufficient to determine the value of the expression.  This
+is important if the right-hand argument has side-effects or could cause
+an error.<P>
+<P>
+The <CODE>?|</CODE> operator is a trinary operator, with the following syntax:<P>
+<P>
+<PRE>
+<VAR>condition</VAR> ? <VAR>true-expr</VAR> | <VAR>false-expr</VAR>
+</PRE
+>
+The result of this expression is the result of <VAR>true-expr</VAR> if
+<VAR>condition</VAR> is true, or the result of <VAR>false-expr</VAR> if
+<VAR>condition</VAR> is false.  See <A HREF="Data_Types.html">Data Types</A> for the definition of
+truth for <CODE>C--</CODE> data.<P>
+<P>

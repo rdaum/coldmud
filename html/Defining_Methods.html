@@ -1,0 +1,34 @@
+<TITLE>coldmud.info: Defining Methods</TITLE>
+Next: <A HREF="Errors.html">Errors</A><P>
+Prev: <A HREF="Objects.html">Objects</A><P>
+
+<H1>Defining methods</H1>
+
+A method in Coldmud is an object's definition of how to handle a
+message.  Methods are written in a language called <EM><CODE>C--</CODE></EM>,
+which resembles <CODE>C</CODE> at first glance.  However, <CODE>C--</CODE> is a
+simpler language, and it stresses readability instead of conciseness.<P>
+<P>
+The building blocks of methods are character sequences called
+<EM>tokens</EM>.  From these tokens you can assemble a sequence of
+instructions to the interpreter called <EM>statements</EM>.  You express
+values in statements using <EM>expressions</EM>.<P>
+<P>
+Methods can return values using a <CODE>return</CODE> statement.  If a method
+does not explicitly return a value, its return value is the dbref of the
+current object.<P>
+<P>
+Methods have a limited amount of running time; if a method executes too
+many instructions before returning, it will abort with a <CODE>~ticks</CODE>
+error, which it cannot catch.  See <A HREF="Errors.html">Errors</A><P>
+<P>
+Menu:
+<DL COMPACT>
+<DT><A HREF="Example_Method.html">Example Method</A><DD>An example <CODE>C--</CODE> method
+<DT><A HREF="Tokens.html">Tokens</A><DD>The building blocks of methods
+<DT><A HREF="Method_Structure.html">Method Structure</A><DD>Structure of a method
+<DT><A HREF="Statements.html">Statements</A><DD>Telling the interpreter what to do
+<DT><A HREF="Expressions.html">Expressions</A><DD>Expressing values in <CODE>C--</CODE>
+</DL>
+
+

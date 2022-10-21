@@ -1,0 +1,19 @@
+<TITLE>coldmud.info: dict_del</TITLE>
+Next: <A HREF="dict_del_elem.html">dict_del_elem</A><P>
+Prev: <A HREF="dict_contains.html">dict_contains</A><P>
+
+<H3>dict_del</H3>
+
+<PRE>
+dict_del(<VAR>dictionary</VAR>, <VAR>key</VAR>)
+</PRE
+>
+This function returns the result of removing the association in
+<VAR>dictionary</VAR> which has the key <VAR>key</VAR>.  If there is no such
+association, then <CODE>dict_del()</CODE> raises a <CODE>~keynf</CODE> exception.<P>
+<P>
+<PRE>
+dict_del(#[["foo", 1], ["bar", 2]], "foo")
+     => #[["bar", 2]]
+</PRE
+>

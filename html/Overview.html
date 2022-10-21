@@ -1,0 +1,44 @@
+<TITLE>coldmud.info: Overview</TITLE>
+Next: <A HREF="Objects.html">Objects</A><P>
+Prev: <A HREF="Top.html">Top</A><P>
+
+<H1>Overview</H1>
+
+Coldmud is an object-oriented multi-user network database server with a
+<CODE>C</CODE>-like programming language for defining object behavior.<P>
+
+
+The components of Coldmud's database are <EM>objects</EM>, which together
+comprise the <EM>object hierarchy</EM>.  Objects have <EM>variables</EM>,
+which determine their state, <EM>methods</EM>, which determine their
+behavior in response to <EM>messages</EM> from other objects, and
+<EM>parameters</EM>, which give the names of the variables used by the
+object's methods.<P>
+<P>
+Coldmud objects also have <EM>parents</EM>, which are other objects.  An
+object's behavior is determined by its <EM>inherited</EM> methods, which
+it gets from its parents, and its <EM>overridden</EM> methods, which it
+defines itself.  One object, the <EM>root object</EM>, has no parents; all
+other objects have at least one parent.<P>
+<P>
+Methods determine objects' responses to messages using a <CODE>C</CODE>-like
+language called <CODE>C--</CODE>.  The philosophy of <CODE>C--</CODE> stresses
+simplicity, readability, and vertical code organization.<P>
+<P>
+Encapsulation is an important feature of Coldmud's object system.  An
+object cannot directly access another object's data; it must send a
+message to perform the required action.  Moreover, an object cannot
+directly access the data used by its parents' or its children's methods.<P>
+<P>
+Coldmud uses a disk-based database; only a limited number of objects
+exist in memory at any time.  As long as the bulk of the object database
+is not concentrated in a few objects, Coldmud's process size should not
+grow beyond a certain point even if the database gets very large.<P>
+<P>
+This manual is intended as a reference for programmers and
+administrators.  It does not document any object database, and may not
+be appropriate as a tutorial.  The best way to get started learning
+<CODE>C--</CODE> is to look at existing code, such as code in a core database,
+and refer to this manual when you don't understand how a piece of code
+works.<P>
+<P>

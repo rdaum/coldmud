@@ -1,0 +1,18 @@
+<TITLE>coldmud.info: bind</TITLE>
+Next: <A HREF="chparents.html">chparents</A><P>
+Prev: <A HREF="binary_dump.html">binary_dump</A><P>
+
+<H3>bind</H3>
+
+<PRE>
+bind(<VAR>port</VAR>, <VAR>receiver</VAR>)
+</PRE
+>
+This function instructs the server to begin listening on the port
+numbered <VAR>port</VAR>, with the receiver object <VAR>receiver</VAR>.  If the
+server is already listening on that port, then the receiver object is
+changed, with no other effect.  If the socket cannot be created, then
+<CODE>bind()</CODE> throws a <CODE>~socket</CODE> error.  If the server cannot
+bind to the port <VAR>port</VAR>, then <CODE>bind()</CODE> throws a <CODE>~bind</CODE>
+error.  Otherwise, <CODE>bind()</CODE> returns 1.<P>
+<P>

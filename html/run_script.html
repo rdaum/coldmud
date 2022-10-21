@@ -1,0 +1,30 @@
+<TITLE>coldmud.info: run_script</TITLE>
+Next: <A HREF="set_heartbeat_freq.html">set_heartbeat_freq</A><P>
+Prev: <A HREF="log.html">log</A><P>
+
+<H3>run_script</H3>
+
+<PRE>
+run_script(<VAR>name</VAR>, <VAR>arguments</VAR>)
+run_script(<VAR>name</VAR>, <VAR>arguments</VAR>, <VAR>background-flag</VAR>)
+</PRE
+>
+This function executes the script named by string <VAR>name</VAR>, passing it
+the arguments in the list <VAR>arguments</VAR>.  Each element of
+<VAR>arguments</VAR> must be a string.  Coldmud looks for the script named by
+<VAR>name</VAR> in the directory <SAMP>scripts</SAMP> in the current directory.
+<VAR>name</VAR> cannot contain a <SAMP>../</SAMP> sequence; that is, it cannot walk
+back down the directory hierarchy.<P>
+<P>
+If <VAR>background-flag</VAR> is specified, it must be an integer.  If it is
+non-zero, then <VAR>script</VAR> is run in the background.  Otherwise,
+Coldmud waits for the script to execute.<P>
+<P>
+If <VAR>background-flag</VAR> is not specified, <CODE>run_script()</CODE> returns
+the return status of the script, or <CODE>-1</CODE> if it does not
+successfully execute the script.  If <VAR>background-flag</VAR> is specified,
+then <CODE>run_script()</CODE> might return <CODE>-1</CODE> if the script is not
+successfully executed, and it may even return the return status of the
+script if the script executes extremely quickly, but it will usually
+return <CODE>0</CODE>.<P>
+<P>

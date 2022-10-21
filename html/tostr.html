@@ -1,0 +1,38 @@
+<TITLE>coldmud.info: tostr</TITLE>
+Next: <A HREF="tosym.html">tosym</A><P>
+Prev: <A HREF="toliteral.html">toliteral</A><P>
+
+<H3>tostr</H3>
+
+<PRE>
+tostr(<VAR>data</VAR>)
+</PRE
+>
+This function converts any data to a string representation of it.  For
+strings, the string representation is the string itself; for symbols and
+error codes, the string representation is the identifier part of the
+data object converted to a string value; for lists and frobs, the string
+representations are <CODE>"<list>"</CODE> and <CODE>"<frob>"</CODE> respectively;
+for integers and dbrefs, <CODE>tostr()</CODE> is equivalent to
+<CODE>toliteral()</CODE>.<P>
+
+
+Examples:<P>
+<P>
+<PRE>
+tostr(3)
+    => "3"
+tostr("foo")
+    => "foo"
+tostr(#0)
+    => "#0"
+tostr([2, 3, 4])
+    => "<list>"
+tostr('foo)
+    => "foo"
+tostr(~methodnf)
+    => "methodnf"
+tostr(<#66, #[['type, 'obj], ['obj, #40]]>)
+    => "<frob>"
+</PRE
+>

@@ -1,0 +1,26 @@
+<TITLE>coldmud.info: buffer_from_strings</TITLE>
+Next: <A HREF="buffer_len.html">buffer_len</A><P>
+Prev: <A HREF="buffer_append.html">buffer_append</A><P>
+
+<H3>buffer_from_strings</H3>
+
+<PRE>
+buffer_from_strings(<VAR>list-of-strings</VAR>, [<VAR>terminator</VAR>])
+</PRE
+>
+This function returns a buffer constructed by appending the strings in
+<VAR>list-of-strings</VAR> together, treating the strings as sequences of
+ASCII values, with each string followed by <VAR>terminator</VAR>, a buffer.
+If <VAR>terminator</VAR> is not specified, then <CODE>buffer_from_strings()</CODE>
+uses the buffer <CODE>%[13, 10]</CODE>, a two-byte buffer containing the ASCII
+codes for a carriage return and a newline.<P>
+<P>
+Examples:<P>
+<P>
+<PRE>
+buffer_from_strings(["foo", "bar"])
+     => <CODE>%[102, 111, 111, 13, 10, 98, 97, 4, 13, 10]</CODE>
+buffer_from_strings(["foo", "bar"], %[10])
+     => <CODE>%[102, 111, 111, 10, 98, 97, 4, 10]</CODE>
+</PRE
+>

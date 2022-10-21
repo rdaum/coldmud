@@ -1,0 +1,26 @@
+<TITLE>coldmud.info: compile</TITLE>
+Next: <A HREF="del_method.html">del_method</A><P>
+Prev: <A HREF="children.html">children</A><P>
+
+<H3>compile</H3>
+
+<PRE>
+compile(<VAR>code</VAR>, <VAR>name</VAR>)
+</PRE
+>
+This function compiles the list of strings <VAR>code</VAR> and uses the
+result as the definition of the method named by the symbol <VAR>name</VAR>.
+If there were errors in compiling <VAR>code</VAR>, then <CODE>compile()</CODE>
+returns a list of strings describing the errors; otherwise
+<CODE>compile()</CODE> returns an empty list.<P>
+
+
+Examples:<P>
+<P>
+<PRE>
+compile(["echo(\"foo\");"], 'foo)
+     => []
+compile(["echo(\"foo\")"], 'foo)
+     => ["Line 2: parse error"]
+</PRE
+>

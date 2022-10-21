@@ -1,0 +1,21 @@
+<TITLE>coldmud.info: chparents</TITLE>
+Next: <A HREF="conn_assign.html">conn_assign</A><P>
+Prev: <A HREF="bind.html">bind</A><P>
+
+<H3>chparents</H3>
+
+<PRE>
+chparents(<VAR>dbref</VAR>, <VAR>parents</VAR>)
+</PRE
+>
+This function changes the parents of the object referred to by
+<VAR>dbref</VAR> to the list of dbrefs in <VAR>parents</VAR>.  If any of the
+dbrefs in <VAR>parents</VAR> do not refer to an existing object, then
+<CODE>chparents()</CODE> throws an <CODE>~objnf</CODE> error.  If any of the parents
+have <VAR>dbref</VAR> as an ancestor, or are <VAR>dbref</VAR> themselves, then
+<CODE>chparents()</CODE> throws a <CODE>~parent</CODE> error.  If <VAR>dbref</VAR> refers
+to the root object, or <VAR>parents</VAR> is an empty list, then then
+<CODE>chparents()</CODE> throws a <CODE>~perm</CODE> error.  Otherwise,
+<CODE>chparents()</CODE> returns <CODE>1</CODE>.<P>
+
+

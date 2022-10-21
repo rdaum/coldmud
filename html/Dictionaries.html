@@ -1,0 +1,49 @@
+<TITLE>coldmud.info: Dictionaries</TITLE>
+Next: <A HREF="Buffers.html">Buffers</A><P>
+Prev: <A HREF="Lists.html">Lists</A><P>
+
+<H3>Dictionaries</H3>
+
+A <EM>dictionary</EM> is a list of <EM>associations</EM>.  Each association
+contains a <EM>key</EM> and a <EM>value</EM>, both arbitrary <CODE>C--</CODE> data
+values.  Dictionaries take up more space than lists, but allow fast
+searches.  Only one association in a dictionary may have a given key.<P>
+<P>
+Dictionary construction expressions have the following syntax:<P>
+<P>
+<PRE>
+#[[<VAR>key1</VAR>, <VAR>value1</VAR>], [<VAR>key2</VAR>, <VAR>value2</VAR>], <VAR>...</VAR>]
+</PRE
+>
+The result of a dictionary construction expression is a dictionary with
+the keys <VAR>key1</VAR>, <VAR>key2</VAR>, <VAR>...</VAR> and the associated values
+<VAR>value1</VAR>, <VAR>value2</VAR>, <VAR>...</VAR>.  The following are valid
+dictionary construction expressions:<P>
+<P>
+<PRE>
+#[["foo", 3], ['bar, 4], [8, [#0, 'startup]]]
+#[['type, 'and], ['lhs, 3], ['rhs, 0]]
+</PRE
+>
+You can search for the value associated with a key in a dictionary using
+the list selection expression:<P>
+<P>
+<PRE>
+<VAR>dict</VAR>[<VAR>key</VAR>]
+</PRE
+>
+If any of the associations in <VAR>dict</VAR> have the key <VAR>key</VAR>, the
+result of this expression is the value associated with that key.  If
+<VAR>key</VAR> is not the key of any of the associations in <VAR>dict</VAR>, then
+the interpreter raises a <CODE>~keynf</CODE> error.<P>
+<P>
+You can iterate over a dictionary's associations using the for-list
+statement; at each step of the for-list statement, the loop index will
+contain a list <CODE>[<VAR>key</VAR>, <VAR>value</VAR>]</CODE> for the current
+association.<P>
+<P>
+The four dictionary manipulation functions <CODE>dict_keys()</CODE>,
+<CODE>dict_contains()</CODE>, <CODE>dict_add()</CODE>, and <CODE>dict_del()</CODE> allow
+you to manipulate dictionaries in other ways; see the descriptions of
+each function for details.<P>
+<P>

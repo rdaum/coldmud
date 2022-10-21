@@ -1,0 +1,49 @@
+<TITLE>coldmud.info: Variables</TITLE>
+Next: <A HREF="Operators.html">Operators</A><P>
+Prev: <A HREF="Frobs.html">Frobs</A><P>
+
+<H3>Variables</H3>
+
+<CODE>C--</CODE> provides two kinds of variables, <EM>local variables</EM> and
+<EM>object variables</EM>.<P>
+
+
+<EM>Local variables</EM> allow methods to temporarily store information.
+To use a local variable in a method, declare the local variable's name
+(an identifier) at the top of the method in a <CODE>var</CODE> declaration
+(see <A HREF="Method_Structure.html">Method Structure</A>).  The variable's name is then an expression
+whose value is the contents of the variable.  The variable initially
+contains the integer <CODE>0</CODE>.<P>
+<P>
+To set the variable's contents, use an <EM>assignment statement</EM>,
+which has the following syntax:<P>
+<P>
+<PRE>
+<VAR>variable</VAR> = <VAR>value</VAR>;
+</PRE
+>
+This assigns the value <EM>value</EM> to the variable <EM>variable</EM>. The
+values of a method's local variables are specific to the processing of a
+particular message call; when the method is invoked another time, all of
+its local variables begin with the value <CODE>0</CODE> again.<P>
+<P>
+The following example method returns <CODE>6</CODE>:<P>
+<P>
+<PRE>
+var a;<P>
+a = 3;
+return a + 3;
+</PRE
+>
+<EM>Object variables</EM> store information for an indefinite period of
+time.  You refer to object variables through parameters, which are
+defined on the current method's defining object (<EM>not</EM> the current
+object).  As with local variables, you can retrieve the value of an
+object variable by writing the name of the parameter which refers to
+that variable, and you can assign to an object variable using an
+assignment statement.  You can also use the <CODE>get_var()</CODE> and
+<CODE>set_var()</CODE> functions to perform these operations.  It is an error
+of type <CODE>~paramnf</CODE> to refer to a parameter which does not exist on
+the current method's defining object.  Object variables begin with the
+value <CODE>0</CODE>.<P>
+<P>

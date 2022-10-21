@@ -1,0 +1,23 @@
+<TITLE>coldmud.info: dict_add</TITLE>
+Next: <A HREF="dict_add_elem.html">dict_add_elem</A><P>
+
+<H3>dict_add</H3>
+
+<PRE>
+dict_add(<VAR>dictionary</VAR>, <VAR>key</VAR>, <VAR>value</VAR>)
+</PRE
+>
+This function returns the result of adding the association
+<CODE>[<VAR>key</VAR>, <VAR>value</VAR>]</CODE> to the dictionary <VAR>dictionary</VAR>.  If
+<VAR>key</VAR> already exists in <VAR>dictionary</VAR>, then <CODE>dict_add()</CODE>
+replaces the value of that key with <VAR>value</VAR>.<P>
+<P>
+Examples:<P>
+<P>
+<PRE>
+dict_add(#[["foo", "bar"]], 3, 'quux)
+     => #[["foo", "bar"], [3, 'quux]]
+dict_add(#[["foo", 1], ["bar", 2], ["baz", 3]], "bar", 4)
+     => #[["foo", 1], ["bar", 4], ["baz", 3]]
+</PRE
+>

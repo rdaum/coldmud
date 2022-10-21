@@ -1,0 +1,27 @@
+<TITLE>coldmud.info: explode</TITLE>
+Next: <A HREF="lowercase.html">lowercase</A><P>
+Prev: <A HREF="crypt.html">crypt</A><P>
+
+<H3>explode</H3>
+
+<PRE>
+explode(<VAR>string</VAR>)
+explode(<VAR>string</VAR>, <VAR>separator</VAR>, [<VAR>want-blanks</VAR>])
+</PRE
+>
+This function returns a list of the words in <VAR>string</VAR>.  If the
+string <VAR>separator</VAR> is specified, then it is used as the word
+separator; otherwise a space (<CODE>" "</CODE>) is used.  If the optional
+argument <VAR>want-blanks</VAR> is specified and is true, <CODE>explode()</CODE>
+will include zero-length words in the returned list; otherwise, it will
+not.<P>
+<P>
+Examples:<P>
+<P>
+<PRE>
+explode(" foo  bar baz")
+     => ["foo", "bar", "baz"]
+explode("foo:bar:baz", ":")
+     => ["foo", "bar", "baz"]
+</PRE
+>

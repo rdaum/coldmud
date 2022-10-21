@@ -1,0 +1,34 @@
+<TITLE>coldmud.info: match_pattern</TITLE>
+Next: <A HREF="match_regexp.html">match_regexp</A><P>
+Prev: <A HREF="match_begin.html">match_begin</A><P>
+
+<H3>match_pattern</H3>
+
+<PRE>
+match_pattern(<VAR>pattern</VAR>, <VAR>string</VAR>)
+</PRE
+>
+This function matches the wildcard pattern <VAR>pattern</VAR> against
+<VAR>string</VAR>.  A wildcard pattern is a string with asterixes (<SAMP>*</SAMP>)
+signifying wildcards.  A regular character matches itself, while a
+wildcard matches any number of arbitrary characters.  The return value
+of <CODE>match_pattern()</CODE> is a list of the substrings of <VAR>string</VAR>
+which matched the wildcards in <VAR>pattern</VAR>, or <CODE>0</CODE> if the match
+fails.<P>
+<P>
+<CODE>match_pattern()</CODE> allows you to do simple character-based matching.
+For matching against command formats, however, you should use the
+<CODE>match_template()</CODE> function.<P>
+
+
+Examples:<P>
+<P>
+<PRE>
+match_pattern("*", "foobar")
+     => ["foobar"]
+match_pattern("foo * bar * baz", "foo quux bar quuux baz")
+     => ["quux", "quuux"]
+match_pattern("foo * bar", "baz")
+     => 0
+</PRE
+>

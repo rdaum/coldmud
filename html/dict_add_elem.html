@@ -1,0 +1,29 @@
+<TITLE>coldmud.info: dict_add_elem</TITLE>
+Next: <A HREF="dict_contains.html">dict_contains</A><P>
+Prev: <A HREF="dict_add.html">dict_add</A><P>
+
+<H3>dict_add_elem</H3>
+
+<PRE>
+dict_add_elem(<VAR>dictionary</VAR>, <VAR>key</VAR>, <VAR>element</VAR>)
+</PRE
+>
+This function returns the result of adding <VAR>element</VAR> to the list
+value <VAR>key</VAR> in <VAR>dictionary</VAR>.  If <VAR>dictionary</VAR> has no
+association with key <VAR>key</VAR>, then <CODE>dict_add_elem()</CODE> adds an
+association <CODE>[<VAR>key</VAR>, [<VAR>element</VAR>]]</CODE> to <VAR>dictionary</VAR>.  If
+<VAR>dictionary</VAR> has an association with key <VAR>key</VAR>, and the value
+part of the association is a list, then <CODE>dict_add_elem()</CODE> adds
+<VAR>element</VAR> to the end of that list.  If <VAR>dictionary</VAR> has an
+association with key <VAR>key</VAR>, but the value part of the association is
+not a list, then <CODE>dict_add_elem()</CODE> throws a <CODE>~type</CODE> error.<P>
+<P>
+Examples:<P>
+<P>
+<PRE>
+dict_add_elem(#[["foo", ["bar"]]], "foo", "baz")
+     => #[["foo", ["bar", "baz"]]]
+dict_add_elem(#[], "foo", "bar")
+     => #[["foo", ["bar"]]]
+</PRE
+>

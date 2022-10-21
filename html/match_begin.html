@@ -1,0 +1,28 @@
+<TITLE>coldmud.info: match_begin</TITLE>
+Next: <A HREF="match_pattern.html">match_pattern</A><P>
+Prev: <A HREF="lowercase.html">lowercase</A><P>
+
+<H3>match_begin</H3>
+
+<PRE>
+match_begin(<VAR>string</VAR>, <VAR>search</VAR>)
+match_begin(<VAR>string</VAR>, <VAR>search</VAR>, <VAR>separator</VAR>)
+</PRE
+>
+This function looks for the string <VAR>search</VAR> at the beginning of each
+word in <VAR>string</VAR>.  The word separator is given by the string
+<VAR>separator</VAR> if it is specified; otherwise, a space (<CODE>" "</CODE>) is
+used.  The return value of <CODE>match_begin()</CODE> is <CODE>1</CODE> if
+<VAR>search</VAR> was found at the beginning of a word in <VAR>string</VAR>, or
+<CODE>0</CODE> if not.<P>
+
+
+Examples:<P>
+<P>
+<PRE>
+match_begin("foo:bar:baz", "fo", ":")
+     => 1
+match_begin("foo bar baz", "ar")
+     => 0
+</PRE
+>

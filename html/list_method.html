@@ -1,0 +1,28 @@
+<TITLE>coldmud.info: list_method</TITLE>
+Next: <A HREF="methods.html">methods</A><P>
+Prev: <A HREF="get_var.html">get_var</A><P>
+
+<H3>list_method</H3>
+
+<PRE>
+list_method(<VAR>name</VAR>)
+list_method(<VAR>name</VAR>, <VAR>indentation</VAR>)
+list_method(<VAR>name</VAR>, <VAR>indentation</VAR>, <VAR>parenthesization</VAR>)
+</PRE
+>
+This function returns a list of strings containing a decompiled version
+of the method named by the symbol <VAR>name</VAR>.  If the method <VAR>name</VAR>
+is not defined on the current object, then <CODE>list_method()</CODE> results
+in a <CODE>~methodnf</CODE> error.  Note that <VAR>name</VAR> must be defined on
+the current object, not on its ancestors.<P>
+<P>
+The decompiled code may not look exactly like the code that was compiled
+to produce the method.  The only guarantee is that it will compile to a
+method with the same behavior.<P>
+<P>
+If you specify the integer <VAR>indentation</VAR>, then the decompiler will
+use that number of spaces for indenting.  The default is 4 spaces.  If
+you specify the integer <VAR>parenthesization</VAR> and it is non-zero, then
+the decompiler will put parentheses around every subexpression.
+Otherwise, the compiler will only use parentheses when needed.<P>
+<P>

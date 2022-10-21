@@ -1,0 +1,180 @@
+<TITLE>coldmud.info: Top</TITLE>
+Next: <A HREF="Overview.html">Overview</A><P>
+Prev: <A HREF="(dir).html">(dir)</A><P>
+
+Coldmud is a multi-user network server featuring an object-oriented
+database and programming language.  This Info file documents the Coldmud
+server version 0.10 and the <CODE>C--</CODE> programming language.<P>
+<P>
+This manual does not document the features of any Coldmud object
+database, or any object database's interface for defining methods on
+objects.<P>
+<P>
+Menu:
+<DL COMPACT>
+<DT><A HREF="Overview.html">Overview</A><DD>			Overview of Coldmud
+<DT><A HREF="Objects.html">Objects</A><DD>			Objects in Coldmud
+<DT><A HREF="Defining_Methods.html">Defining Methods</A><DD>		Writing methods in <CODE>C--</CODE>
+<DT><A HREF="Errors.html">Errors</A><DD>			Error conditions in Coldmud
+<DT><A HREF="Function_Descriptions.html">Function Descriptions</A><DD>	Descriptions of Coldmud functions
+<DT><A HREF="Administration.html">Administration</A><DD>		Running and maintaining the server<P>
+<DT><A HREF="Function_Index.html">Function Index</A><DD>		Index of built-in Coldmud functions
+<DT><A HREF="Concept_Index.html">Concept Index</A><DD>		Index of concepts<P>
+ -- The Detailed Node Listing ---<P>
+Objects in Coldmud<P>
+<DT><A HREF="Dbrefs.html">Dbrefs</A><DD>			Database references
+<DT><A HREF="Inheritance.html">Inheritance</A><DD>			Parents and inheritance
+<DT><A HREF="Messages.html">Messages</A><DD>			Interactions between objects
+<DT><A HREF="Variables_and_Parameters.html">Variables and Parameters</A><DD>	Information stored in objects
+<DT><A HREF="System_Object.html">System Object</A><DD>		The system object<P>
+Methods: Writing methods in <CODE>C--</CODE><P>
+<DT><A HREF="Example_Method.html">Example Method</A><DD>		Example of a <CODE>C--</CODE> method
+<DT><A HREF="Tokens.html">Tokens</A><DD>			The building blocks of methods
+<DT><A HREF="Method_Structure.html">Method Structure</A><DD>		Structure of a method
+<DT><A HREF="Statements.html">Statements</A><DD>			Telling the interpreter what to do
+<DT><A HREF="Expressions.html">Expressions</A><DD>			Expressing values in <CODE>C--</CODE><P>
+Statements: Telling the interpreter what to do<P>
+<DT><A HREF="Simple_Statements.html">Simple Statements</A><DD>		Performing simple actions
+<DT><A HREF="Conditional_Statements.html">Conditional Statements</A><DD>	Executing instructions conditionally
+<DT><A HREF="Looping_Statements.html">Looping Statements</A><DD>		Executing instructions repeatedly
+<DT><A HREF="Error-Handling_Statements.html">Error-Handling Statements</A><DD>	Handling errors<P>
+Expressions: Expressing values in methods<P>
+<DT><A HREF="Data_Types.html">Data Types</A><DD>			Data types and literal expressions
+<DT><A HREF="Names.html">Names</A><DD>			Referring to objects indirectly
+<DT><A HREF="Lists.html">Lists</A><DD>			Constructing and retrieving from lists
+<DT><A HREF="Dictionaries.html">Dictionaries</A><DD>		Associating values with data
+<DT><A HREF="Buffers.html">Buffers</A><DD>			Raw byte values for network I/O
+<DT><A HREF="Frobs.html">Frobs</A><DD>			Constructing and using frobs
+<DT><A HREF="Variables.html">Variables</A><DD>			Local and object variables
+<DT><A HREF="Operators.html">Operators</A><DD>			Operator syntax and precedence
+<DT><A HREF="Calling_Functions.html">Calling Functions</A><DD>		Making calls to built-in functions
+<DT><A HREF="Sending_Messages.html">Sending Messages</A><DD>		Sending messages to other objects
+<DT><A HREF="Passing_Messages.html">Passing Messages</A><DD>		Passing messages to parents
+<DT><A HREF="Error-Handling_Expressions.html">Error-Handling Expressions</A><DD>	Handling errors
+<DT><A HREF="Splicing.html">Splicing</A><DD>			Splicing lists into argument lists<P>
+Operators: Operator syntax and precedence<P>
+<DT><A HREF="Precedence.html">Precedence</A><DD>			Resolving ambiguous expressions
+<DT><A HREF="Arithmetic.html">Arithmetic</A><DD>			Arithmetic operators
+<DT><A HREF="Logic.html">Logic</A><DD>			Logical and relational operators
+<DT><A HREF="Conditional_Operators.html">Conditional Operators</A><DD>	Conditional operators<P>
+Function Descriptions: Descriptions of Coldmud Functions<P>
+<DT><A HREF="Data_Functions.html">Data Functions</A><DD>		Operations on data in general
+<DT><A HREF="String_Functions.html">String Functions</A><DD>		Operations on strings
+<DT><A HREF="List_Functions.html">List Functions</A><DD>		Operations on lists
+<DT><A HREF="Dictionary_Functions.html">Dictionary Functions</A><DD>	Operations on dictionaries
+<DT><A HREF="Buffer_Functions.html">Buffer Functions</A><DD>		Operations on buffers
+<DT><A HREF="Method_Functions.html">Method Functions</A><DD>		Information about the current method
+<DT><A HREF="Error_Functions.html">Error Functions</A><DD>		Handling errors
+<DT><A HREF="Communication_Functions.html">Communication Functions</A><DD>	Communicating with the user
+<DT><A HREF="Object_Functions.html">Object Functions</A><DD>		Operations on the current object
+<DT><A HREF="Administrative_Functions.html">Administrative Functions</A><DD>	Privileged operations
+<DT><A HREF="Miscellaneous_Functions.html">Miscellaneous Functions</A><DD>	Miscellaneous operations<P>
+Data Functions: Operations on data in general<P>
+<DT><A HREF="todbref.html">todbref</A><DD>			Convert an integer or string to a dbref
+<DT><A HREF="toerr.html">toerr</A><DD>			Convert a string to an error code
+<DT><A HREF="toint.html">toint</A><DD>			Convert a string or dbref to an integer
+<DT><A HREF="tostr.html">tostr</A><DD>			Convert any data to a string
+<DT><A HREF="tosym.html">tosym</A><DD>			Convert a string to a symbol
+<DT><A HREF="type.html">type</A><DD>			Retrieve the type of a piece of data
+<DT><A HREF="valid.html">valid</A><DD>			Check if data is a valid dbref<P>
+String Functions: Operations on strings<P>
+<DT><A HREF="crypt.html">crypt</A><DD>			Perform one-way encryption on a string
+<DT><A HREF="explode.html">explode</A><DD>			Get a list of words in a string
+<DT><A HREF="lowercase.html">lowercase</A><DD>			Convert a string to lowercase
+<DT><A HREF="match_begin.html">match_begin</A><DD>			Match against the beginnings of words
+<DT><A HREF="match_pattern.html">match_pattern</A><DD>		Match against a wildcard pattern
+<DT><A HREF="match_regexp.html">match_regexp</A><DD>		Match against a regular expression
+<DT><A HREF="match_template.html">match_template</A><DD>		Match against a command template
+<DT><A HREF="pad.html">pad</A><DD>				Pad a string to a given length
+<DT><A HREF="strcmp.html">strcmp</A><DD>			Case-sensitive comparison of two strings
+<DT><A HREF="strlen.html">strlen</A><DD>			Get the length of a string
+<DT><A HREF="strsub.html">strsub</A><DD>			Substitute text within a string
+<DT><A HREF="substr.html">substr</A><DD>			Get a substring of a string
+<DT><A HREF="uppercase.html">uppercase</A><DD>			Convert a string to uppercase<P>
+List Functions: Operations on lists<P>
+<DT><A HREF="delete.html">delete</A><DD>			Delete an element of a list
+<DT><A HREF="insert.html">insert</A><DD>			Insert an element in a list
+<DT><A HREF="listlen.html">listlen</A><DD>			Get the length of a list
+<DT><A HREF="replace.html">replace</A><DD>			Replace an element in a list
+<DT><A HREF="setadd.html">setadd</A><DD>			Add an element to a "set"
+<DT><A HREF="setremove.html">setremove</A><DD>			Remove an element from a "set"
+<DT><A HREF="sublist.html">sublist</A><DD>			Get a sublist of a list<P>
+Dictionary Functions: Operations on dictionaries<P>
+<DT><A HREF="dict_add.html">dict_add</A><DD>			Add an association to a dictionary
+<DT><A HREF="dict_add_elem.html">dict_add_elem</A><DD>		Add an element to a list value
+<DT><A HREF="dict_contains.html">dict_contains</A><DD>		Determine if a key is in a dictionary
+<DT><A HREF="dict_del.html">dict_del</A><DD>			Delete an association to a dictionary
+<DT><A HREF="dict_del_elem.html">dict_del_elem</A><DD>		Remove an element from a list value
+<DT><A HREF="dict_keys.html">dict_keys</A><DD>			Get a list of keys in a dictionary<P>
+Buffer Functions: Operations on buffers<P>
+<DT><A HREF="buffer_add.html">buffer_add</A><DD>			Add a byte value to the end of a buffer
+<DT><A HREF="buffer_append.html">buffer_append</A><DD>		Append two buffers together
+<DT><A HREF="buffer_from_strings.html">buffer_from_strings</A><DD>		Convert a list of strings into a buffer
+<DT><A HREF="buffer_len.html">buffer_len</A><DD>			Get the length of a buffer
+<DT><A HREF="buffer_replace.html">buffer_replace</A><DD>		Replace a byte value in a buffer
+<DT><A HREF="buffer_retrieve.html">buffer_retrieve</A><DD>		Retrieve a byte value from a buffer
+<DT><A HREF="buffer_to_strings.html">buffer_to_strings</A><DD>		Convert a buffer to a list of strings
+<DT><A HREF="buffer_truncate.html">buffer_truncate</A><DD>		Truncate a buffer to a length<P>
+Method Functions: Information about the current method<P>
+<DT><A HREF="caller.html">caller</A><DD>			The definer of the calling method
+<DT><A HREF="definer.html">definer</A><DD>			The definer of the current method
+<DT><A HREF="sender.html">sender</A><DD>			The sending object
+<DT><A HREF="task_id.html">task_id</A><DD>			ID of the current task
+<DT><A HREF="this.html">this</A><DD>			The current object<P>
+Error Functions: Handling errors<P>
+<DT><A HREF="error.html">error</A><DD>			Get the error code, in a handler
+<DT><A HREF="error_arg.html">error_arg</A><DD>			Get the error argument, in a handler
+<DT><A HREF="error_str.html">error_str</A><DD>			Get the error explanation, in a handler
+<DT><A HREF="rethrow.html">rethrow</A><DD>			Continue propagating an error
+<DT><A HREF="throw.html">throw</A><DD>			Throw an error in the calling method
+<DT><A HREF="traceback.html">traceback</A><DD>			Get the traceback, in a handler<P>
+Communication Functions: Communicating with the user<P>
+<DT><A HREF="disconnect.html">disconnect</A><DD>			Close connections to the current object
+<DT><A HREF="echo.html">echo</A><DD>			Echo text to the current object
+<DT><A HREF="echo_file.html">echo_file</A><DD>			Echo a file to the current object<P>
+Object Functions: Operations on the current object<P>
+<DT><A HREF="add_parameter.html">add_parameter</A><DD>		Add a parameter
+<DT><A HREF="ancestors.html">ancestors</A><DD>			Get a list of ancestors
+<DT><A HREF="children.html">children</A><DD>			Get a list of children dbrefs
+<DT><A HREF="compile.html">compile</A><DD>			Compile <CODE>C--</CODE> code into a method
+<DT><A HREF="del_method.html">del_method</A><DD>			Remove a method
+<DT><A HREF="del_parameter.html">del_parameter</A><DD>		Remove a parameter
+<DT><A HREF="find_method.html">find_method</A><DD>			Find location of method definition
+<DT><A HREF="find_next_method.html">find_next_method</A><DD>		Find location of next method definition
+<DT><A HREF="get_var.html">get_var</A><DD>			Get value of a variable
+<DT><A HREF="list_method.html">list_method</A><DD>			Decompile method into <CODE>C--</CODE> code
+<DT><A HREF="methods.html">methods</A><DD>			Get a list of defined method names
+<DT><A HREF="parameters.html">parameters</A><DD>			Get a list of parameter names
+<DT><A HREF="parents.html">parents</A><DD>			Get a list of parent dbrefs
+<DT><A HREF="set_var.html">set_var</A><DD>			Assign to a variable<P>
+Administrative Functions: Privileged operations<P>
+<DT><A HREF="binary_dump.html">binary_dump</A><DD>Bring binary database up to date
+<DT><A HREF="bind.html">bind</A><DD>			Begin listening on a port
+<DT><A HREF="chparents.html">chparents</A><DD>Change parents of an object
+<DT><A HREF="conn_assign.html">conn_assign</A><DD>Set the current connection's object
+<DT><A HREF="connect.html">connect</A><DD>			Connect to a remote server
+<DT><A HREF="create.html">create</A><DD>			Create an object
+<DT><A HREF="data.html">data</A><DD>			Getting the data on an object
+<DT><A HREF="destroy.html">destroy</A><DD>			Destroy an object
+<DT><A HREF="log.html">log</A><DD>Write a string to stderr
+<DT><A HREF="run_script.html">run_script</A><DD>			Execute an administrative script
+<DT><A HREF="set_heartbeat_freq.html">set_heartbeat_freq</A><DD>		Set the heartbeat frequency
+<DT><A HREF="shutdown.html">shutdown</A><DD>Shut down the server
+<DT><A HREF="text_dump.html">text_dump</A><DD>Dump a text database image
+<DT><A HREF="unbind.html">unbind</A><DD>			Stop listening on a port<P>
+Miscellaneous Functions: Miscellaneous operations<P>
+<DT><A HREF="abs.html">abs</A><DD>				Take the absolute value of a number
+<DT><A HREF="ctime.html">ctime</A><DD>			Convert the time to string format
+<DT><A HREF="max.html">max</A><DD>				Find the maximum of several values
+<DT><A HREF="min.html">min</A><DD>				Find the minimum of several values
+<DT><A HREF="random.html">random</A><DD>			Get a random number
+<DT><A HREF="run_script.html">run_script</A><DD>			Execute an administrative script
+<DT><A HREF="time.html">time</A><DD>			Get the current time
+<DT><A HREF="version.html">version</A><DD>			Get the server version number<P>
+Administration: Running and maintaining the server<P>
+<DT><A HREF="Starting.html">Starting</A><DD>			Starting up the server
+<DT><A HREF="Disk_Database.html">Disk Database</A><DD>		Managing the disk database
+<DT><A HREF="Connections.html">Connections</A><DD>			How Coldmud manages network connections<P>
+</DL>
+
+

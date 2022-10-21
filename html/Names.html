@@ -1,0 +1,24 @@
+<TITLE>coldmud.info: Names</TITLE>
+Next: <A HREF="Lists.html">Lists</A><P>
+Prev: <A HREF="Data_Types.html">Data Types</A><P>
+
+<H3>Names</H3>
+
+A <VAR>name</VAR> is an indirect reference to an object.  Coldmud translates
+names into dbrefs during method interpretation according to the
+associations made using the administrative function <CODE>set_name()</CODE>.
+A <VAR>name expression</VAR> is simply a name token, an identifier or string
+following a dollar sign (<SAMP>$</SAMP>).<P>
+<P>
+When the interpreter encounters a name expression, it looks up the name
+to see what dbref it has been assigned by the <CODE>set_name()</CODE>
+function.  If no such assignment has been made, then the interpreter
+throws a <CODE>~namenf</CODE> error; otherwise, the value of the name
+expression is the dbref assigned to the name by <CODE>set_name()</CODE>.<P>
+<P>
+You can also use the (non-administrative) function <CODE>get_name()</CODE> to
+look up a symbol as a name.<P>
+<P>
+The administrative function <CODE>del_name()</CODE> deletes the association
+for a name.<P>
+<P>

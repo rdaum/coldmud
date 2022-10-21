@@ -1,0 +1,24 @@
+<TITLE>coldmud.info: Method Functions</TITLE>
+Next: <A HREF="Error_Functions.html">Error Functions</A><P>
+Prev: <A HREF="Buffer_Functions.html">Buffer Functions</A><P>
+
+<H2>Method Functions</H2>
+
+The functions described in this section return information about the
+objects involved in the call to the current method: the caller, the
+definer, the sender, and the current object.  If a method defined by
+object A, processing a message for object B, sends a message to object
+C, which results in a call to a method defined by object D, then A is
+the caller, B is the sender, C is the current object, and D is the
+definer.<P>
+<P>
+Menu:
+<DL COMPACT>
+<DT><A HREF="caller.html">caller</A><DD>			The definer of the calling method
+<DT><A HREF="definer.html">definer</A><DD>			The definer of the current method
+<DT><A HREF="sender.html">sender</A><DD>			The sending object
+<DT><A HREF="task_id.html">task_id</A><DD>			ID of the current task
+<DT><A HREF="this.html">this</A><DD>			The current object
+</DL>
+
+

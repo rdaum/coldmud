@@ -1,0 +1,38 @@
+<TITLE>coldmud.info: Calling Functions</TITLE>
+Next: <A HREF="Sending_Messages.html">Sending Messages</A><P>
+Prev: <A HREF="Operators.html">Operators</A><P>
+
+<H3>Calling Functions</H3>
+
+A <CODE>C--</CODE> method can call a built-in function using a <EM>function
+call expression</EM>, which has the following syntax:<P>
+<P>
+<PRE>
+<VAR>function-name</VAR>(<VAR>arg1</VAR>, <VAR>arg2</VAR>, <VAR>...</VAR>)
+</PRE
+>
+<VAR>function-name</VAR> is an identifier naming the function, and
+<VAR>arg1</VAR>, <VAR>arg2</VAR>, <VAR>...</VAR> are expressions.  There do not have to
+be any arguments, but you must include the parentheses even if there are
+no arguments.  The arguments are evaluated from left to right.<P>
+<P>
+As an example, the <CODE>pad()</CODE> function pads a string argument with
+spaces to a certain length.  The following expression has the value
+<CODE>"foo "</CODE>:<P>
+
+
+<PRE>
+pad("foo", 6);
+</PRE
+>
+Coldmud's built-in functions allow you to perform string and list
+operations, modify and retrieve information from the current object,
+perform administrative tasks, among other things.  For descriptions of
+the available functions, see <A HREF="Function_Descriptions.html">Function Descriptions</A>.<P>
+<P>
+For various reasons, functions can throw errors. For instance, calling a
+function with an incorrect number of arguments causes a <CODE>~numargs</CODE>
+error, and calling a function with arguments of incorrect type causes a
+<CODE>~type</CODE> error.  See <A HREF="Errors.html">Errors</A> for information on how to handle
+errors.<P>
+<P>

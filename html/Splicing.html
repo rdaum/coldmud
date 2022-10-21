@@ -1,0 +1,28 @@
+<TITLE>coldmud.info: Splicing</TITLE>
+Prev: <A HREF="Error-Handling_Expressions.html">Error-Handling Expressions</A><P>
+
+<H3>Splicing</H3>
+
+Whenever you are writing an argument list or a list constructor
+expression, you can splice a list value into the sequence of expressions
+by prepending a list expression with <SAMP>@</SAMP>.  For instance, the
+following method returns <CODE>['foo, 4, 5, 6, 'quux]</CODE>:<P>
+<P>
+<PRE>
+var a;<P>
+a = [4, 5, 6];
+return ['foo, @a, 'quux];
+</PRE
+>
+You use the splicing operator to pass a message along with all of its
+arguments:<P>
+<P>
+<PRE>
+pass(@args);
+</PRE
+>
+The splicing operator is not listed in the operator precedence list
+(see <A HREF="Precedence.html">Precedence</A>).  This is because it is meaningless to talk about,
+say, adding a spliced list to another value.  Using the splicing
+operator never causes an ambiguity.<P>
+<P>

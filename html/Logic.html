@@ -1,0 +1,30 @@
+<TITLE>coldmud.info: Logic</TITLE>
+Next: <A HREF="Conditional_Operators.html">Conditional Operators</A><P>
+Prev: <A HREF="Arithmetic.html">Arithmetic</A><P>
+
+<H4>Logic</H4>
+
+<CODE>C--</CODE> provides a number of relational and logical operators.  These
+operators are primarily useful for expressing conditions, since they
+return either true or false, represented by the integers <CODE>1</CODE> and
+<CODE>0</CODE>.<P>
+
+
+The <CODE>==</CODE> and <CODE>!=</CODE> operators test for equality and inequality,
+respectively, of their arguments.  Two pieces of data are equal if they
+have the same type and contain the same value.  Equality of strings is
+not case-sensitive, but equality of symbols is, so <CODE>("foo" ==
+"fOo")</CODE> is true, but <CODE>('car == 'CAr)</CODE> is false.  Lists are equal if
+all of their elements are equal.<P>
+<P>
+The <CODE><</CODE>, <CODE><=</CODE>, <CODE>>=</CODE>, and <CODE>></CODE> operators test whether
+their left-hand arguments are less than, less than or equal to, greater
+than or equal to, or greater than their right-hand arguments,
+respectively.  Arguments to these operators must both be of the same
+type, and must be of integer, string, or dbref type.  String comparison
+is not case-sensitive, so <CODE>("fooa" < "fooB")</CODE> is true, even though
+the ASCII value of <SAMP>a</SAMP> is greater than that of <SAMP>B</SAMP>.<P>
+<P>
+The unary <CODE>!</CODE> operator tests whether its argument is false, thus
+acting as a logical not operation.<P>
+<P>

@@ -1,0 +1,15 @@
+<TITLE>coldmud.info: unbind</TITLE>
+Prev: <A HREF="text_dump.html">text_dump</A><P>
+
+<H3>unbind</H3>
+
+<PRE>
+unbind(<VAR>port</VAR>)
+</PRE
+>
+This function instructs the server to stop listening on the port
+numbered <VAR>port</VAR>.  If the server was not already listening on that
+port, then <CODE>unbind()</CODE> throws a <CODE>~servnf</CODE> error; otherwise,
+<CODE>unbind()</CODE> returns 1.<P>
+
+

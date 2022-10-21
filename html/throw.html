@@ -1,0 +1,24 @@
+<TITLE>coldmud.info: throw</TITLE>
+Next: <A HREF="traceback.html">traceback</A><P>
+Prev: <A HREF="rethrow.html">rethrow</A><P>
+
+<H3>throw</H3>
+
+<PRE>
+throw(<VAR>error-code</VAR>, <VAR>explanation</VAR>, [<VAR>arg</VAR>])
+</PRE
+>
+This function throws an error in the method which called the current
+method.  The interpreter will abort the current method and throw an
+error of type <VAR>error-code</VAR> in the calling method.  The string
+<VAR>explanation</VAR> will appear in the traceback.  If <VAR>arg</VAR> is
+specified, then it can be retrieved in an error handler by
+<CODE>error_arg()</CODE>.<P>
+
+
+Examples:<P>
+<P>
+<PRE>
+throw(~perm, "Sender is not the system object.");
+</PRE
+>

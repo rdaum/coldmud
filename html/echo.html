@@ -1,0 +1,20 @@
+<TITLE>coldmud.info: echo</TITLE>
+Next: <A HREF="echo_file.html">echo_file</A><P>
+Prev: <A HREF="disconnect.html">disconnect</A><P>
+
+<H3>echo</H3>
+
+<PRE>
+echo(<VAR>buffer</VAR>)
+</PRE
+>
+This function sends the bytes in <VAR>buffer</VAR> to all connections
+associated with the current object, and returns <CODE>1</CODE>.<P>
+<P>
+Examples:<P>
+<P>
+<PRE>
+echo(%[65, 66, 67, 13, 10])
+     => 1
+</PRE
+>

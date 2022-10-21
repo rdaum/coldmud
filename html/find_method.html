@@ -1,0 +1,16 @@
+<TITLE>coldmud.info: find_method</TITLE>
+Next: <A HREF="find_next_method.html">find_next_method</A><P>
+Prev: <A HREF="del_parameter.html">del_parameter</A><P>
+
+<H3>find_method</H3>
+
+<PRE>
+find_method(<VAR>name</VAR>)
+</PRE
+>
+This function returns the object which contains the method definition
+which would be used if a message <VAR>name</VAR> were sent to the current
+object.  If none of the ancestors of the current object define a method
+<VAR>name</VAR>, then <CODE>find_method()</CODE> throws a <CODE>~methodnf</CODE>
+exception.<P>
+<P>

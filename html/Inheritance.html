@@ -1,0 +1,39 @@
+<TITLE>coldmud.info: Inheritance</TITLE>
+Next: <A HREF="Messages.html">Messages</A><P>
+Prev: <A HREF="Dbrefs.html">Dbrefs</A><P>
+
+<H2>Inheritance</H2>
+
+In addition to the methods an object defines for itself, objects inherit
+methods from their <EM>parents</EM>.  An object can override a parent's
+method by defining its own methods with the same name.<P>
+<P>
+The root object has no parents.  All other objects have at least one
+parent, and eventually inherit from the root object.  The root object
+has the dbref <CODE>1</CODE>.<P>
+<P>
+It is easy to determine how an object with one parent will react to a
+message; either the object defines its own method for that message, or
+it uses the inherited method from its parent.<P>
+<P>
+Objects with more than one parent are more complicated.  Ancestors of
+such an object take precedence over each other according to the
+following rules:<P>
+<P>
+<OL>
+<LI>Any ancestor object has higher precedence than its own ancestors.<P>
+
+<LI>The first parent of an object and the first parent's ancestors have
+higher precedence than the second parent and the second parent's
+ancestors, and so on, except when this conflicts with the first rule.<P>
+
+</OL>
+
+Normally, an object's response to a message is determined by checking
+its own method definitions, and then those of its ancestors in order of
+decreasing precedence (<A HREF="Inheritance-Footnotes.html">footnote 1</A>).  However, it is possible for a method to disallow
+overrides.  If one or more ancestors of an object define non-overridable
+methods, then Coldmud will select the non-overridable method defined on
+the ancestor with the least precedence.<P>
+<P>
+^

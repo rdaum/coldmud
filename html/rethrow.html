@@ -1,0 +1,24 @@
+<TITLE>coldmud.info: rethrow</TITLE>
+Next: <A HREF="throw.html">throw</A><P>
+Prev: <A HREF="error_str.html">error_str</A><P>
+
+<H3>rethrow</H3>
+
+<PRE>
+rethrow(<VAR>error-code</VAR>)
+</PRE
+>
+This function, which you should only call inside an error handler for a
+catch statement (see <A HREF="Error-Handling_Statements.html">Error-Handling Statements</A>), continues
+propagating an error condition.  The interpreter will abort the current
+method and throw an error of type <VAR>error-code</VAR> in the calling
+method.  If you are not in an error handler, this function throws an
+<CODE>~error</CODE> error.<P>
+
+
+Examples:<P>
+<P>
+<PRE>
+rethrow(~perm);
+</PRE
+>

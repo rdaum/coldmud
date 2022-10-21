@@ -1,0 +1,44 @@
+
+REFERENCE COUNTING CONVENTIONS
+------------------------------
+
+In order to avoid losing track of reference counts, functions should
+follow certain conventions according to their behavior.  The following
+list describes several types of functions and their behaviors:
+
+Constructors: Functions which construct new values should assign them
+	      a reference count of one, so that the calling function
+	      is responsible for discarding the value.
+
+Constructors/retrievers: Functions which construct new values under
+			 some circumstances but retrieve values under
+			 other circumstances should assign new objects
+			 a reference count of one and should increase
+			 the reference count of existing objects, so
+			 that the calling function is responsible for
+			 discarding the value.
+
+Retrievers: Functions which merely retrieve values should not increase
+	    the reference count, so that the calling function need not
+	    discard them.
+
+Assignment: Functions which merely assign values to structures should
+	    not increase the reference count, since they are simply
+	    abbreviations for assignment.
+
+Storage: Anything more complicated than a simple assignment function
+	 should update the reference counts of any objects it stores.
+
+Mutators: Functions which take a value and return a modified value
+	  should claim the reference count on the value so that they
+	  can operate more efficiently.
+
+Users: Functions which look at values without modifying them should
+       generally not modify the reference count on the data they take
+       as arguments.
+
+Exceptions to these conventions (e.g. user functions which mutate
+values for efficiency but do not return new values of the same type)
+should be clearly marked, preferrably by name (e.g.
+add_and_discard_string()), and should not have external linkage.
+

@@ -1,0 +1,35 @@
+<TITLE>coldmud.info: dict_del_elem</TITLE>
+Next: <A HREF="dict_keys.html">dict_keys</A><P>
+Prev: <A HREF="dict_del.html">dict_del</A><P>
+
+<H3>dict_del_elem</H3>
+
+<PRE>
+dict_del_elem(<VAR>dictionary</VAR>, <VAR>key</VAR>, <VAR>element</VAR>)
+</PRE
+>
+This function returns the result of removing <VAR>element</VAR> from the list
+value of <VAR>key</VAR> in <VAR>dictionary</VAR>.  If <VAR>dictionary</VAR> contains no
+association with key <VAR>key</VAR>, then <CODE>dict_del_elem()</CODE> throws a
+<CODE>~keynf</CODE> error.  If <VAR>dictionary</VAR> contains an association with
+key <VAR>key</VAR>, and it is not a list, then <CODE>dict_del_elem()</CODE> throws
+a <CODE>~type</CODE> error.<P>
+<P>
+Assuming that <VAR>dictionary</VAR> contains an association with key
+<VAR>key</VAR>, and it is a list, <CODE>dict_del_elem()</CODE> removes the first
+occurrence of <VAR>element</VAR> in the list if <VAR>element</VAR> occurs in the
+list.  If the resulting list is an empty list, then
+<CODE>dict_del_elem()</CODE> removes the association from <VAR>dictionary</VAR>
+altogether.  If <VAR>element</VAR> does not occur in the list, then
+<CODE>dict_del_elem()</CODE> returns <VAR>dictionary</VAR> unchanged.<P>
+
+
+Examples:<P>
+<P>
+<PRE>
+dict_del_elem(#[["foo", ["bar", "baz"]]], "foo", "bar")
+     => #[["foo", ["baz"]]]
+dict_del_elem(#[["foo", ["baz"]]], "foo", "baz")
+     => #[]
+</PRE
+>

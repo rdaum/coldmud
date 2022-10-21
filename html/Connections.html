@@ -1,0 +1,42 @@
+<TITLE>coldmud.info: Connections</TITLE>
+Prev: <A HREF="Disk_Database.html">Disk Database</A><P>
+
+<H2>Connections</H2>
+
+As a network server, Coldmud has the ability to listen for Internet
+connections on ports.  The <CODE>bind()</CODE> function instructs Coldmud to
+listen on a port, with some object acting as a <EM>receiver object</EM>
+for that port.<P>
+<P>
+Network connections have associated with them a <EM>handler object</EM>.
+When a connection occurs on a port, Coldmud initially uses the receiver
+object for the port as the handler object for the connection, and sends
+a <CODE>connect</CODE> message to the handler object, with two arguments: a
+string giving the IP address of the remote host, and an integer giving
+the port of the connection on the remote host.  Because there is no way
+to distinguish between connections with the same handler object, the
+<CODE>connect</CODE> method on the handler object should arrange to have the
+system object change either the receiver object for the port (using
+<CODE>bind()</CODE>) or the handler object for the connection (using
+<CODE>conn_assign()</CODE>).<P>
+
+
+When text arrives from a network connection, Coldmud sends a
+<CODE>parse</CODE> message to the handler object for that connection, with the
+text as a buffer argument.  The <CODE>parse</CODE> method can then use
+<CODE>buffer_to_strings()</CODE> to convert the buffer to a list of text
+lines, if that is the usual form of input.<P>
+
+
+When a network connection is terminated, Coldmud sends a
+<CODE>disconnect</CODE> message to the handler object for that connection.<P>
+
+
+Coldmud can also make make connections actively, using the
+<CODE>connect()</CODE> function.  The third argument to <CODE>connect()</CODE>
+specifies a receiver object for the new connection; the server sends a
+<CODE>connect</CODE> message to the receiver object upon success, or a
+<CODE>failed</CODE> message to the receiver object upon failure, as described
+in <A HREF="connect.html">connect</A>.<P>
+
+

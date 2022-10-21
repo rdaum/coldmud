@@ -1,0 +1,17 @@
+<TITLE>coldmud.info: echo_file</TITLE>
+Prev: <A HREF="echo.html">echo</A><P>
+
+<H3>echo_file</H3>
+
+<PRE>
+echo_file(<VAR>name</VAR>)
+</PRE
+>
+This function sends the contents of the file named by the string
+<VAR>name</VAR> to all connections associated with the current object.  The
+filename <VAR>name</VAR> must not contain the sequence <SAMP>../</SAMP>.
+<CODE>echo_file()</CODE> returns <CODE>1</CODE> if <VAR>name</VAR> exists in the
+subdirectory "text" of the current directory; otherwise, the result of
+<CODE>echo_file()</CODE> is a <CODE>~file</CODE> error.<P>
+
+

@@ -1,0 +1,37 @@
+<TITLE>coldmud.info: data</TITLE>
+Next: <A HREF="destroy.html">destroy</A><P>
+Prev: <A HREF="create.html">create</A><P>
+
+<H3>data</H3>
+
+<PRE>
+data(<VAR>dbref</VAR>)
+</PRE
+>
+This function retrieves all the variables on the object given by the
+dbref <VAR>dbref</VAR>.  The return value is a dictionary whose associations
+are between ancestors of the object and subdictionaries giving the
+variable values for each ancestor's parameters.  Each subdictionary's
+associations are between parameters (expressed as symbols) of the
+ancestor in question (as symbols) and the values of the variables
+corresponding to those parameters.  Thus, if the object given by
+<VAR>dbref</VAR> defines a variable corresponding to a parameter
+<VAR>parameter</VAR> on an ancestor <VAR>ancestor</VAR>, then
+<CODE>data(<VAR>dbref</VAR>)[<VAR>ancestor</VAR>][<VAR>parameter</VAR>])</CODE> is the value
+of that variable.<P>
+<P>
+The subdictionaries in the dictionary returned by <CODE>data()</CODE> only
+contains <CODE>[<VAR>parameter</VAR>, <VAR>value</VAR>]</CODE> associations for
+variables which have been assigned values on the object given by
+<VAR>dbref</VAR>, not variables which have never been assigned values and
+which still have the default value <CODE>0</CODE>.  Also, if no variables have
+been assigned values for any parameters on an ancestor of the object
+given by <VAR>dbref</VAR> (as is the case when the ancestor has no
+parameters), then there will not be an association for that ancestor in
+the dictionary returned by <CODE>data()</CODE>.  Neither the keys in the
+dictionary returned by <CODE>data()</CODE> nor the parameters in the
+subdictionaries have any particular ordering.<P>
+<P>
+If <VAR>dbref</VAR> is not the dbref of an object, then <CODE>data()</CODE> throws
+an <CODE>~objnf</CODE> error.<P>
+<P>

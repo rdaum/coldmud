@@ -1,0 +1,85 @@
+<TITLE>coldmud.info: match_regexp</TITLE>
+Next: <A HREF="match_template.html">match_template</A><P>
+Prev: <A HREF="match_pattern.html">match_pattern</A><P>
+
+<H3>match_regexp</H3>
+
+<PRE>
+match_regexp(<VAR>regexp</VAR>, <VAR>string</VAR>, [<VAR>case_matters</VAR>])
+</PRE
+>
+This function matches the regular expression <VAR>regexp</VAR>, a
+string,against the string <VAR>string</VAR>.  If <VAR>case_matters</VAR> is
+specified and is true, the match is case-sensitive; otherwise, it is
+case-insensitive.  If the match succeeds, <CODE>match_regexp()</CODE> returns
+a ten-element list giving the substitutions for the match (see below);
+otherwise, <CODE>match_regexp()</CODE> returns 0.<P>
+<P>
+Coldmud uses a regular expression matcher written by Henry Spencer.  Its
+syntax is very similar to the regular expression syntax used by Unix
+utilities like <CODE>ed</CODE> or <CODE>egrep</CODE>.  Here is Spencer's description
+of his regular expression syntax:<P>
+<P>
+<BLOCKQUOTE>
+A regular expression is zero or more branches, separated by <SAMP>|</SAMP>.
+It matches anything that matches one of the branches.<P>
+<P>
+A branch is zero or more pieces, concatenated.  It matches a match for
+the first, followed by a match for the second, etc.<P>
+<P>
+A piece is an atom possibly followed by <SAMP>*</SAMP>, <SAMP>+</SAMP>, or <SAMP>?</SAMP>.
+An atom followed by <SAMP>*</SAMP> matches a sequence of 0 or more matches of
+the atom.  An atom followed by <SAMP>+</SAMP> matches a sequence of 1 or more
+matches of the atom.  An atom followed by <SAMP>?</SAMP> matches a match of
+the atom, or the null string.<P>
+<P>
+An atom is a regular expression in parentheses (matching a match for the
+regular expression), a range (see below), <SAMP>.</SAMP> (matching any single
+character), <SAMP>^</SAMP> (matching the null string at the beginning of the
+input string), <SAMP>$</SAMP> (matching the null string at the end of the
+input string), a <SAMP>\</SAMP> followed by a single character (matching that
+character), or a single character with no other significance (matching
+that character).<P>
+<P>
+A range is a sequence of characters enclosed in <SAMP>[]</SAMP>.  It normally
+matches any single character from the sequence.  If the sequence begins
+with <SAMP>^</SAMP>, it matches any single character not from the rest of the
+sequence.  If two characters in the sequence are separated by <SAMP>-</SAMP>,
+this is shorthand for the full list of ASCII characters between them
+(e.g.  <CODE>[0-9]</CODE> matches any decimal digit).  To include a literal
+<SAMP>]</SAMP> in the sequence, make it the first character (following a
+possible <SAMP>^</SAMP>).  To include a literal <SAMP>-</SAMP>, make it the first or
+last character.<P>
+
+</BLOCKQUOTE
+>
+The substitutions are the text in <VAR>string</VAR> which matches the
+parenthesized subexpressions in <VAR>regexp</VAR>.  The first substitution is
+the text in <VAR>string</VAR> which matches the whole regexp.  Thus, a
+regular expression can contain no more than nine parenthesized
+subexpressions.  Substitutions are returned as two-element lists
+<CODE>[<VAR>start</VAR>, <VAR>len</VAR>]</CODE> giving the index of the matching text in
+<VAR>string</VAR> and the length of the text.  When the substitutions are
+ambiguous, leftmost <SAMP>*</SAMP> matches are always as long as possible.<P>
+<P>
+If <VAR>regexp</VAR> is not a valid regular expression, <CODE>match_regexp()</CODE>
+throws a <CODE>~regexp</CODE> error.<P>
+<P>
+Examples:<P>
+<P>
+<PRE>
+match_regexp("bar", "fooBAR")
+     => [[4, 3], [0, 0], [0, 0], [0, 0], [0, 0],
+     [0, 0], [0, 0], [0, 0], [0, 0], [0, 0]]
+match_regexp("^([^ ]+) says, \"(.*)\"$", "Greg says, \"Hello.\"")
+     => [[1, 19], [1, 4], [13, 6], [0, 0], [0, 0],
+     [0, 0], [0, 0], [0, 0], [0, 0], [0, 0]]
+match_regexp("[0-9]+", " 300 100 200 ")
+     => [[2, 3], [0, 0], [0, 0], [0, 0], [0, 0],
+     [0, 0], [0, 0], [0, 0], [0, 0], [0, 0]]
+match_regexp("foo", "bar")
+     => 0
+match_regexp("foo", "Foo", 1)
+     => 0
+</PRE
+>

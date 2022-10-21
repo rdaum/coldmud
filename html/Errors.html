@@ -1,0 +1,81 @@
+<TITLE>coldmud.info: Errors</TITLE>
+Next: <A HREF="Function_Descriptions.html">Function Descriptions</A><P>
+Prev: <A HREF="Defining_Methods.html">Defining Methods</A><P>
+
+<H1>Errors</H1>
+
+When something goes wrong in a <CODE>C--</CODE> method, the interpreter will
+often throw an error.  Methods can also throw their own errors using the
+<CODE>throw()</CODE> function.  An error condition consists of an error code
+(the <EM>type</EM> of the error) and a string describing the error.
+Methods can recognize errors using the error codes; the string appears,
+along with the error code, in the traceback obtainable through the
+<CODE>traceback()</CODE> function inside a catch handler.<P>
+
+
+When the interpreter throws an error, it checks to see how the current
+method handles that error type.  If the error occured in a critical
+expression (see <A HREF="Error-Handling_Expressions.html">Error-Handling Expressions</A>), then the interpreter
+will cease evaluating the critical expression.  Processing of the method
+will continue as if the interpreter had completed evaluation of the
+critical expression.  The value of the critical expression will be the
+error code associated with the thrown error.  In this case, the
+traceback is not accessible from <CODE>traceback()</CODE>; in order to get a
+traceback, you must use a catch statement.<P>
+<P>
+If the error did not occur in a critical expression, but occurred in a
+catch statement which catches the error code (either because it is a
+<CODE>catch all</CODE> statement or because it lists the error
+code---see <A HREF="Error-Handling_Statements.html">Error-Handling Statements</A>), then processing of the method
+jumps to the error handler, if one was provided, or to the end of the
+catch statement if not.  Inside an error handler, you can use the
+<CODE>error()</CODE>, <CODE>traceback()</CODE>, and <CODE>rethrow()</CODE> functions to
+retrieve the error or traceback associated with the error condition, or
+continue propagating the error.<P>
+<P>
+If the error did not occur in a critical expression or in an appropriate
+catch statement, then the current method aborts, and the interpreter
+throws an error in the calling method.  Normally, the error thrown in
+the calling routine will have the error code <CODE>~methoderr</CODE>, but if
+the original error occurred in a propagation expression
+(see <A HREF="Error-Handling_Expressions.html">Error-Handling Expressions</A>, then the error code will be the
+same as it was for the original error.  A propagation expression has no
+effect on how an error is handled except to cause it to propagate
+differently to the calling routine.<P>
+<P>
+You can throw your own errors using the <CODE>throw()</CODE> function.  This
+does not throw an error in the current method; instead, it exits the
+current method and throws an error in the calling method.  Thus a method
+cannot ignore an error which it threw itself using <CODE>throw()</CODE>.<P>
+<P>
+There is one case in which a method cannot catch an
+interpreter-generated error.  Methods have a limited amount of time to
+run, measured in <EM>ticks</EM>.  A method will generally only run out of
+ticks if it gets stuck in an infinite loop.  If a method runs out of
+ticks, then the interpreter will throw a <CODE>~ticks</CODE> error, which the
+method cannot catch.  This causes the method to abort, which in turn
+causes the interpreter to throw a <CODE>~methoderr</CODE> error in the calling
+routine.<P>
+<P>
+You should use critical expressions when you anticipate that you may be
+calling a buggy or undefined method, but you do not wish your own method
+to bomb as a result.  For instance, a method which announces a string to
+every object in a container should probably ignore errors in the methods
+for each individual object which handle receiving the string.  You
+should be careful that your critical expressions are correct code,
+however, because you will not immediately notice errors which occur
+while the interpreter is evaluating them.<P>
+<P>
+You should use catch statements when you wish to handle errors with any
+kind of sophistication.  The catch statement is much more powerful than
+the critical expression, and is ideal for situations in which fine-grain
+control over error handling is required.<P>
+<P>
+You should use propagation expressions when your method is an
+intermediary between an outside object and an internal feature.  For
+instance, a method which checks permissions and calls an object function
+such as <CODE>list_method()</CODE> is acting as an intermediary.  In this
+case, the method should throw the same errors as the
+<CODE>list_method()</CODE> function, so you should enclose the function call
+in a propagation expression.<P>
+<P>

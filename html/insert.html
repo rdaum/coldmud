@@ -1,0 +1,24 @@
+<TITLE>coldmud.info: insert</TITLE>
+Next: <A HREF="listlen.html">listlen</A><P>
+Prev: <A HREF="delete.html">delete</A><P>
+
+<H3>insert</H3>
+
+<PRE>
+insert(<VAR>list</VAR>, <VAR>position</VAR>, <VAR>data</VAR>)
+</PRE
+>
+This function returns the result of inserting <VAR>data</VAR> into <VAR>list</VAR>
+before the element numbered by the integer <VAR>position</VAR>.  If
+<VAR>position</VAR> is less than one or is more than one more than the length
+of <VAR>list</VAR>, then <CODE>insert()</CODE> throws a <CODE>~range</CODE> error.<P>
+<P>
+Examples:<P>
+<P>
+<PRE>
+insert([2, 3, 4], 3, 'foo)
+     => [2, 3, 'foo, 4]
+insert(["foo", 'bar, ~none], 4, 'baz)
+     => ["foo", 'bar, ~none, 'baz]
+</PRE
+>

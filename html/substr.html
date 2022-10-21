@@ -1,0 +1,31 @@
+<TITLE>coldmud.info: substr</TITLE>
+Next: <A HREF="uppercase.html">uppercase</A><P>
+Prev: <A HREF="strsub.html">strsub</A><P>
+
+<H3>substr</H3>
+
+<PRE>
+substr(<VAR>string</VAR>, <VAR>start</VAR>)
+substr(<VAR>string</VAR>, <VAR>start</VAR>, <VAR>length</VAR>)
+</PRE
+>
+This function returns a substring of <VAR>string</VAR> beginning at the
+character numbered by <VAR>start</VAR>.  If <VAR>length</VAR> is specified, then
+the substring has that length; otherwise, the length is given by
+<CODE>(length(<VAR>string</VAR>) - (<VAR>start</VAR> - 1))</CODE>.  If <VAR>start</VAR> is
+less than <CODE>1</CODE>, if the length of the substring is negative, or if
+the sum of <VAR>start</VAR> and <VAR>length</VAR> is greater than one more than
+the length of the string, then <CODE>substr()</CODE> throws a <CODE>~range</CODE>
+error.<P>
+<P>
+Examples:<P>
+<P>
+<PRE>
+substr("foobar", 2, 3)
+     => "oob"
+substr("foobar", 3)
+     => "obar"
+substr("foobar", 7)
+     => ""
+</PRE
+>

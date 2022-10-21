@@ -1,0 +1,31 @@
+<TITLE>coldmud.info: Objects</TITLE>
+Next: <A HREF="Defining_Methods.html">Defining Methods</A><P>
+Prev: <A HREF="Overview.html">Overview</A><P>
+
+<H1>Objects</H1>
+
+Objects in Coldmud have four characteristics: a <EM>database
+reference</EM> (called a <EM>dbref</EM>) which identifies the object, a list
+of <EM>parent</EM> dbrefs which determine what default behavior the object
+inherits, <EM>variables</EM> which store information, and <EM>methods</EM>
+which determine how the object responds to messages.  Objects refer to
+each other using dbrefs, and interact with each other by sending
+messages.  The objects which a Coldmud server has to work with are known
+collectively as the <EM>object database</EM>.<P>
+<P>
+Coldmud gives special status to two objects, the <EM>system object</EM>
+and the <EM>root object</EM>.  The system object is allowed to call
+administrative functions and receives <CODE>startup</CODE> and
+<CODE>heartbeat</CODE> messages from the server.  The root object is the only
+object without parents, and is thus an ancestor of every object.<P>
+<P>
+Menu:
+<DL COMPACT>
+<DT><A HREF="Dbrefs.html">Dbrefs</A><DD>Database references
+<DT><A HREF="Inheritance.html">Inheritance</A><DD>Parents and inheritance
+<DT><A HREF="Messages.html">Messages</A><DD>Interaction between objects
+<DT><A HREF="Variables_and_Parameters.html">Variables and Parameters</A><DD>	Information stored in objects
+<DT><A HREF="System_Object.html">System Object</A><DD>The system object
+</DL>
+
+

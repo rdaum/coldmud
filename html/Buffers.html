@@ -1,0 +1,36 @@
+<TITLE>coldmud.info: Buffers</TITLE>
+Next: <A HREF="Frobs.html">Frobs</A><P>
+Prev: <A HREF="Dictionaries.html">Dictionaries</A><P>
+
+<H3>Buffers</H3>
+
+A <EM>buffer</EM> is a vector of unsigned eight-bit values, intended
+primarily for network I/O.  Although they are not as convenient to use
+as strings, they can contain any character value, while strings can
+contain only printable characters.<P>
+<P>
+You can construct a buffer using a <EM>buffer construction
+expression</EM>, which has the following syntax:<P>
+<P>
+<PRE>
+%[<VAR>byte1</VAR>, <VAR>byte2</VAR>, <VAR>...</VAR>]
+</PRE
+>
+The result of a buffer construction expression is a buffer containing
+the byte values expressed by <VAR>byte1</VAR>, <VAR>byte2</VAR>, <VAR>...</VAR>, all of
+which must be integers.  If any of the values of <VAR>byte1</VAR>,
+<VAR>byte2</VAR>, <VAR>...</VAR> cannot fit inside an unsigned eight-bit number,
+then that byte will contain the lower order eight bits of the specified
+number.<P>
+<P>
+Apart from operations which apply to all data types, the only language
+operations which apply to buffers are the functions whose names begin
+with <SAMP>buffer_</SAMP>: <CODE>buffer_len()</CODE>, <CODE>buffer_retrieve()</CODE>,
+<CODE>buffer_append()</CODE>, <CODE>buffer_replace()</CODE>, <CODE>buffer_add()</CODE>,
+<CODE>buffer_truncate()</CODE>, <CODE>buffer_to_strings()</CODE>, and
+<CODE>buffer_from_strings()</CODE>.  The last two functions allow you to
+convert between buffers and lists of strings.<P>
+<P>
+Coldmud passes data between the object heirarchy and network connections
+in terms of buffers; see <A HREF="Connections.html">Connections</A> for details.<P>
+<P>

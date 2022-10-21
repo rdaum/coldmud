@@ -1,0 +1,43 @@
+<TITLE>coldmud.info: Precedence</TITLE>
+Next: <A HREF="Arithmetic.html">Arithmetic</A><P>
+
+<H4>Precedence</H4>
+
+It is easy to write an expression whose order of evaluation is unclear.
+For instance, the expression <CODE>a - b + c</CODE> could be parsed as
+<CODE>(a - b) + c</CODE> or as <CODE>a - (b + c)</CODE>.  To resolve these
+conflicts, each operator has two properties: <EM>precedence</EM> and
+<EM>association</EM>.<P>
+
+
+<EM>Precedence</EM> determines whether an operator binds more tightly than
+another operator; for instance, <CODE>a + b * c</CODE> is equivalent to
+<CODE>a + (b * c)</CODE> because multiplication has higher precedence than
+addition.<P>
+<P>
+<EM>Association</EM> determines whether operators at the same precedence
+level associate left to right or right to left; <CODE>a - b - c</CODE> is
+equivalent to <CODE>(a - b) - c</CODE> because subtraction associates left to
+right.<P>
+<P>
+Here is a list of operators grouped by precedence, in order from highest
+precedence to lowest:<P>
+<P>
+<UL>
+<LI><CODE>.</CODE>
+<LI><CODE>[]</CODE>
+<LI><CODE>!</CODE> and unary <CODE>-</CODE>
+<LI><CODE>* / %</CODE>
+<LI><CODE>+ -</CODE>
+<LI><CODE>== != > >= < <=</CODE>
+<LI><CODE>in</CODE>
+<LI><CODE>&&</CODE>
+<LI><CODE>||</CODE>
+<LI><CODE>?|</CODE>
+</UL>
+
+All operators associate from left to right except the <CODE>&&</CODE>,
+<CODE>||</CODE>, and <CODE>?|</CODE> operators, which associate from right to left.
+You can always use parentheses (<SAMP>(</SAMP> and <SAMP>)</SAMP>) to specify the
+order of evaluation explicitly.<P>
+<P>

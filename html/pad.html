@@ -1,0 +1,29 @@
+<TITLE>coldmud.info: pad</TITLE>
+Next: <A HREF="strcmp.html">strcmp</A><P>
+Prev: <A HREF="match_template.html">match_template</A><P>
+
+<H3>pad</H3>
+
+<PRE>
+pad(<VAR>string</VAR>, <VAR>length</VAR>)
+pad(<VAR>string</VAR>, <VAR>length</VAR>, <VAR>filler</VAR>)
+</PRE
+>
+This function pads or truncates <VAR>string</VAR> to the length <VAR>length</VAR>.
+If <VAR>filler</VAR> is specified, then it must be a single-character string
+to use as the filler character; otherwise, a space is used.  If
+<VAR>length</VAR> is greater than the length of <VAR>string</VAR>, then <VAR>pad</VAR>
+adds filler characters on the right; however, you can force <VAR>pad</VAR> to
+add filler on the left by specifying <VAR>length</VAR> as a negative number.<P>
+<P>
+Examples:<P>
+<P>
+<PRE>
+pad("foo", 6)
+     => "foo   "
+pad("foobar", 3)
+     => "foo"
+pad(tostr(29), -4, "0")
+     => "0029"
+</PRE
+>

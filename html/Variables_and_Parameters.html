@@ -1,0 +1,29 @@
+<TITLE>coldmud.info: Variables and Parameters</TITLE>
+Next: <A HREF="System_Object.html">System Object</A><P>
+Prev: <A HREF="Messages.html">Messages</A><P>
+
+<H2>Variables and Parameters</H2>
+
+An object's <EM>parameters</EM> gives the names of the variables its
+methods have access to.  An object's <EM>variables</EM> correspond to
+parameters on that object or one of its ancestors.<P>
+<P>
+The function <CODE>add_parameter()</CODE> adds a parameter to an object.  Once
+you have created a parameter on an object, the methods on that object
+can use it to refer to a variable on that object or any of its
+descendents, using the <CODE>C--</CODE> constructs described in
+<A HREF="Variables.html">Variables</A>.<P>
+
+
+Two objects can have parameters of the same name; a third object which
+inherits from both of them will contain two separate variables for
+those parameters.  Methods on the first object will refer to one
+variable, and methods on the second object will refer to the other.
+Likewise, variables on separate objects are distinct, even though the
+methods which can access them and the parameter used by the method are
+the same.<P>
+<P>
+Note that this system does not permit children to access the variables
+used by their ancestors directly.  Objects can build on the abstractions
+of their parent objects, but not their internal representations.<P>
+<P>

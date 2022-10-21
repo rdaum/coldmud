@@ -1,0 +1,23 @@
+<TITLE>coldmud.info: replace</TITLE>
+Next: <A HREF="setadd.html">setadd</A><P>
+Prev: <A HREF="listlen.html">listlen</A><P>
+
+<H3>replace</H3>
+
+<PRE>
+replace(<VAR>list</VAR>, <VAR>position</VAR>, <VAR>data</VAR>)
+</PRE
+>
+This function returns the result of replacing the element of <VAR>list</VAR>
+numbered by <VAR>position</VAR> with <VAR>data</VAR>.  If <VAR>position</VAR> is less
+than one or is greater than the length of <VAR>list</VAR>, then
+<CODE>replace()</CODE> throws a <CODE>~range</CODE> error.<P>
+
+
+Examples:<P>
+<P>
+<PRE>
+replace([2, 3, 4], 2, 'foo)
+     => [2, 'foo, 4]
+</PRE
+>

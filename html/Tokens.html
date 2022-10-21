@@ -1,0 +1,72 @@
+<TITLE>coldmud.info: Tokens</TITLE>
+Next: <A HREF="Method_Structure.html">Method Structure</A><P>
+Prev: <A HREF="Example_Method.html">Example Method</A><P>
+
+<H2>Tokens</H2>
+
+The building blocks of <CODE>C--</CODE> methods are character sequences called
+<EM>tokens</EM>.  There are many different types of tokens, ranging from
+single characters to lines of text.  <CODE>C--</CODE> methods are assembled
+from sequences of tokens.<P>
+<P>
+The following characters and pairs of characters are tokens:<P>
+<P>
+<PRE>
+{ } [ ] #[ %[ ( ) (| |) (> <) .. ; , = !
+- + * / % == != > >= < <= . || && ? | : @
+</PRE
+>
+These tokens are used as operators and as punctuation in various types
+of expressions.<P>
+<P>
+You can use <EM>identifiers</EM> as tokens and as parts of tokens.  An
+identifier is a sequence of alphabetical and numeric characters or
+underlines beginning with an alphabetical character or an underline.
+Identifiers in <CODE>C--</CODE> are case-sensitive, so the identifiers
+<CODE>car</CODE> and <CODE>CAr</CODE> are not equivalent.  The following are valid
+identifiers:<P>
+<P>
+<PRE>
+we_3_kings
+obj
+a
+</PRE
+>
+By themselves, identifiers usually represent variables.  However,
+certain identifiers have special meanings to the parser.  These
+<EM>reserved words</EM> are used in writing certain kinds of statements
+and expressions.  They are:<P>
+<P>
+<PRE>
+var if else while for switch case default break continue return
+catch any with handler pass to in fork atomic non_atomic
+</PRE
+>
+(<CODE>fork</CODE>, <CODE>atomic</CODE>, and <CODE>non_atomic</CODE> are not actually used
+by the current version of Coldmud, but are reserved for future use.)<P>
+<P>
+There are several kinds of tokens for denoting literal expressions of
+various data types.  These are <EM>integers</EM>, denoted by a sequence of
+digits; <EM>strings</EM>, denoted by a sequence of characters enclosed in
+double quotes; <EM>dbrefs</EM>, denoted by a sharp (<SAMP>#</SAMP>) and a
+number; <EM>symbols</EM>, denoted by a single forward quote (<SAMP>'</SAMP>) and
+an identifier or string; and <EM>error codes</EM>, denoted by a tilde
+(<SAMP>~</SAMP>) and an identifier or string.  These literals are described
+more fully in <A HREF="Data_Types.html">Data Types</A>, along with the data types they
+represent.<P>
+<P>
+A <EM>name token</EM> is a dollar sign (<SAMP>$</SAMP>) followed by an
+identifier or string.  Names refer to objects indirectly; see
+<A HREF="Names.html">Names</A>.<P>
+
+
+Tokens which contain identifiers but begin with a distinguishing
+character (that is, symbol tokens, error code tokens, and name tokens)
+relax the restriction that identifiers not begin with an integer.  Thus,
+<CODE>$23a</CODE> is a valid name token, even though <CODE>23a</CODE> is not an
+identifier.<P>
+<P>
+Finally, a <EM>comment token</EM> is any text on a line after a pair of
+slashes (<SAMP>//</SAMP>).  Comment tokens can be used as statements in
+methods; such statements are ignored by the interpreter.<P>
+<P>

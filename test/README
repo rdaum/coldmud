@@ -1,0 +1,12 @@
+
+This directory contains language and regression tests for Coldmud.  To
+run the tests, do
+
+	sh test-coldmud.sh ../src/coldmud
+
+(This assumes that there is a coldmud executable in ../src; otherwise,
+give the pathname of a coldmud executable.)
+
+See NOTES for notes on the tests.  See TRACKING for bug-tracking
+information used to write the regression tests.
+

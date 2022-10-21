@@ -1,0 +1,44 @@
+<TITLE>coldmud.info: Error-Handling Expressions</TITLE>
+Next: <A HREF="Splicing.html">Splicing</A><P>
+Prev: <A HREF="Passing_Messages.html">Passing Messages</A><P>
+
+<H3>Error-Handling Expressions</H3>
+
+<CODE>C--</CODE> provides two kinds of expressions for handling errors in
+expressions.  These are the <EM>critical expression</EM> and the
+<EM>propagation expression</EM>.<P>
+
+
+The <EM>critical expression</EM> allows you to ignore errors which occur
+inside an expression.  It has the following syntax:<P>
+<P>
+<PRE>
+(| expression |)
+</PRE
+>
+If an error occurs in <VAR>expression</VAR>, then the interpreter will stop
+evaluating <VAR>expression</VAR>, and continue to execute the current method
+as if it had succeeded evaluating <VAR>expression</VAR>.  The value of
+<VAR>expression</VAR> will be the error code for the error condition which
+occurred.<P>
+<P>
+The <EM>propagation expression</EM> allows you to indicate that any errors
+which occur inside an expression are the responsibility of the calling
+routine.  It has the following syntax:<P>
+<P>
+<PRE>
+(> expression <)
+</PRE
+>
+If an unhandled error occurs in <VAR>expression</VAR>, then it will propagate
+to the calling routine as itself, instead of as <CODE>~methoderr</CODE>.<P>
+<P>
+Critical expressions override the behavior of catch statements, so that
+errors which occur within critical expressions do not trigger catch
+error handlers.  Propagation expressions do not override critical
+expressions or catch statements, however; they do not prevent errors
+from being caught, but only determine how errors propagate if they are
+not caught.<P>
+<P>
+For more information on how <CODE>C--</CODE> handles errors, see <A HREF="Errors.html">Errors</A>.<P>
+<P>

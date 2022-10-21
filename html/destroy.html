@@ -1,0 +1,25 @@
+<TITLE>coldmud.info: destroy</TITLE>
+Next: <A HREF="log.html">log</A><P>
+Prev: <A HREF="data.html">data</A><P>
+
+<H3>destroy</H3>
+
+<PRE>
+destroy(<VAR>dbref</VAR>)
+</PRE
+>
+This function destroys the object given by the dbref <VAR>dbref</VAR>.  If
+any methods are currently executing on that object, or any methods are
+executing which are defined by that object, then it will not be
+destroyed immediately.  If no object exists with the dbref
+<VAR>dbref</VAR>, then <CODE>destroy()</CODE> throws a <CODE>~objnf</CODE> error.<P>
+
+
+Objects left orphaned by the destruction of their only parent are
+reparented to the parents of the parent which was destroyed.<P>
+<P>
+<CODE>destroy()</CODE> throws a <CODE>~perm</CODE> error if you attempt to destroy
+the root object or system object, which is not allowed.  Otherwise,
+<CODE>destroy()</CODE> returns <CODE>1</CODE>.<P>
+
+

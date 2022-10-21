@@ -1,0 +1,31 @@
+<TITLE>coldmud.info: Example Method</TITLE>
+Next: <A HREF="Tokens.html">Tokens</A><P>
+
+<H2>Example Method</H2>
+
+Here is an example of a simple <CODE>C--</CODE> method.  This method might be
+used in a mud server to handle a <CODE>tell_contents</CODE> message sent to a
+container object.  Here is the code for the method:<P>
+<P>
+<PRE>
+arg str;
+var obj;<P>
+for obj in (contents) {
+    // Tell the string to the object.
+    (| obj.tell(str) |);
+}
+</PRE
+>
+
+This method takes one argument, <CODE>str</CODE>, a string to send to each
+object in the room.  The method uses a local variable <CODE>obj</CODE> to
+traverse the list stored in the object variable <CODE>contents</CODE>.  The
+body of the method is a for loop, which traverses the contents list.
+For each element in the for list, this method sends a <CODE>tell</CODE>
+message with the string.  The parenthesis and vertical bar delimiters
+(<SAMP>(|</SAMP> and <SAMP>|)</SAMP>) surrounding the message expression mark it as
+a <EM>critical expression</EM>.  Errors which occur inside a critical
+expression are ignored; thus, errors which occur during the processing
+of the <CODE>tell</CODE> messages won't cause the <CODE>tell_contents</CODE> method
+to abort.<P>
+<P>

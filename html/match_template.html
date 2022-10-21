@@ -1,0 +1,112 @@
+<TITLE>coldmud.info: match_template</TITLE>
+Next: <A HREF="pad.html">pad</A><P>
+Prev: <A HREF="match_regexp.html">match_regexp</A><P>
+
+<H3>match_template</H3>
+
+<PRE>
+match_template(<VAR>template</VAR>, <VAR>string</VAR>)
+</PRE
+>
+This function matches the template <VAR>template</VAR> against the command
+<VAR>string</VAR>.  The return value of <CODE>match_template()</CODE> is a list of
+fields resulting from the template match, or <CODE>0</CODE> if the match fails
+or if <VAR>template</VAR> is an invalid template.<P>
+<P>
+A <EM>template</EM> is a sequence of word-patterns and wildcards separated
+by spaces, with wildcards never occurring more than one at a time.  A
+<EM>word-pattern</EM> is a sequence of words separated by pipe characters
+(<SAMP>|</SAMP>).  A word is a sequence of alphanumeric characters, with an
+optional question mark (<SAMP>?</SAMP>) indicating the beginning of an allowed
+partial match.  A <EM>wildcard</EM> is either a simple wildcard,
+represented by an asterix (<SAMP>*</SAMP>) or a <EM>coupled wildcard</EM>,
+represented by the three-character sequence <SAMP>*=*</SAMP>.<P>
+<P>
+That definition of a template is confusing, so we will now go back and
+explain each component of a template in more detail.<P>
+<P>
+A <EM>word-pattern</EM> is a list of words separated by pipe characters.
+A word-pattern matches any of the words contained in it.  The
+word-pattern <CODE>"look|examine"</CODE> matches either of the words
+<CODE>"look"</CODE> or <CODE>"examine"</CODE>.  The word separator for template
+matching is always a space.<P>
+<P>
+A word can include a question mark (<SAMP>?</SAMP>) to indicate that partial
+matches that extend at least as far as the question mark are okay.  The
+word pattern <CODE>"look|ex?amine"</CODE> matches any of the words
+<CODE>"look"</CODE>, <CODE>"ex"</CODE>, <CODE>"exa"</CODE>, <CODE>"exam"</CODE>, <CODE>"exami"</CODE>,
+<CODE>"examin"</CODE>, and <CODE>"examine"</CODE>.<P>
+
+
+When a word-pattern successfully matches a word in <VAR>string</VAR>, it
+results in a <EM>field</EM>, or string in the returned list.  This field
+contains the word which matched the word-pattern.<P>
+<P>
+A <EM>simple wildcard</EM> is represented by an asterix (<SAMP>*</SAMP>).  A
+simple wildcard matches any number of words in <EM>string</EM>.  If the
+wildcard is followed by a word-pattern in <EM>template</EM>, then it can
+also match a <EM>quoted wildcard match</EM>.<P>
+<P>
+A quoted wildcard match is just like a <CODE>C--</CODE> string literal: it
+begins and ends with a double quote (<SAMP>"</SAMP>), and can include a
+literal double quote or backslash by preceding the character with a
+backslash (<SAMP>\</SAMP>).  If the simple wildcard is followed by a
+word-pattern, and the words in <VAR>string</VAR> that the wildcard would
+match begin with a double quote, then the match must be a quoted
+wildcard match or the match fails, even if the match would have
+succeeded if the words were not treated as a quoted wildcard match.
+However, if the words that the wildcard would match begin with a
+backslash followed by a double quote, then the backslash is ignored and
+the double quote and the text following it are treated as regular words.<P>
+<P>
+The template <CODE>"* bar"</CODE> matches any of the following strings:<P>
+<P>
+<PRE>
+foo bar
+foo baz bar
+"foo bar \\ \" baz" bar
+\"foo baz bar
+</PRE
+>
+Matching against a simple wildcard produces one field, the words that
+the simple wildcard matched.  If the wildcard matches a quoted wildcard
+match, then the beginning and ending double quotes are stripped out of
+the resulting field, as well as any backslashes used to escape
+characters inside the double quotes.<P>
+<P>
+A <EM>coupled wildcard</EM> is represented by the three-character sequence
+<SAMP>*=*</SAMP>.  It matches any sequence of words containing an equal sign
+(<SAMP>=</SAMP>), and results in two fields, the text before the equal sign
+and the text after it.  Any spaces surrounding the equal sign are
+ignored and do not show up in the resulting fields.  The text before the
+equal sign can be a quoted wildcard match (as before, if it begins with
+a double quote, then it must be a quoted wildcard match or the match
+fails, unless the initial double quote is escaped by a backslash).  If
+the coupled wildcard is followed by a word pattern, then the text after
+the equal sign can also be a quoted wildcard match.<P>
+<P>
+The coupled wildcard is a special feature intended for parsing 
+TinyMUD command formats.  If possible, its use should be avoided.<P>
+<P>
+If <VAR>template</VAR> is invalid, then the match usually fails, although
+this is not guaranteed.<P>
+<P>
+Examples:<P>
+<P>
+<PRE>
+match_template("@desc?ribe * as *", "@descr me as foobar")
+     => ["@descr", "me", "as", "foobar"]
+match_template("@desc?ribe * as *", "@desc \"as is\" as foobar")
+     => ["@desc", "as is", "as", "foobar"]
+match_template("@desc?ribe * as *", "@desc \"as\" is as foobar")
+     => 0
+match_template("@desc?ribe * as *", "@desc \\\"as\" is as foobar")
+     => ["@desc", "\"as\" is", "as", "foobar"]
+match_template("@desc?ribe *=*", "@descr me =foobar")
+     => ["@descr", "me", "foobar"]
+match_template("@desc?ribe *=*", "@desc \"2+2=4\"= an equation")
+     => ["@desc", "2+2=4", "an equation"]
+match_template("l?ook|ex?amine *", "look at rose")
+     => ["look", "at rose"]
+</PRE
+>

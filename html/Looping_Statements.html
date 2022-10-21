@@ -1,0 +1,106 @@
+<TITLE>coldmud.info: Looping Statements</TITLE>
+Next: <A HREF="Error-Handling_Statements.html">Error-Handling Statements</A><P>
+Prev: <A HREF="Conditional_Statements.html">Conditional Statements</A><P>
+
+<H3>Looping Statements</H3>
+
+<CODE>C--</CODE> provides three kinds of looping statements.  These statements
+allow you to traverse a list or a range of numbers, or to execute a
+statement as long as a certain condition is true.  <CODE>C--</CODE> also
+provides two kinds of jump statements which allow you to prematurely
+exit from a loop or continue onto the next iteration.<P>
+<P>
+The <EM>for-list statement</EM> allows you to traverse a list.  It has the
+following syntax:<P>
+<P>
+<PRE>
+for <VAR>variable</VAR> in (<VAR>list</VAR>)
+    <VAR>statement</VAR>
+</PRE
+>
+<VAR>variable</VAR> must be the name of a local variable, and <VAR>list</VAR> must
+be an expression of list type.  The interpreter executes <VAR>statement</VAR>
+once for each element of <VAR>list</VAR>. <VAR>variable</VAR> contains the list
+element that the interpreter is at.  Here is an example of a method
+using a for-list statement:<P>
+<P>
+<PRE>
+var a, s;<P>
+a = ["foo", "bar", "baz"];
+for s in (a)
+    .tell(s);
+</PRE
+>
+You can also iterate over the associations in a dictionary with the
+for-list statement; see <A HREF="Dictionaries.html">Dictionaries</A>.<P>
+<P>
+The <EM>for-range statement</EM> allows you to traverse a range of
+integers.  It has the following syntax:<P>
+<P>
+<PRE>
+for <VAR>variable</VAR> in [<VAR>lower</VAR> .. <VAR>upper</VAR>]
+    <VAR>statement</VAR>
+</PRE
+>
+As before, <VAR>variable</VAR> must be the name of a local variable.
+<VAR>lower</VAR> and <VAR>upper</VAR> must be expressions of integer type.  The
+interpreter executes <VAR>statement</VAR> once for each number from
+<VAR>lower</VAR> to <VAR>upper</VAR> inclusive.  <VAR>variable</VAR> contains the
+number that the interpreter is at.  Assigning to <VAR>variable</VAR> within
+the loop body will not change the status of the loop; the interpreter
+remembers what number it is at independently of the loop index.  Here is
+an example of a method using a for-range statement:<P>
+<P>
+<PRE>
+var i;<P>
+for i in [1 .. 10]
+    .tell(tostr(i));
+</PRE
+>
+The <EM>while statement</EM> allows you to execute code as long as a
+condition expression is true.  The while statement has the following
+syntax:<P>
+<P>
+<PRE>
+while (<VAR>expression</VAR>)
+    <VAR>statement</VAR>
+</PRE
+>
+The interpreter continually evaluates <VAR>expression</VAR> and executes
+<VAR>statement</VAR> until the value of <VAR>expression</VAR> is false, according
+to the rules in <A HREF="Data_Types.html">Data Types</A>.  Here is an example of a method using
+a while statement:<P>
+<P>
+<PRE>
+var a;<P>
+a = 1;
+while (a < 35)
+    a = a * 2;
+.tell(tostr(a));
+</PRE
+>
+The <EM>break statement</EM> allows you to exit a loop prematurely.  The
+break statement has the following syntax:<P>
+<P>
+<PRE>
+break;
+</PRE
+>
+The interpreter jumps to the end of the innermost for-list, for-range,
+or while statement.<P>
+<P>
+The <EM>continue statement</EM> allows you to jump to the next iteration
+of a loop.  The continue statement has the following syntax:<P>
+<P>
+<PRE>
+continue;
+</PRE
+>
+The interpreter skips the remainder of the loop body and begins another
+iteration of the innermost for-list, for-range, or while statement.<P>
+<P>
+The break and continue statements do not allow you to break out of two
+loops at once.  <CODE>C--</CODE> does not provide any general jump mechanism.
+If you find that you require jumps other than break or continue
+statements, then you probably need to reorganize your code.<P>
+<P>

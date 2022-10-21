@@ -1,0 +1,77 @@
+<TITLE>coldmud.info: Simple Statements</TITLE>
+Next: <A HREF="Conditional_Statements.html">Conditional Statements</A><P>
+
+<H3>Simple Statements</H3>
+
+The <EM>comment statement</EM> does nothing at all.  A comment statement
+is just a comment token, which is a sequence of two slashes (<SAMP>//</SAMP>)
+followed by any characters up to the end of the lines.  For instance:<P>
+<P>
+<PRE>
+// This is a comment.
+</PRE
+>
+The interpreter ignores comment statements completely; they are for the
+benefit of human readers.  Note that comments in <CODE>C--</CODE> are actual
+statements, unlike comments in <CODE>C</CODE>, which are filtered out by the
+preprocessor.<P>
+<P>
+The <EM>expression statement</EM> evaluates an expression and discards its
+value.  The syntax of the expression statement is:<P>
+<P>
+<PRE>
+<VAR>expression</VAR>;
+</PRE
+>
+The following are expression statements:<P>
+<P>
+<PRE>
+3;
+sender().tell($sys.who());
+</PRE
+>
+The <EM>assignment statement</EM> evaluates an expression and assigns the
+value to a variable.  The syntax of the assignment statement is:<P>
+<P>
+<PRE>
+<VAR>variable</VAR> = <VAR>expression</VAR>;
+</PRE
+>
+The interpreter assigns the value of <VAR>expression</VAR> to <VAR>variable</VAR>,
+which is a local variable if it has been declared as one, or an object
+variable on the current object if it has not been declared.
+See <A HREF="Variables.html">Variables</A>.<P>
+
+
+The <EM>compound statement</EM> allows you to treat one or more statements
+as a single statement.  The compound statement has the following syntax:<P>
+<P>
+<PRE>
+{
+    <VAR>statement1</VAR>
+    <VAR>statement2</VAR>
+    <VAR>.</VAR>
+    <VAR>.</VAR>
+    <VAR>.</VAR>
+}
+</PRE
+>
+The interpreter executes each of <VAR>statement1</VAR>, <VAR>statement2</VAR>,
+<VAR>...</VAR> in turn.<P>
+
+
+The <EM>return statement</EM> allows a method to stop exeuting statements
+and to return a value other than the default return value of
+<CODE>this()</CODE>.  The return statement can have either of the following
+two forms:<P>
+<P>
+<PRE>
+return <VAR>expression</VAR>;
+return;
+</PRE
+>
+The interpreter stops executing statements in the method and returns the
+value of <VAR>expression</VAR>, or the dbref of the current object if
+<VAR>expression</VAR> is not given.<P>
+
+

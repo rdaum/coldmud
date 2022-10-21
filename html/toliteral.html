@@ -1,0 +1,25 @@
+<TITLE>coldmud.info: toliteral</TITLE>
+Next: <A HREF="tostr.html">tostr</A><P>
+Prev: <A HREF="toint.html">toint</A><P>
+
+<H3>toliteral</H3>
+
+<PRE>
+toliteral(<VAR>data</VAR>)
+</PRE
+>
+This function converts any data to a <CODE>C--</CODE> literal or constructor
+expression which, when read by the interpreter, will result in the same
+data object.<P>
+<P>
+Examples:<P>
+<P>
+<PRE>
+toliteral([3, "foo", 'bar, #60, ~none])
+     => "[3, \"foo\", 'bar, #60, ~none]"
+toliteral(tosym("foo-" + tostr(3 + 4)))
+     => "tosym(\"foo-7\")"
+toliteral(<#56, #[['type, 'obj], ['obj, #22]]>)
+     => "<#56, #[['type, 'obj], ['obj, #22]]>"
+</PRE
+>

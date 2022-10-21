@@ -1,0 +1,21 @@
+<TITLE>coldmud.info: System Object</TITLE>
+Prev: <A HREF="Variables_and_Parameters.html">Variables and Parameters</A><P>
+
+<H2>The System Object</H2>
+
+The system object is a special object for communicating with the Coldmud
+server.  The system object has the dbref <CODE>0</CODE>.<P>
+<P>
+At startup time, the server sends a <CODE>startup</CODE> message to the system
+object, with one argument, a list of strings giving the arguments passed
+on the command line when the server was invoked.<P>
+<P>
+If you use the <CODE>set_heartbeat_freq()</CODE> function to enable the
+heartbeat, then the server will send a <CODE>heartbeat</CODE> message to the
+system object periodically.<P>
+<P>
+Methods on the system object can call administrative functions such as
+<CODE>shutdown()</CODE> which ordinary objects are not permitted to call.  In
+most databases, the system object will define methods which allow
+certain authorized objects to access these functions.<P>
+<P>

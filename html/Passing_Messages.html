@@ -1,0 +1,30 @@
+<TITLE>coldmud.info: Passing Messages</TITLE>
+Next: <A HREF="Error-Handling_Expressions.html">Error-Handling Expressions</A><P>
+Prev: <A HREF="Sending_Messages.html">Sending Messages</A><P>
+
+<H3>Passing Messages</H3>
+
+A method can pass control of a message to a different ancestor of the
+current object using a <EM>pass expression</EM>, which has the following
+syntax:<P>
+<P>
+<PRE>
+pass(<VAR>arg1</VAR>, <VAR>arg2</VAR>, <VAR>...</VAR>)
+</PRE
+>
+The arguments are evaluated from left to right.  The result of this
+expression is the result of calling the ``next'' method with the
+arguments <VAR>arg1</VAR>, <VAR>arg2</VAR>, <VAR>...</VAR>.  The ``next'' method is
+defined as the method which would be called if the current method, and
+any other methods which have already passed control of the message, were
+not defined.  This method may not be defined on an ancestor of the
+current object; you should, in general, not depend on a specific method
+being called when you use a pass expression.<P>
+<P>
+The called method sees the same current object, sender, and caller as
+the current method.<P>
+<P>
+The pass expression can cause a <CODE>~methodnf</CODE> errors if the called
+method does not exist.  See <A HREF="Errors.html">Errors</A> for information on how to
+handle errors.<P>
+<P>

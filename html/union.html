@@ -1,0 +1,21 @@
+<TITLE>coldmud.info: union</TITLE>
+Prev: <A HREF="sublist.html">sublist</A><P>
+
+<H3>union</H3>
+
+<PRE>
+union(<VAR>list1</VAR>, <VAR>list2</VAR>)
+</PRE
+>
+This function returns the result of adding each element of <VAR>list2</VAR>
+which does not already exist in <VAR>list1</VAR> to the elements of
+<VAR>list1</VAR>.  Elements which exist in <VAR>list2</VAR> more than once will
+only be added once, but duplicate elements in <VAR>list1</VAR> will remain.<P>
+<P>
+<PRE>
+union([2, 3, 4], [4, 5, 4, 6])
+     => [2, 3, 4, 5, 6]
+union([2, 2, 4, 5], [4, 5, 6, 6, 7])
+     => [2, 2, 4, 5, 6, 7])
+</PRE
+>

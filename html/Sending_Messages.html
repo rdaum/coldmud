@@ -1,0 +1,64 @@
+<TITLE>coldmud.info: Sending Messages</TITLE>
+Next: <A HREF="Passing_Messages.html">Passing Messages</A><P>
+Prev: <A HREF="Calling_Functions.html">Calling Functions</A><P>
+
+<H3>Sending Messages</H3>
+
+If you want to retrieve information from or modify an object other than
+the current object, you can do so by sending it a message.  You can do
+this with a <EM>message expression</EM>, which has the following syntax:<P>
+<P>
+<PRE>
+<VAR>receiver</VAR>.<VAR>message</VAR>(<VAR>arg1</VAR>, <VAR>arg2</VAR>, <VAR>...</VAR>)
+</PRE
+>
+You may omit <VAR>receiver</VAR>, in which case it is assumed to be the
+current object.  Otherwise, <VAR>receiver</VAR> must be an expression of
+dbref or frob type, and <VAR>message</VAR> an identifier giving the name of
+the message.  <VAR>arg1</VAR>, <VAR>arg2</VAR>, <VAR>...</VAR> are the arguments to be
+sent with the message.  The arguments are evaluated from left to right.
+You must include the parentheses around the argument list, even if there
+are no arguments.  The result of a message expression is the value
+returned by <VAR>receiver</VAR>'s method for the message <VAR>message</VAR>.<P>
+<P>
+If <VAR>receiver</VAR> is a frob, then the message is sent to the frob's
+class object, with the frob's representation inserted as the first
+argument.  If <VAR>receiver</VAR> is a dbref, then the message is sent to
+the object with that dbref.<P>
+<P>
+If <VAR>receiver</VAR> is not an object or frob, then the interpreter
+throws a <CODE>~type</CODE> error.  If <VAR>receiver</VAR> is a dbref which does
+not refer to an existing object, or if it is a frob whose class is not
+an existing object, then the interpreter throws an <CODE>~objnf</CODE>
+error.  If <VAR>receiver</VAR> does not have a method defined for
+<VAR>message</VAR>, then the interpreter throws a <CODE>~methodnf</CODE> error.
+See <A HREF="Errors.html">Errors</A> for information on how to handle errors.<P>
+<P>
+Here are some examples of message expressions:<P>
+<P>
+<PRE>
+.tell("I don't see that here.");
+$sys.wizards()
+loc.tell_contents(args[1]);
+</PRE
+>
+You can substitute an arbitrary expression for <VAR>message</VAR>, by
+enclosing it in parentheses.  The syntax for sending an arbitrary
+message is:<P>
+<P>
+<PRE>
+<VAR>receiver</VAR>.(<VAR>message-expression</VAR>)(<VAR>arg1</VAR>, <VAR>arg2</VAR>, <VAR>...</VAR>)
+</PRE
+>
+As before, <VAR>receiver</VAR> can be omitted, in which case it is assumed to
+be the current object.  <VAR>message-expression</VAR> must be an expression
+of symbol type, or the expression will cause a <CODE>~type</CODE> error.  You
+must include the parentheses around the argument list, even if there are
+no arguments.<P>
+<P>
+In order to prevent incidents of infinite recursion, Coldmud has a
+maximum calling depth for messages.  This maximum depth is <CODE>128</CODE>
+method calls in the current version.  If sending a message would exceed
+the maximum calling depth, the interpreter raises a <CODE>~maxdepth</CODE>
+error.<P>
+<P>

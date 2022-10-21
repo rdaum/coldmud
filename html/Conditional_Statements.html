@@ -1,0 +1,136 @@
+<TITLE>coldmud.info: Conditional Statements</TITLE>
+Next: <A HREF="Looping_Statements.html">Looping Statements</A><P>
+Prev: <A HREF="Simple_Statements.html">Simple Statements</A><P>
+
+<H3>Conditional Statements</H3>
+
+There are three types of conditional statements in <CODE>C--</CODE>.  The
+<EM>if statement</EM> has the following syntax:<P>
+
+
+<PRE>
+if (<VAR>expression</VAR>)
+    <VAR>statement</VAR>
+</PRE
+>
+The interpreter evaluates <VAR>expression</VAR>.  If the value of
+<VAR>expression</VAR> is true (see <A HREF="Data_Types.html">Data Types</A>), then the interpreter
+executes <VAR>statement</VAR>.<P>
+<P>
+The <EM>if-else statement</EM> is similar to the if statement.  The
+if-else statement has the following syntax:<P>
+<P>
+<PRE>
+if (<VAR>expression</VAR>)
+    <VAR>true-statement</VAR>
+else
+    <VAR>false-statement</VAR>
+</PRE
+>
+The interpreter evaluates <VAR>expression</VAR>, as before.  If the value of
+<VAR>expression</VAR> is true, then the interpreter executes
+<VAR>true-statement</VAR>; otherwise, it executes <VAR>false-statement</VAR>.<P>
+
+
+Because the if statement and the if-else statement are similar, they can
+sometimes be ambiguous.  The following code will produce unexpected
+results:<P>
+<P>
+<PRE>
+if (a)
+    if (b) c;
+else
+    d;
+</PRE
+>
+The indentation suggests that the <CODE>else</CODE> clause should apply to the
+first <CODE>if</CODE> clause, but in fact it applies to the more recent one.
+You can avoid ambiguities like this by using braces to create compound
+statements out of conditional and looping statements, even if there is
+only one of them.  In this case, you might write:<P>
+<P>
+<PRE>
+if (a) {
+    if (b)
+        c;
+} else {
+    d;
+}
+</PRE
+>
+The third type of conditional statement is the <EM>switch statement</EM>,
+which allows you to compare one value against a series of other values.
+The switch statement is the most complicated statement type in
+<CODE>C--</CODE>, so we'll start with an example:<P>
+
+
+<PRE>
+switch (val) {
+    case 0:
+        echo("The value is zero.");
+    case 1 .. 10:
+        echo("The value is between one and ten inclusive.");
+    case 11 .. a:
+        echo("The value is between eleven and a inclusive.");
+    case "foo", "bar".."baz":
+	echo("The value is \"foo\" or between \"bar\" and \"baz\"");
+    case a .. b, c .. d, 42:
+        count = count + 1;
+        echo("The value is in the counted area.");
+    case ~perm:
+        echo("Permission denied while getting the value.");
+    default:
+        echo("Did not recognize value.");
+}
+</PRE
+>
+This example illustrates all of the capabilities of the switch
+statement.  The expression given by <CODE>val</CODE> in the example is the
+<EM>controlling expression</EM>, and is compared against each of the cases
+inside the switch body.  Each case has a value or list of values to
+compare against.  The values can be of any type, and need not be
+constant expressions.  You can also specify ranges, using two dots
+(<SAMP>..</SAMP>) to separate the lower and upper bounds.  The keyword
+<CODE>default</CODE> specifies an action to perform if no cases were matched
+by the controlling expression.<P>
+<P>
+Here is a more formal description of the syntax of the switch statement:<P>
+<P>
+<PRE>
+switch (<VAR>controlling-expression</VAR>) {
+    case <VAR>expr-or-range</VAR>, <VAR>expr-or-range</VAR>, <VAR>...</VAR>:
+        <VAR>statements</VAR>
+    case <VAR>expr-or-range</VAR>, <VAR>expr-or-range</VAR>, <VAR>...</VAR>:
+        <VAR>statements</VAR>
+    <VAR>.</VAR>
+    <VAR>.</VAR>
+    <VAR>.</VAR>
+    default:
+        <VAR>default-statement</VAR>
+}
+</PRE
+>
+When executing a switch statement, the interpreter scans through the
+list of cases and compares <VAR>controlling-expression</VAR> against each of
+the lists of values in the cases, evaluating the value lists from left
+to right until there is a match.  The lower and upper bounds of ranges
+must be of the same type and must be either integers or strings, or the
+interpreter will throw a <CODE>~type</CODE> error.  When the interpreter finds
+a match, it will execute the statement for that case.  The interpreter
+will not continue checking cases after a match.<P>
+<P>
+If the interpreter does not find a match, it will execute
+<VAR>default-statement</VAR>, the statement corresponding to the default
+case.  You do not need to provide a default case if you do not wish to
+provide a default action.<P>
+<P>
+<CODE>C</CODE> programmers should note that switch statements in <CODE>C--</CODE>
+differ from switch statements in <CODE>C</CODE> in several respects.  Because
+case values do not have to be constants, they may conflict, in which
+case the first match will take precedence.  Also, there is no
+fall-through in <CODE>C--</CODE> switch statements; only the statements
+corresponding to the matching case will be executed.  Because there is
+no fall-through, the <CODE>break</CODE> statement does not apply to switch
+statements.  Finally, the default case must be placed last in the list
+of cases if it is given.<P>
+<P>

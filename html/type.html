@@ -1,0 +1,26 @@
+<TITLE>coldmud.info: type</TITLE>
+Next: <A HREF="valid.html">valid</A><P>
+Prev: <A HREF="tosym.html">tosym</A><P>
+
+<H3>type</H3>
+
+<PRE>
+type(<VAR>data</VAR>)
+</PRE
+>
+This function returns a symbol giving the type of <VAR>data</VAR>.  The
+return value is one of <CODE>'integer</CODE>, <CODE>'string</CODE>, <CODE>'dbref</CODE>,
+<CODE>'list</CODE>, <CODE>'symbol</CODE>, or <CODE>'error</CODE>.<P>
+
+
+Examples:<P>
+<P>
+<PRE>
+type(5)
+     => 'integer
+type([6, 'foo, "bar"])
+     => 'list
+type(<#44, #[['type, 'obj], ['obj, #20]]>)
+     => 'frob
+</PRE
+>

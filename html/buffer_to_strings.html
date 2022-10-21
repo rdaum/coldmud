@@ -1,0 +1,31 @@
+<TITLE>coldmud.info: buffer_to_strings</TITLE>
+Next: <A HREF="buffer_truncate.html">buffer_truncate</A><P>
+Prev: <A HREF="buffer_retrieve.html">buffer_retrieve</A><P>
+
+<H3>buffer_to_strings</H3>
+
+<PRE>
+buffer_to_strings(<VAR>buffer</VAR>, [<VAR>separator</VAR>])
+</PRE
+>
+This function returns a list of strings constructed from <VAR>buffer</VAR> by
+splitting it around the bytes given by the buffer <VAR>separator</VAR>.  If
+<VAR>separator</VAR> is not specified, <CODE>buffer_to_strings()</CODE> uses the
+buffer <CODE>%[10]</CODE>, a single-byte buffer containing the ASCII code for
+a newline.  <CODE>buffer_to_strings()</CODE> treats the bytes in <VAR>buffer</VAR>
+not accounted for by the separator as ASCII values; unprintable ASCII
+values are stripped.  The last element of the returned list is a buffer
+containing the bytes in the buffer after the last separator found; no
+string is included in the returned list for these bytes.<P>
+<P>
+Examples:<P>
+<P>
+<PRE>
+buffer_to_strings(%[65, 66, 67, 13, 10, 67, 66, 65, 13, 10, 66])
+     => ["ABC", "CBA", %[66]]
+buffer_to_strings(%[66, 10, 10, 65, 10])
+     => ["B", "", "A", %[]]
+buffer_to_strings(%[65, 66, 67, 13, 10, 67, 66, 65, 10, 66], %[66])
+     => ["A", "CC", "A", %[]]
+</PRE
+>

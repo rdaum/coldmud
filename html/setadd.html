@@ -1,0 +1,24 @@
+<TITLE>coldmud.info: setadd</TITLE>
+Next: <A HREF="setremove.html">setremove</A><P>
+Prev: <A HREF="replace.html">replace</A><P>
+
+<H3>setadd</H3>
+
+<PRE>
+setadd(<VAR>list</VAR>, <VAR>data</VAR>)
+</PRE
+>
+This function returns the result of adding <VAR>data</VAR> to the end of
+<VAR>list</VAR> if it was not already somewhere in <VAR>list</VAR>.  If <VAR>data</VAR>
+was already in <VAR>list</VAR>, then <CODE>setadd()</CODE> returns <VAR>list</VAR>
+unmodified.<P>
+<P>
+Examples:<P>
+<P>
+<PRE>
+setadd([2, 3, 4], 'foo)
+     => [2, 3, 4, 'foo]
+setadd([2, 3, 4], 3)
+     => [2, 3, 4]
+</PRE
+>

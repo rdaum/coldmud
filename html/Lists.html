@@ -1,0 +1,82 @@
+<TITLE>coldmud.info: Lists</TITLE>
+Next: <A HREF="Dictionaries.html">Dictionaries</A><P>
+Prev: <A HREF="Names.html">Names</A><P>
+
+<H3>Lists</H3>
+
+A <EM>list</EM> is a collection of pieces of data of any type.  You can
+create a list in <CODE>C--</CODE> using a <EM>list construction expression</EM>.
+A list construction expression has the following syntax:<P>
+<P>
+<PRE>
+[<VAR>expression1</VAR>, <VAR>expression2</VAR>, ...]
+</PRE
+>
+<VAR>expression1</VAR>, <VAR>expression2</VAR>, <VAR>...</VAR> are the elements of the
+list.  You can also splice a list into a list construction expression;
+see <A HREF="Splicing.html">Splicing</A>.  The result of a list construction expression is a
+list containing the values of the expressions.  Here are some examples
+of list construction expressions:<P>
+<P>
+<PRE>
+[1, 2, 3]
+[a + 5, 'string, [3, "b"], tostr(~none)]
+[]
+</PRE
+>
+To retrieve an element of a list, you can use a <EM>list selection
+expression</EM>, which has the following syntax:<P>
+<P>
+<PRE>
+<VAR>list</VAR>[<VAR>element</VAR>]
+</PRE
+>
+<VAR>list</VAR> must be an expression of list type (or string type; see
+below) and <VAR>element</VAR> is an expression of integer type whose value is
+between one and the length of the list.  The value of a list selection
+expression is the value of the element of <VAR>list</VAR> numbered by
+<VAR>element</VAR>, where the elements of <VAR>list</VAR> are numbered starting
+from one.  For example, the following method returns <CODE>3</CODE>:<P>
+<P>
+<PRE>
+var a;<P>
+a = ["foo", 2, 'bar, 3, ~parents];
+return a[4];
+</PRE
+>
+You can use the list selection expression with strings as well as with
+lists.  In this case, <CODE>C--</CODE> treats the string as if it were a list
+of one-character strings.  The following method returns <CODE>"p"</CODE>:<P>
+<P>
+<PRE>
+var a;<P>
+a = "Depth";
+return a[3];
+</PRE
+>
+You can also use the list selection expression with dictionaries; we
+will describe this usage in the next section.<P>
+<P>
+You can look for a piece of data in a list, you can use a <VAR>list
+search expression</VAR>, which has the following syntax:<P>
+<P>
+<PRE>
+<VAR>element</VAR> in <VAR>list</VAR>
+</PRE
+>
+The value of this expression is the index of the first occurrance of
+<VAR>element</VAR> in <VAR>list</VAR>, or <CODE>0</CODE> if <VAR>element</VAR> does not occur
+in <VAR>list</VAR>.  The following method returns <CODE>[3, 0]</CODE>:<P>
+<P>
+<PRE>
+var a;<P>
+a = ['foo, "bar", 4 + 2, #77];
+return [6 in a, 'quux in a];
+</PRE
+>
+As with the list selection expression, you can use the list search
+expression with strings as well as with lists.  In this case, both
+<VAR>element</VAR> and <VAR>list</VAR> must be strings, and the result is the
+first position at which <VAR>element</VAR> occurs in <VAR>list</VAR>, or 0 if it
+does not occur.<P>
+<P>

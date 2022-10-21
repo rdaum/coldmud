@@ -1,0 +1,23 @@
+<TITLE>coldmud.info: buffer_retrieve</TITLE>
+Next: <A HREF="buffer_to_strings.html">buffer_to_strings</A><P>
+Prev: <A HREF="buffer_replace.html">buffer_replace</A><P>
+
+<H3>buffer_retrieve</H3>
+
+<PRE>
+buffer_retrieve(<VAR>buffer</VAR>, <VAR>pos</VAR>)
+</PRE
+>
+This function returns the byte numbered <VAR>pos</VAR> in <VAR>buffer</VAR>, with
+the first byte of <VAR>buffer</VAR> is numbered <CODE>1</CODE>.  If <VAR>pos</VAR> is
+less than <CODE>1</CODE>, or greater than the length of <VAR>buffer</VAR>, then
+<CODE>buffer_replace()</CODE> throws a <CODE>~range</CODE> error.<P>
+
+
+Examples:<P>
+<P>
+<PRE>
+buffer_retrieve(%[65, 66, 67, 10], 3)
+     => 67
+</PRE
+>

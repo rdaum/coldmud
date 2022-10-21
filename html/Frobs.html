@@ -1,0 +1,40 @@
+<TITLE>coldmud.info: Frobs</TITLE>
+Next: <A HREF="Variables.html">Variables</A><P>
+Prev: <A HREF="Buffers.html">Buffers</A><P>
+
+<H3>Frobs</H3>
+
+A <EM>frob</EM> is a dictionary or list (its <EM>representation</EM>)
+associated with a dbref (its <EM>class</EM>).  Frobs represent a kind of
+lightweight object, with less overhead than real objects.  The
+encapsulation around frobs is not as strong as the encapsulation around
+real objects, and in some respects frobs are not as convenient to work
+with as real objects.  In general, objects should be used for
+long-lasting, complicated, changing entities, while frobs should be used
+for small pieces of data.<P>
+<P>
+Frob construction expressions have the following syntax:<P>
+<P>
+<PRE>
+<<VAR>class</VAR>, <VAR>representation</VAR>>
+</PRE
+>
+The result of a frob construction expression is a frob of class
+<VAR>class</VAR>, which must be a dbref, with a representation
+<VAR>representation</VAR>, which must be a list or dictionary.  In general,
+you should only use the frob construction expression to construct frobs
+of class <CODE>this()</CODE>, but this is not enforced.  The following are
+valid frob construction expressions:<P>
+<P>
+<PRE>
+<#76, #[['type, 'true]]>
+<#89, ["You cannot go that way."]>
+</PRE
+>
+Apart from operations which apply to all data types, the only operations
+supported on frobs are message-passing and the <CODE>class()</CODE> function.
+When you send a message to a frob, the interpreter treats it as a
+message to the frob's class, with the frob's representation inserted as
+the first argument.  The <CODE>class()</CODE> function returns the class of a
+frob.<P>
+<P>

@@ -1,0 +1,4394 @@
+This is Info file coldmud.info, produced by Makeinfo-1.55 from the
+input file coldmud.texi.
+
+   This file documents Coldmud and the `C--' programming language.
+
+   Copyright (C) 1993 Greg Hudson.
+
+   Permission is granted with no restrictions to make and distribute
+this manual in verbatim or modified form.
+
+
+File: coldmud.info,  Node: Top,  Next: Overview,  Prev: (dir),  Up: (dir)
+
+   Coldmud is a multi-user network server featuring an object-oriented
+database and programming language.  This Info file documents the Coldmud
+server version 0.10 and the `C--' programming language.
+
+   This manual does not document the features of any Coldmud object
+database, or any object database's interface for defining methods on
+objects.
+
+* Menu:
+
+* Overview::			Overview of Coldmud
+* Objects::			Objects in Coldmud
+* Defining Methods::		Writing methods in `C--'
+* Errors::			Error conditions in Coldmud
+* Function Descriptions::	Descriptions of Coldmud functions
+* Administration::		Running and maintaining the server
+
+* Function Index::		Index of built-in Coldmud functions
+* Concept Index::		Index of concepts
+
+ -- The Detailed Node Listing --
+
+Objects in Coldmud
+
+* Dbrefs::			Database references
+* Inheritance::			Parents and inheritance
+* Messages::			Interactions between objects
+* Variables and Parameters::	Information stored in objects
+* System Object::		The system object
+
+Methods: Writing methods in `C--'
+
+* Example Method::		Example of a `C--' method
+* Tokens::			The building blocks of methods
+* Method Structure::		Structure of a method
+* Statements::			Telling the interpreter what to do
+* Expressions::			Expressing values in `C--'
+
+Statements: Telling the interpreter what to do
+
+* Simple Statements::		Performing simple actions
+* Conditional Statements::	Executing instructions conditionally
+* Looping Statements::		Executing instructions repeatedly
+* Error-Handling Statements::	Handling errors
+
+Expressions: Expressing values in methods
+
+* Data Types::			Data types and literal expressions
+* Names::			Referring to objects indirectly
+* Lists::			Constructing and retrieving from lists
+* Dictionaries::		Associating values with data
+* Buffers::			Raw byte values for network I/O
+* Frobs::			Constructing and using frobs
+* Variables::			Local and object variables
+* Operators::			Operator syntax and precedence
+* Calling Functions::		Making calls to built-in functions
+* Sending Messages::		Sending messages to other objects
+* Passing Messages::		Passing messages to parents
+* Error-Handling Expressions::	Handling errors
+* Splicing::			Splicing lists into argument lists
+
+Operators: Operator syntax and precedence
+
+* Precedence::			Resolving ambiguous expressions
+* Arithmetic::			Arithmetic operators
+* Logic::			Logical and relational operators
+* Conditional Operators::	Conditional operators
+
+Function Descriptions: Descriptions of Coldmud Functions
+
+* Data Functions::		Operations on data in general
+* String Functions::		Operations on strings
+* List Functions::		Operations on lists
+* Dictionary Functions::	Operations on dictionaries
+* Buffer Functions::		Operations on buffers
+* Method Functions::		Information about the current method
+* Error Functions::		Handling errors
+* Communication Functions::	Communicating with the user
+* Object Functions::		Operations on the current object
+* Administrative Functions::	Privileged operations
+* Miscellaneous Functions::	Miscellaneous operations
+
+Data Functions: Operations on data in general
+
+* todbref::			Convert an integer or string to a dbref
+* toerr::			Convert a string to an error code
+* toint::			Convert a string or dbref to an integer
+* tostr::			Convert any data to a string
+* tosym::			Convert a string to a symbol
+* type::			Retrieve the type of a piece of data
+* valid::			Check if data is a valid dbref
+
+String Functions: Operations on strings
+
+* crypt::			Perform one-way encryption on a string
+* explode::			Get a list of words in a string
+* lowercase::			Convert a string to lowercase
+* match_begin::			Match against the beginnings of words
+* match_pattern::		Match against a wildcard pattern
+* match_regexp::		Match against a regular expression
+* match_template::		Match against a command template
+* pad::				Pad a string to a given length
+* strcmp::			Case-sensitive comparison of two strings
+* strlen::			Get the length of a string
+* strsub::			Substitute text within a string
+* substr::			Get a substring of a string
+* uppercase::			Convert a string to uppercase
+
+List Functions: Operations on lists
+
+* delete::			Delete an element of a list
+* insert::			Insert an element in a list
+* listlen::			Get the length of a list
+* replace::			Replace an element in a list
+* setadd::			Add an element to a "set"
+* setremove::			Remove an element from a "set"
+* sublist::			Get a sublist of a list
+
+Dictionary Functions: Operations on dictionaries
+
+* dict_add::			Add an association to a dictionary
+* dict_add_elem::		Add an element to a list value
+* dict_contains::		Determine if a key is in a dictionary
+* dict_del::			Delete an association to a dictionary
+* dict_del_elem::		Remove an element from a list value
+* dict_keys::			Get a list of keys in a dictionary
+
+Buffer Functions: Operations on buffers
+
+* buffer_add::			Add a byte value to the end of a buffer
+* buffer_append::		Append two buffers together
+* buffer_from_strings::		Convert a list of strings into a buffer
+* buffer_len::			Get the length of a buffer
+* buffer_replace::		Replace a byte value in a buffer
+* buffer_retrieve::		Retrieve a byte value from a buffer
+* buffer_to_strings::		Convert a buffer to a list of strings
+* buffer_truncate::		Truncate a buffer to a length
+
+Method Functions: Information about the current method
+
+* caller::			The definer of the calling method
+* definer::			The definer of the current method
+* sender::			The sending object
+* task_id::			ID of the current task
+* this::			The current object
+
+Error Functions: Handling errors
+
+* error::			Get the error code, in a handler
+* error_arg::			Get the error argument, in a handler
+* error_str::			Get the error explanation, in a handler
+* rethrow::			Continue propagating an error
+* throw::			Throw an error in the calling method
+* traceback::			Get the traceback, in a handler
+
+Communication Functions: Communicating with the user
+
+* disconnect::			Close connections to the current object
+* echo::			Echo text to the current object
+* echo_file::			Echo a file to the current object
+
+Object Functions: Operations on the current object
+
+* add_parameter::		Add a parameter
+* ancestors::			Get a list of ancestors
+* children::			Get a list of children dbrefs
+* compile::			Compile `C--' code into a method
+* del_method::			Remove a method
+* del_parameter::		Remove a parameter
+* find_method::			Find location of method definition
+* find_next_method::		Find location of next method definition
+* get_var::			Get value of a variable
+* list_method::			Decompile method into `C--' code
+* methods::			Get a list of defined method names
+* parameters::			Get a list of parameter names
+* parents::			Get a list of parent dbrefs
+* set_var::			Assign to a variable
+
+Administrative Functions: Privileged operations
+
+* binary_dump::                 Bring binary database up to date
+* bind::			Begin listening on a port
+* chparents::                   Change parents of an object
+* conn_assign::                 Set the current connection's object
+* connect::			Connect to a remote server
+* create::			Create an object
+* data::			Getting the data on an object
+* destroy::			Destroy an object
+* log::                         Write a string to stderr
+* run_script::			Execute an administrative script
+* set_heartbeat_freq::		Set the heartbeat frequency
+* shutdown::                    Shut down the server
+* text_dump::                   Dump a text database image
+* unbind::			Stop listening on a port
+
+Miscellaneous Functions: Miscellaneous operations
+
+* abs::				Take the absolute value of a number
+* ctime::			Convert the time to string format
+* max::				Find the maximum of several values
+* min::				Find the minimum of several values
+* random::			Get a random number
+* run_script::			Execute an administrative script
+* time::			Get the current time
+* version::			Get the server version number
+
+Administration: Running and maintaining the server
+
+* Starting::			Starting up the server
+* Disk Database::		Managing the disk database
+* Connections::			How Coldmud manages network connections
+
+
+File: coldmud.info,  Node: Overview,  Next: Objects,  Prev: Top,  Up: Top
+
+Overview
+********
+
+   Coldmud is an object-oriented multi-user network database server
+with a `C'-like programming language for defining object behavior.
+
+   The components of Coldmud's database are *objects*, which together
+comprise the *object hierarchy*.  Objects have *variables*, which
+determine their state, *methods*, which determine their behavior in
+response to *messages* from other objects, and *parameters*, which give
+the names of the variables used by the object's methods.
+
+   Coldmud objects also have *parents*, which are other objects.  An
+object's behavior is determined by its *inherited* methods, which it
+gets from its parents, and its *overridden* methods, which it defines
+itself.  One object, the *root object*, has no parents; all other
+objects have at least one parent.
+
+   Methods determine objects' responses to messages using a `C'-like
+language called `C--'.  The philosophy of `C--' stresses simplicity,
+readability, and vertical code organization.
+
+   Encapsulation is an important feature of Coldmud's object system.  An
+object cannot directly access another object's data; it must send a
+message to perform the required action.  Moreover, an object cannot
+directly access the data used by its parents' or its children's methods.
+
+   Coldmud uses a disk-based database; only a limited number of objects
+exist in memory at any time.  As long as the bulk of the object database
+is not concentrated in a few objects, Coldmud's process size should not
+grow beyond a certain point even if the database gets very large.
+
+   This manual is intended as a reference for programmers and
+administrators.  It does not document any object database, and may not
+be appropriate as a tutorial.  The best way to get started learning
+`C--' is to look at existing code, such as code in a core database, and
+refer to this manual when you don't understand how a piece of code
+works.
+
+
+File: coldmud.info,  Node: Objects,  Next: Defining Methods,  Prev: Overview,  Up: Top
+
+Objects
+*******
+
+   Objects in Coldmud have four characteristics: a *database reference*
+(called a *dbref*) which identifies the object, a list of *parent*
+dbrefs which determine what default behavior the object inherits,
+*variables* which store information, and *methods* which determine how
+the object responds to messages.  Objects refer to each other using
+dbrefs, and interact with each other by sending messages.  The objects
+which a Coldmud server has to work with are known collectively as the
+*object database*.
+
+   Coldmud gives special status to two objects, the *system object* and
+the *root object*.  The system object is allowed to call administrative
+functions and receives `startup' and `heartbeat' messages from the
+server.  The root object is the only object without parents, and is
+thus an ancestor of every object.
+
+* Menu:
+
+* Dbrefs::                      Database references
+* Inheritance::                 Parents and inheritance
+* Messages::                    Interaction between objects
+* Variables and Parameters::	Information stored in objects
+* System Object::               The system object
+
+
+File: coldmud.info,  Node: Dbrefs,  Next: Inheritance,  Up: Objects
+
+Database References
+===================
+
+   Database references are numbers which refer to objects.  When an
+object is created, it is assigned a unique database reference.  Database
+references cannot be changed after an object is created.
+
+   In `C--', you indicate a database reference by preceding a number
+with a hash mark (`#').  For instance, `#126' refers to the object with
+the dbref 126.
+
+   In general, programmers should not have to be concerned with database
+references.  See *Note Names:: for information on naming objects.
+
+
+File: coldmud.info,  Node: Inheritance,  Next: Messages,  Prev: Dbrefs,  Up: Objects
+
+Inheritance
+===========
+
+   In addition to the methods an object defines for itself, objects
+inherit methods from their *parents*.  An object can override a parent's
+method by defining its own methods with the same name.
+
+   The root object has no parents.  All other objects have at least one
+parent, and eventually inherit from the root object.  The root object
+has the dbref `1'.
+
+   It is easy to determine how an object with one parent will react to a
+message; either the object defines its own method for that message, or
+it uses the inherited method from its parent.
+
+   Objects with more than one parent are more complicated.  Ancestors of
+such an object take precedence over each other according to the
+following rules:
+
+  1. Any ancestor object has higher precedence than its own ancestors.
+
+  2. The first parent of an object and the first parent's ancestors have
+     higher precedence than the second parent and the second parent's
+     ancestors, and so on, except when this conflicts with the first
+     rule.
+
+   Normally, an object's response to a message is determined by checking
+its own method definitions, and then those of its ancestors in order of
+decreasing precedence(1).  However, it is possible for a method to
+disallow overrides.  If one or more ancestors of an object define
+non-overridable methods, then Coldmud will select the non-overridable
+method defined on the ancestor with the least precedence.
+
+   ---------- Footnotes ----------
+
+   (1)  Because of Coldmud's precedence rules, its multiple-inheritance
+scheme can be described loosely as "left-to-right, up-to-join".  That
+is, Coldmud performs a depth-first traversal of the ancestors digraph,
+ordering the parents from left to right, stopping at an ancestor if it
+will reach the ancestor again later in the traversal.
+
+
+File: coldmud.info,  Node: Messages,  Next: Variables and Parameters,  Prev: Inheritance,  Up: Objects
+
+Messages and Methods
+====================
+
+   Objects interact with each other by sending *messages*.  Messages
+have two components, a name and a list of arguments.  To see how to send
+a message in a `C--' method, see *Note Sending Messages::.
+
+   Coldmud processes a message by looking on the recipient object and
+its ancestors for a method with the same name as the message, following
+the rules given in the previous section.  The recipient's method
+processes the message according to its `C--' instructions, and returns a
+value to the calling object.
+
+   While a message is being processed, the object which received the
+message is called the *current object*.  Only the current object's
+variables can be accessed or changed by the method which processes the
+message; to examine or modify another object, the method must send a
+message to that object.
+
+   If a method definition overrides a definition on an ancestor of the
+current object with lower precedence, the overriding method can *pass*
+the message to the ancestor; see *Note Passing Messages:: for details.
+
+   Methods can use the functions `this()' and `sender()' to determine
+the dbrefs of the current object and the object which sent the message
+to the current object.  The functions `definer()' and `caller()' allow
+methods to determine the dbrefs of the objects which define the current
+method and the calling method.
+
+   Messages to an object are not always sent by another object; they can
+also come from the server.  Coldmud sends `parse', `connect', and
+`disconnect' messages to handler objects of connections, `startup' and
+`heartbeat' messages to the system object, and `connect' and `failed'
+messages to receiver objects of pending connections generated by the
+`connect()' function.  When Coldmud sends a message to an object,
+`sender()' and `caller()' return the integer `0'.
+
+
+File: coldmud.info,  Node: Variables and Parameters,  Next: System Object,  Prev: Messages,  Up: Objects
+
+Variables and Parameters
+========================
+
+   An object's *parameters* gives the names of the variables its
+methods have access to.  An object's *variables* correspond to
+parameters on that object or one of its ancestors.
+
+   The function `add_parameter()' adds a parameter to an object.  Once
+you have created a parameter on an object, the methods on that object
+can use it to refer to a variable on that object or any of its
+descendents, using the `C--' constructs described in *Note Variables::.
+
+   Two objects can have parameters of the same name; a third object
+which inherits from both of them will contain two separate variables for
+those parameters.  Methods on the first object will refer to one
+variable, and methods on the second object will refer to the other.
+Likewise, variables on separate objects are distinct, even though the
+methods which can access them and the parameter used by the method are
+the same.
+
+   Note that this system does not permit children to access the
+variables used by their ancestors directly.  Objects can build on the
+abstractions of their parent objects, but not their internal
+representations.
+
+
+File: coldmud.info,  Node: System Object,  Prev: Variables and Parameters,  Up: Objects
+
+The System Object
+=================
+
+   The system object is a special object for communicating with the
+Coldmud server.  The system object has the dbref `0'.
+
+   At startup time, the server sends a `startup' message to the system
+object, with one argument, a list of strings giving the arguments passed
+on the command line when the server was invoked.
+
+   If you use the `set_heartbeat_freq()' function to enable the
+heartbeat, then the server will send a `heartbeat' message to the
+system object periodically.
+
+   Methods on the system object can call administrative functions such
+as `shutdown()' which ordinary objects are not permitted to call.  In
+most databases, the system object will define methods which allow
+certain authorized objects to access these functions.
+
+
+File: coldmud.info,  Node: Defining Methods,  Next: Errors,  Prev: Objects,  Up: Top
+
+Defining methods
+****************
+
+   A method in Coldmud is an object's definition of how to handle a
+message.  Methods are written in a language called *`C--'*, which
+resembles `C' at first glance.  However, `C--' is a simpler language,
+and it stresses readability instead of conciseness.
+
+   The building blocks of methods are character sequences called
+*tokens*.  From these tokens you can assemble a sequence of
+instructions to the interpreter called *statements*.  You express
+values in statements using *expressions*.
+
+   Methods can return values using a `return' statement.  If a method
+does not explicitly return a value, its return value is the dbref of the
+current object.
+
+   Methods have a limited amount of running time; if a method executes
+too many instructions before returning, it will abort with a `~ticks'
+error, which it cannot catch.  *Note Errors::
+
+* Menu:
+
+* Example Method::              An example `C--' method
+* Tokens::                      The building blocks of methods
+* Method Structure::            Structure of a method
+* Statements::                  Telling the interpreter what to do
+* Expressions::                 Expressing values in `C--'
+
+
+File: coldmud.info,  Node: Example Method,  Next: Tokens,  Up: Defining Methods
+
+Example Method
+==============
+
+   Here is an example of a simple `C--' method.  This method might be
+used in a mud server to handle a `tell_contents' message sent to a
+container object.  Here is the code for the method:
+
+     arg str;
+     var obj;
+     
+     for obj in (contents) {
+         // Tell the string to the object.
+         (| obj.tell(str) |);
+     }
+
+This method takes one argument, `str', a string to send to each object
+in the room.  The method uses a local variable `obj' to traverse the
+list stored in the object variable `contents'.  The body of the method
+is a for loop, which traverses the contents list.  For each element in
+the for list, this method sends a `tell' message with the string.  The
+parenthesis and vertical bar delimiters (`(|' and `|)') surrounding the
+message expression mark it as a *critical expression*.  Errors which
+occur inside a critical expression are ignored; thus, errors which
+occur during the processing of the `tell' messages won't cause the
+`tell_contents' method to abort.
+
+
+File: coldmud.info,  Node: Tokens,  Next: Method Structure,  Prev: Example Method,  Up: Defining Methods
+
+Tokens
+======
+
+   The building blocks of `C--' methods are character sequences called
+*tokens*.  There are many different types of tokens, ranging from
+single characters to lines of text.  `C--' methods are assembled from
+sequences of tokens.
+
+   The following characters and pairs of characters are tokens:
+
+     { } [ ] #[ %[ ( ) (| |) (> <) .. ; , = !
+     - + * / % == != > >= < <= . || && ? | : @
+
+These tokens are used as operators and as punctuation in various types
+of expressions.
+
+   You can use *identifiers* as tokens and as parts of tokens.  An
+identifier is a sequence of alphabetical and numeric characters or
+underlines beginning with an alphabetical character or an underline.
+Identifiers in `C--' are case-sensitive, so the identifiers `car' and
+`CAr' are not equivalent.  The following are valid identifiers:
+
+     we_3_kings
+     obj
+     a
+
+By themselves, identifiers usually represent variables.  However,
+certain identifiers have special meanings to the parser.  These
+*reserved words* are used in writing certain kinds of statements and
+expressions.  They are:
+
+     var if else while for switch case default break continue return
+     catch any with handler pass to in fork atomic non_atomic
+
+   (`fork', `atomic', and `non_atomic' are not actually used by the
+current version of Coldmud, but are reserved for future use.)
+
+   There are several kinds of tokens for denoting literal expressions of
+various data types.  These are *integers*, denoted by a sequence of
+digits; *strings*, denoted by a sequence of characters enclosed in
+double quotes; *dbrefs*, denoted by a sharp (`#') and a number;
+*symbols*, denoted by a single forward quote (`'') and an identifier or
+string; and *error codes*, denoted by a tilde (`~') and an identifier
+or string.  These literals are described more fully in *Note Data
+Types::, along with the data types they represent.
+
+   A *name token* is a dollar sign (`$') followed by an identifier or
+string.  Names refer to objects indirectly; see *Note Names::.
+
+   Tokens which contain identifiers but begin with a distinguishing
+character (that is, symbol tokens, error code tokens, and name tokens)
+relax the restriction that identifiers not begin with an integer.  Thus,
+`$23a' is a valid name token, even though `23a' is not an identifier.
+
+   Finally, a *comment token* is any text on a line after a pair of
+slashes (`//').  Comment tokens can be used as statements in methods;
+such statements are ignored by the interpreter.
+
+
+File: coldmud.info,  Node: Method Structure,  Next: Statements,  Prev: Tokens,  Up: Defining Methods
+
+Method Structure
+================
+
+   A `C--' method has the following structure:
+
+     disallow_overrides;
+     arg ARG1, ARG2, ..., [REST];
+     var VAR1, VAR2, ...;
+     
+     STATEMENT1
+     STATEMENT2
+     .
+     .
+     .
+
+The `disallow_overrides;' declaration indicates a non-overridable
+method (*note Inheritance::.).  Normally, you should omit this
+declaration.
+
+   The `arg' declaration gives a list of argument variables, whose
+values will correspond to the arguments passed with the message.  You
+may omit the `arg' declaration if the method does not take any
+arguments.  If the final argument variable is given in square brackets
+(that is, if you specify REST), then the method can accept a variable
+number of argments; REST will contain a list of the arguments beyond
+the ones corresponding to the argument variables.  If you do not
+specify REST, then the method can accept only the number of arguments
+specified by the argument variables, no more.
+
+   The `var' declaration tells the compiler that the listed identifiers
+should refer to local variables.  You may omit the `var' declaration if
+you do not wish to declare any local variables.
+
+   The statements STATEMENT1, STATEMENT2, ... are the body of the
+method.  They tell the interpreter what the method does.
+
+
+File: coldmud.info,  Node: Statements,  Next: Expressions,  Prev: Method Structure,  Up: Defining Methods
+
+Statements
+==========
+
+   *Statements* are instructions to the interpreter.  Statements can be
+as simple as comments, or they can be complex loops and conditionals.
+However, most statement types in `C--' have simple structures.  Because
+statements can include other statements, you can use these simple
+statement types to build complex directives.
+
+   The following sections describe simple statements, which perform
+simple actions once, conditional statements, which perform different
+actions depending on the value of an expression, looping statements,
+which perform an action multiple times, and error-handling statements,
+which affect how the interpreter handles error conditions.
+
+* Menu:
+
+* Simple Statements::           Performing simple actions
+* Conditional Statements::      Executing instructions conditionally
+* Looping Statements::          Executing instructions repeatedly
+* Error-Handling Statements::	Handling errors
+
+
+File: coldmud.info,  Node: Simple Statements,  Next: Conditional Statements,  Up: Statements
+
+Simple Statements
+-----------------
+
+   The *comment statement* does nothing at all.  A comment statement is
+just a comment token, which is a sequence of two slashes (`//')
+followed by any characters up to the end of the lines.  For instance:
+
+     // This is a comment.
+
+The interpreter ignores comment statements completely; they are for the
+benefit of human readers.  Note that comments in `C--' are actual
+statements, unlike comments in `C', which are filtered out by the
+preprocessor.
+
+   The *expression statement* evaluates an expression and discards its
+value.  The syntax of the expression statement is:
+
+     EXPRESSION;
+
+The following are expression statements:
+
+     3;
+     sender().tell($sys.who());
+
+   The *assignment statement* evaluates an expression and assigns the
+value to a variable.  The syntax of the assignment statement is:
+
+     VARIABLE = EXPRESSION;
+
+The interpreter assigns the value of EXPRESSION to VARIABLE, which is a
+local variable if it has been declared as one, or an object variable on
+the current object if it has not been declared.  *Note Variables::.
+
+   The *compound statement* allows you to treat one or more statements
+as a single statement.  The compound statement has the following syntax:
+
+     {
+         STATEMENT1
+         STATEMENT2
+         .
+         .
+         .
+     }
+
+The interpreter executes each of STATEMENT1, STATEMENT2, ... in turn.
+
+   The *return statement* allows a method to stop exeuting statements
+and to return a value other than the default return value of `this()'.
+The return statement can have either of the following two forms:
+
+     return EXPRESSION;
+     return;
+
+The interpreter stops executing statements in the method and returns the
+value of EXPRESSION, or the dbref of the current object if EXPRESSION
+is not given.
+
+
+File: coldmud.info,  Node: Conditional Statements,  Next: Looping Statements,  Prev: Simple Statements,  Up: Statements
+
+Conditional Statements
+----------------------
+
+   There are three types of conditional statements in `C--'.  The *if
+statement* has the following syntax:
+
+     if (EXPRESSION)
+         STATEMENT
+
+The interpreter evaluates EXPRESSION.  If the value of EXPRESSION is
+true (*note Data Types::.), then the interpreter executes STATEMENT.
+
+   The *if-else statement* is similar to the if statement.  The if-else
+statement has the following syntax:
+
+     if (EXPRESSION)
+         TRUE-STATEMENT
+     else
+         FALSE-STATEMENT
+
+The interpreter evaluates EXPRESSION, as before.  If the value of
+EXPRESSION is true, then the interpreter executes TRUE-STATEMENT;
+otherwise, it executes FALSE-STATEMENT.
+
+   Because the if statement and the if-else statement are similar, they
+can sometimes be ambiguous.  The following code will produce unexpected
+results:
+
+     if (a)
+         if (b) c;
+     else
+         d;
+
+   The indentation suggests that the `else' clause should apply to the
+first `if' clause, but in fact it applies to the more recent one.  You
+can avoid ambiguities like this by using braces to create compound
+statements out of conditional and looping statements, even if there is
+only one of them.  In this case, you might write:
+
+     if (a) {
+         if (b)
+             c;
+     } else {
+         d;
+     }
+
+   The third type of conditional statement is the *switch statement*,
+which allows you to compare one value against a series of other values.
+The switch statement is the most complicated statement type in `C--',
+so we'll start with an example:
+
+     switch (val) {
+         case 0:
+             echo("The value is zero.");
+         case 1 .. 10:
+             echo("The value is between one and ten inclusive.");
+         case 11 .. a:
+             echo("The value is between eleven and a inclusive.");
+         case "foo", "bar".."baz":
+     	echo("The value is \"foo\" or between \"bar\" and \"baz\"");
+         case a .. b, c .. d, 42:
+             count = count + 1;
+             echo("The value is in the counted area.");
+         case ~perm:
+             echo("Permission denied while getting the value.");
+         default:
+             echo("Did not recognize value.");
+     }
+
+This example illustrates all of the capabilities of the switch
+statement.  The expression given by `val' in the example is the
+*controlling expression*, and is compared against each of the cases
+inside the switch body.  Each case has a value or list of values to
+compare against.  The values can be of any type, and need not be
+constant expressions.  You can also specify ranges, using two dots
+(`..') to separate the lower and upper bounds.  The keyword `default'
+specifies an action to perform if no cases were matched by the
+controlling expression.
+
+   Here is a more formal description of the syntax of the switch
+statement:
+
+     switch (CONTROLLING-EXPRESSION) {
+         case EXPR-OR-RANGE, EXPR-OR-RANGE, ...:
+             STATEMENTS
+         case EXPR-OR-RANGE, EXPR-OR-RANGE, ...:
+             STATEMENTS
+         .
+         .
+         .
+         default:
+             DEFAULT-STATEMENT
+     }
+
+When executing a switch statement, the interpreter scans through the
+list of cases and compares CONTROLLING-EXPRESSION against each of the
+lists of values in the cases, evaluating the value lists from left to
+right until there is a match.  The lower and upper bounds of ranges
+must be of the same type and must be either integers or strings, or the
+interpreter will throw a `~type' error.  When the interpreter finds a
+match, it will execute the statement for that case.  The interpreter
+will not continue checking cases after a match.
+
+   If the interpreter does not find a match, it will execute
+DEFAULT-STATEMENT, the statement corresponding to the default case.
+You do not need to provide a default case if you do not wish to provide
+a default action.
+
+   `C' programmers should note that switch statements in `C--' differ
+from switch statements in `C' in several respects.  Because case values
+do not have to be constants, they may conflict, in which case the first
+match will take precedence.  Also, there is no fall-through in `C--'
+switch statements; only the statements corresponding to the matching
+case will be executed.  Because there is no fall-through, the `break'
+statement does not apply to switch statements.  Finally, the default
+case must be placed last in the list of cases if it is given.
+
+
+File: coldmud.info,  Node: Looping Statements,  Next: Error-Handling Statements,  Prev: Conditional Statements,  Up: Statements
+
+Looping Statements
+------------------
+
+   `C--' provides three kinds of looping statements.  These statements
+allow you to traverse a list or a range of numbers, or to execute a
+statement as long as a certain condition is true.  `C--' also provides
+two kinds of jump statements which allow you to prematurely exit from a
+loop or continue onto the next iteration.
+
+   The *for-list statement* allows you to traverse a list.  It has the
+following syntax:
+
+     for VARIABLE in (LIST)
+         STATEMENT
+
+VARIABLE must be the name of a local variable, and LIST must be an
+expression of list type.  The interpreter executes STATEMENT once for
+each element of LIST. VARIABLE contains the list element that the
+interpreter is at.  Here is an example of a method using a for-list
+statement:
+
+     var a, s;
+     
+     a = ["foo", "bar", "baz"];
+     for s in (a)
+         .tell(s);
+
+   You can also iterate over the associations in a dictionary with the
+for-list statement; see *Note Dictionaries::.
+
+   The *for-range statement* allows you to traverse a range of
+integers.  It has the following syntax:
+
+     for VARIABLE in [LOWER .. UPPER]
+         STATEMENT
+
+   As before, VARIABLE must be the name of a local variable.  LOWER and
+UPPER must be expressions of integer type.  The interpreter executes
+STATEMENT once for each number from LOWER to UPPER inclusive.  VARIABLE
+contains the number that the interpreter is at.  Assigning to VARIABLE
+within the loop body will not change the status of the loop; the
+interpreter remembers what number it is at independently of the loop
+index.  Here is an example of a method using a for-range statement:
+
+     var i;
+     
+     for i in [1 .. 10]
+         .tell(tostr(i));
+
+   The *while statement* allows you to execute code as long as a
+condition expression is true.  The while statement has the following
+syntax:
+
+     while (EXPRESSION)
+         STATEMENT
+
+The interpreter continually evaluates EXPRESSION and executes STATEMENT
+until the value of EXPRESSION is false, according to the rules in *Note
+Data Types::.  Here is an example of a method using a while statement:
+
+     var a;
+     
+     a = 1;
+     while (a < 35)
+         a = a * 2;
+     .tell(tostr(a));
+
+   The *break statement* allows you to exit a loop prematurely.  The
+break statement has the following syntax:
+
+     break;
+
+   The interpreter jumps to the end of the innermost for-list,
+for-range, or while statement.
+
+   The *continue statement* allows you to jump to the next iteration of
+a loop.  The continue statement has the following syntax:
+
+     continue;
+
+   The interpreter skips the remainder of the loop body and begins
+another iteration of the innermost for-list, for-range, or while
+statement.
+
+   The break and continue statements do not allow you to break out of
+two loops at once.  `C--' does not provide any general jump mechanism.
+If you find that you require jumps other than break or continue
+statements, then you probably need to reorganize your code.
+
+
+File: coldmud.info,  Node: Error-Handling Statements,  Prev: Looping Statements,  Up: Statements
+
+Error-Handling Statements
+=========================
+
+   The *catch statement* allows you to indicate how errors should be
+handled in a block.  You can use this statement when you anticipate that
+an error might occur for reasons other than your programming errors.
+For instance, you may anticipate being denied permission to perform an
+operation, and use a catch statement to handle this error explicitly.
+You can also use the catch statement to make sure that cleanup
+operations are performed if an error occurs.
+
+   The catch statement has the following syntax:
+
+     catch ERROR CODE, ERROR CODE, ...
+         BODY-STATEMENT
+     with handler
+         HANDLER-STATEMENT
+
+You can substitute the keyword `any' for the list of errors to indicate
+that you wish to catch all errors.  You can leave out the `with
+handler' and the handler statement if you do not wish to do anything in
+the handler.
+
+   If an error listed in the error list is thrown inside
+BODY-STATEMENT, the interpreter will execute the handler rather than
+aborting the method.  After the handler is done, control continues
+after the end of the catch statement, as if BODY-STATEMENT had
+completed with no errors.
+
+   Inside the handler, you can use the function `error()' to determine
+the error code which triggered the handler, the function `error_arg()'
+to retrieve the error argument specified by `throw()' if one weas
+given, and the function `traceback()' to retrieve a list of strings
+describing the propagation of the error down the call stack.  You can
+use the function `rethrow()' to continue propagating an error.
+
+   Here is an example of how you might use a catch statement to
+intelligently handle a `~methodnf' error from the `list_method()'
+function:
+
+     catch ~methodnf {
+         code = list_method(method_name);
+     } with handler {
+         .tell("There is no method named " + tostr(method_name) + ".");
+     }
+
+   Note that critical expressions (*note Error-Handling Expressions::.)
+inside BODY-STATEMENT will override the behavior of the catch
+statement.  For more detail on errors in `C--', see *Note Errors::.
+
+
+File: coldmud.info,  Node: Expressions,  Prev: Statements,  Up: Defining Methods
+
+Expressions
+===========
+
+   You can express values in `C--' methods using EXPRESSIONS.  The
+following sections document the various types of expressions in `C--',
+as well as the types of values they can have when evaluated.
+
+* Menu:
+
+* Data Types::                  Data types and literal expressions
+* Names::			Referring to objects indirectly
+* Lists::                       Constructing and retrieving from lists
+* Dictionaries::		Associating values with data
+* Buffers::			Raw byte values for network I/O
+* Frobs::			Constructing and using frobs
+* Variables::                   Local and object variables
+* Operators::                   Operator syntax and precedence
+* Calling Functions::           Making calls to built-in functions
+* Sending Messages::            Sending messages to other objects
+* Passing Messages::            Passing messages to parents
+* Error-Handling Expressions::	Handling errors
+* Splicing::                    Splicing lists into argument lists
+
+
+File: coldmud.info,  Node: Data Types,  Next: Names,  Up: Expressions
+
+Data Types
+----------
+
+   Every piece of data in `C--' has a type.  This section documents the
+data types in `C--'.  You can produce values of the simpler data types
+(integers, strings, dbrefs, symbols, error codes) can be produced with
+LITERAL expressions; you can produce values of the more complex data
+types (lists, dictionaries, frobs, buffers) with CONSTRUCTOR
+expressions.  As we go, we will explain how to specify or construct
+values of each of the data types, and explain what it means for a value
+of each data type to be true.
+
+   Every piece of data in `C--' has a type and a truth value.  The type
+can be one of:
+
+   * Integer
+
+   * String
+
+   * Dbref
+
+   * List
+
+   * Symbol
+
+   * Error type
+
+   * Frob
+
+   * Dictionary
+
+   * Buffer
+
+   An *integer* is just a number.  Integers can reliably be from
+-2147483648 to +2147483647.  An integer is true if it is not zero.  You
+can denote integer literals in `C--' by writing a sequence of digits,
+optionally preceded by a `-' or `+' sign.
+
+   A *string* is a sequence of printable characters.  A string is true
+if it is not empty.  You can denote string literals in `C--' by
+enclosing a sequence of characters in double quotes (`"').  To include
+a double quote or backslash character in a string literal, precede it
+by a backslash (`\').  The following are string literals:
+
+     "foo"
+     "\"foo\" is a metasyntactic variable."
+     "The backslash (`\\') is a much-abused character in many languages."
+
+   A *dbref* is a reference to an object, which may or may not exist.
+Database references are always true, whether or not they refer to actual
+objects.  You can denote dbref literals in `C--' by preceding a number
+with a sharp (`#'); for example, `#1' and `#267' are valid dbref
+literals.
+
+   A *list* is a collection of objects of any type.  Lists are useful
+for manipulating several objects at once.  A list is true if it is not
+empty.  You can construct a list value by enclosing a comma-separated
+series of expressions in square brackets; for example, `[1, 2, 3]' and
+`[1, ["foo", 'bar], #23]' are valid list construction expressions.
+
+   A *symbol* is a symbolic value.  You can denote symbols in `C--' by
+preceding an identifier or string with an apostrophe (`'').  `'remote',
+`'template', and `'object' are valid symbol literals.  Symbols are
+always true.
+
+   An *error code* identifies a type of error condition.  Both the
+`C--' interpreter and `C--' methods use error codes to identify types
+of errors when they occur.  See *Note Errors:: for information about
+how Coldmud handles errors.  You can denote error code literals in
+`C--' by preceding an identifier or string with a tilde (`~').  Error
+codes are always false.
+
+   A *frob* consists of a *class*, the dbref of an object, and a
+*representation*, a list or dictionary.  Frobs are intended to serve as
+lightweight objects.  You can construct a frob value by enclosing
+expressions for the class and representation in triangular brackets,
+separated by a comma; for instance, `<#73, [1, 2]>' is a valid frob
+construction expression.  Frobs are always true.
+
+   A *dictionary* is a collection of *associations*, each of which has
+a *key* and a *value*.  Dictionaries take up more space than lists, but
+searching for a data value in a dictionary is generally faster than
+searching for data values in lists.  You can construct a dictionary by
+enclosing a comma-separated series of associations in square brackets,
+where each association is a two-element list giving a key and a value,
+and preceding the whole thing with a hash mark (`#').  For instance,
+`#[["foo", 3], ["bar", 'baz]]' is a valid dictionary construction
+expression.  A dictionary is true if it is not empty.
+
+   a *buffer* is an array of unsigned eight-bit values, intended for
+network I/O.  You can construct a buffer by enclosing a comma-separated
+series of integer expressions in square brackets, preceded by a percent
+sign (`%').  For instance, `%[65, 66, 67, 10]' is a valid buffer
+construction expression.  A buffer is true if it is not empty.
+
+   You can get the type of a piece of `C--' data using the `type()'
+function.  The `type()' function returns a symbol corresponding to the
+type of its argument.  This symbol can be `'integer', `'string',
+`'dbref', `'list', `'symbol', `'error', `'frob', or `'dictionary'.
+
+
+File: coldmud.info,  Node: Names,  Next: Lists,  Prev: Data Types,  Up: Expressions
+
+Names
+-----
+
+   A NAME is an indirect reference to an object.  Coldmud translates
+names into dbrefs during method interpretation according to the
+associations made using the administrative function `set_name()'.  A
+NAME EXPRESSION is simply a name token, an identifier or string
+following a dollar sign (`$').
+
+   When the interpreter encounters a name expression, it looks up the
+name to see what dbref it has been assigned by the `set_name()'
+function.  If no such assignment has been made, then the interpreter
+throws a `~namenf' error; otherwise, the value of the name expression
+is the dbref assigned to the name by `set_name()'.
+
+   You can also use the (non-administrative) function `get_name()' to
+look up a symbol as a name.
+
+   The administrative function `del_name()' deletes the association for
+a name.
+
+
+File: coldmud.info,  Node: Lists,  Next: Dictionaries,  Prev: Names,  Up: Expressions
+
+Lists
+-----
+
+   A *list* is a collection of pieces of data of any type.  You can
+create a list in `C--' using a *list construction expression*.  A list
+construction expression has the following syntax:
+
+     [EXPRESSION1, EXPRESSION2, ...]
+
+EXPRESSION1, EXPRESSION2, ... are the elements of the list.  You can
+also splice a list into a list construction expression; see *Note
+Splicing::.  The result of a list construction expression is a list
+containing the values of the expressions.  Here are some examples of
+list construction expressions:
+
+     [1, 2, 3]
+     [a + 5, 'string, [3, "b"], tostr(~none)]
+     []
+
+   To retrieve an element of a list, you can use a *list selection
+expression*, which has the following syntax:
+
+     LIST[ELEMENT]
+
+LIST must be an expression of list type (or string type; see below) and
+ELEMENT is an expression of integer type whose value is between one and
+the length of the list.  The value of a list selection expression is
+the value of the element of LIST numbered by ELEMENT, where the
+elements of LIST are numbered starting from one.  For example, the
+following method returns `3':
+
+     var a;
+     
+     a = ["foo", 2, 'bar, 3, ~parents];
+     return a[4];
+
+You can use the list selection expression with strings as well as with
+lists.  In this case, `C--' treats the string as if it were a list of
+one-character strings.  The following method returns `"p"':
+
+     var a;
+     
+     a = "Depth";
+     return a[3];
+
+   You can also use the list selection expression with dictionaries; we
+will describe this usage in the next section.
+
+   You can look for a piece of data in a list, you can use a LIST
+SEARCH EXPRESSION, which has the following syntax:
+
+     ELEMENT in LIST
+
+The value of this expression is the index of the first occurrance of
+ELEMENT in LIST, or `0' if ELEMENT does not occur in LIST.  The
+following method returns `[3, 0]':
+
+     var a;
+     
+     a = ['foo, "bar", 4 + 2, #77];
+     return [6 in a, 'quux in a];
+
+As with the list selection expression, you can use the list search
+expression with strings as well as with lists.  In this case, both
+ELEMENT and LIST must be strings, and the result is the first position
+at which ELEMENT occurs in LIST, or 0 if it does not occur.
+
+
+File: coldmud.info,  Node: Dictionaries,  Next: Buffers,  Prev: Lists,  Up: Expressions
+
+Dictionaries
+------------
+
+   A *dictionary* is a list of *associations*.  Each association
+contains a *key* and a *value*, both arbitrary `C--' data values.
+Dictionaries take up more space than lists, but allow fast searches.
+Only one association in a dictionary may have a given key.
+
+   Dictionary construction expressions have the following syntax:
+
+     #[[KEY1, VALUE1], [KEY2, VALUE2], ...]
+
+   The result of a dictionary construction expression is a dictionary
+with the keys KEY1, KEY2, ... and the associated values VALUE1, VALUE2,
+....  The following are valid dictionary construction expressions:
+
+     #[["foo", 3], ['bar, 4], [8, [#0, 'startup]]]
+     #[['type, 'and], ['lhs, 3], ['rhs, 0]]
+
+   You can search for the value associated with a key in a dictionary
+using the list selection expression:
+
+     DICT[KEY]
+
+   If any of the associations in DICT have the key KEY, the result of
+this expression is the value associated with that key.  If KEY is not
+the key of any of the associations in DICT, then the interpreter raises
+a `~keynf' error.
+
+   You can iterate over a dictionary's associations using the for-list
+statement; at each step of the for-list statement, the loop index will
+contain a list `[KEY, VALUE]' for the current association.
+
+   The four dictionary manipulation functions `dict_keys()',
+`dict_contains()', `dict_add()', and `dict_del()' allow you to
+manipulate dictionaries in other ways; see the descriptions of each
+function for details.
+
+
+File: coldmud.info,  Node: Buffers,  Next: Frobs,  Prev: Dictionaries,  Up: Expressions
+
+Buffers
+-------
+
+   A *buffer* is a vector of unsigned eight-bit values, intended
+primarily for network I/O.  Although they are not as convenient to use
+as strings, they can contain any character value, while strings can
+contain only printable characters.
+
+   You can construct a buffer using a *buffer construction expression*,
+which has the following syntax:
+
+     %[BYTE1, BYTE2, ...]
+
+   The result of a buffer construction expression is a buffer containing
+the byte values expressed by BYTE1, BYTE2, ..., all of which must be
+integers.  If any of the values of BYTE1, BYTE2, ... cannot fit inside
+an unsigned eight-bit number, then that byte will contain the lower
+order eight bits of the specified number.
+
+   Apart from operations which apply to all data types, the only
+language operations which apply to buffers are the functions whose
+names begin with `buffer_': `buffer_len()', `buffer_retrieve()',
+`buffer_append()', `buffer_replace()', `buffer_add()',
+`buffer_truncate()', `buffer_to_strings()', and
+`buffer_from_strings()'.  The last two functions allow you to convert
+between buffers and lists of strings.
+
+   Coldmud passes data between the object heirarchy and network
+connections in terms of buffers; see *Note Connections:: for details.
+
+
+File: coldmud.info,  Node: Frobs,  Next: Variables,  Prev: Buffers,  Up: Expressions
+
+Frobs
+-----
+
+   A *frob* is a dictionary or list (its *representation*) associated
+with a dbref (its *class*).  Frobs represent a kind of lightweight
+object, with less overhead than real objects.  The encapsulation around
+frobs is not as strong as the encapsulation around real objects, and in
+some respects frobs are not as convenient to work with as real objects.
+In general, objects should be used for long-lasting, complicated,
+changing entities, while frobs should be used for small pieces of data.
+
+   Frob construction expressions have the following syntax:
+
+     <CLASS, REPRESENTATION>
+
+   The result of a frob construction expression is a frob of class
+CLASS, which must be a dbref, with a representation REPRESENTATION,
+which must be a list or dictionary.  In general, you should only use
+the frob construction expression to construct frobs of class `this()',
+but this is not enforced.  The following are valid frob construction
+expressions:
+
+     <#76, #[['type, 'true]]>
+     <#89, ["You cannot go that way."]>
+
+   Apart from operations which apply to all data types, the only
+operations supported on frobs are message-passing and the `class()'
+function.  When you send a message to a frob, the interpreter treats it
+as a message to the frob's class, with the frob's representation
+inserted as the first argument.  The `class()' function returns the
+class of a frob.
+
+
+File: coldmud.info,  Node: Variables,  Next: Operators,  Prev: Frobs,  Up: Expressions
+
+Variables
+---------
+
+   `C--' provides two kinds of variables, *local variables* and *object
+variables*.
+
+   *Local variables* allow methods to temporarily store information.
+To use a local variable in a method, declare the local variable's name
+(an identifier) at the top of the method in a `var' declaration (*note
+Method Structure::.).  The variable's name is then an expression whose
+value is the contents of the variable.  The variable initially contains
+the integer `0'.
+
+   To set the variable's contents, use an *assignment statement*, which
+has the following syntax:
+
+     VARIABLE = VALUE;
+
+   This assigns the value *value* to the variable *variable*. The
+values of a method's local variables are specific to the processing of a
+particular message call; when the method is invoked another time, all of
+its local variables begin with the value `0' again.
+
+   The following example method returns `6':
+
+     var a;
+     
+     a = 3;
+     return a + 3;
+
+   *Object variables* store information for an indefinite period of
+time.  You refer to object variables through parameters, which are
+defined on the current method's defining object (*not* the current
+object).  As with local variables, you can retrieve the value of an
+object variable by writing the name of the parameter which refers to
+that variable, and you can assign to an object variable using an
+assignment statement.  You can also use the `get_var()' and `set_var()'
+functions to perform these operations.  It is an error of type
+`~paramnf' to refer to a parameter which does not exist on the current
+method's defining object.  Object variables begin with the value `0'.
+
+
+File: coldmud.info,  Node: Operators,  Next: Calling Functions,  Prev: Variables,  Up: Expressions
+
+Operators
+---------
+
+   Operators are used to perform simple operations on expression values,
+such as adding two values together.  `C--' provides a variety of
+operators to perform arithmetic and logical operations on data.  Most of
+these operators fall into two syntactical categories: *unary operators*
+and *binary operators*.
+
+   *Unary operators* act on a single expression value.  In `C--', all
+unary operators are single characters which precede expressions.  For
+example, `!a' is the logical negation of the value of the variable `a'.
+
+   *Binary operators* act on two expression values.  For example, `a +
+b' is the sum of the values of the variables `a' and `b'.
+
+   Several operators are neither unary nor binary.  The message operator
+(`.') acts on a value on the left but a message name and an argument
+list on the right (*note Sending Messages::.).  The index operator
+(`[]') uses two punctuation marks to delimit the beginning and end of
+the offset (*note Lists::.).  The conditional operator (`?|') operates
+on three data values (*note Conditional Operators::.).
+
+* Menu:
+
+* Precedence::                  Resolving ambiguous expressions
+* Arithmetic::                  Arithmetic operators
+* Logic::                       Logical and relational operators
+* Conditional Operators::       Conditional operators
+
+
+File: coldmud.info,  Node: Precedence,  Next: Arithmetic,  Up: Operators
+
+Precedence
+..........
+
+   It is easy to write an expression whose order of evaluation is
+unclear.  For instance, the expression `a - b + c' could be parsed as
+`(a - b) + c' or as `a - (b + c)'.  To resolve these conflicts, each
+operator has two properties: *precedence* and *association*.
+
+   *Precedence* determines whether an operator binds more tightly than
+another operator; for instance, `a + b * c' is equivalent to `a + (b *
+c)' because multiplication has higher precedence than addition.
+
+   *Association* determines whether operators at the same precedence
+level associate left to right or right to left; `a - b - c' is
+equivalent to `(a - b) - c' because subtraction associates left to
+right.
+
+   Here is a list of operators grouped by precedence, in order from
+highest precedence to lowest:
+
+   * `.'
+
+   * `[]'
+
+   * `!' and unary `-'
+
+   * `* / %'
+
+   * `+ -'
+
+   * `== != > >= < <='
+
+   * `in'
+
+   * `&&'
+
+   * `||'
+
+   * `?|'
+
+   All operators associate from left to right except the `&&', `||',
+and `?|' operators, which associate from right to left.  You can always
+use parentheses (`(' and `)') to specify the order of evaluation
+explicitly.
+
+
+File: coldmud.info,  Node: Arithmetic,  Next: Logic,  Prev: Precedence,  Up: Operators
+
+Arithmetic
+..........
+
+   `C--' provides seven operators for doing arithmetic, two unary
+operators and five binary operators.  These operators apply primarily to
+integers, but the addition operator also applies to strings.  Using
+these operators on inappropriate data is an error of type `~type'.
+
+   The unary `-' operator takes the negative of an integer value.  The
+expression `-(3 + 4)' has the value `-7'.  The unary `+' operator has
+no effect on its argument, and is provided only for completeness.
+
+   The binary operator `*' performs multiplication on its arguments.
+The expression `(3 * 4)' has the value `12'.  The binary operators `/'
+and `%' perform integer division and modulus, respectively, on their
+arguments.  The expressions `(13 / 5)' and `(13 % 5)' have the values
+`2' and `3' respectively.
+
+   The binary operators `+' and `-' perform addition and subtraction.
+The expressions `(3 + 4)' and `(3 - 4)' have the values `7' and `-1'
+respectively.  The binary `+' operator can also apply to strings and
+lists, in which case it performs concatenation; the expression `("foo"
++ "bar")' has the value `"foobar"', and the expression `(["foo", "bar"]
++ ["baz"])' has the value `["foo", "bar", "baz"]'.
+
+
+File: coldmud.info,  Node: Logic,  Next: Conditional Operators,  Prev: Arithmetic,  Up: Operators
+
+Logic
+.....
+
+   `C--' provides a number of relational and logical operators.  These
+operators are primarily useful for expressing conditions, since they
+return either true or false, represented by the integers `1' and `0'.
+
+   The `==' and `!=' operators test for equality and inequality,
+respectively, of their arguments.  Two pieces of data are equal if they
+have the same type and contain the same value.  Equality of strings is
+not case-sensitive, but equality of symbols is, so `("foo" == "fOo")'
+is true, but `('car == 'CAr)' is false.  Lists are equal if all of
+their elements are equal.
+
+   The `<', `<=', `>=', and `>' operators test whether their left-hand
+arguments are less than, less than or equal to, greater than or equal
+to, or greater than their right-hand arguments, respectively.
+Arguments to these operators must both be of the same type, and must be
+of integer, string, or dbref type.  String comparison is not
+case-sensitive, so `("fooa" < "fooB")' is true, even though the ASCII
+value of `a' is greater than that of `B'.
+
+   The unary `!' operator tests whether its argument is false, thus
+acting as a logical not operation.
+
+
+File: coldmud.info,  Node: Conditional Operators,  Prev: Logic,  Up: Operators
+
+Conditional Operators
+.....................
+
+   The `||' and `&&' operators act as logical or and and operators,
+respectively.  The expression `(a || b)' has the value of `a' if `a' is
+true, or the value of `b' if `a' is false.  The expression `(a && b)'
+has the value of `a' if `a' is false, and the value of `b' if `a' is
+true.  `C--''s logical operators are *short-circuit operators*, meaning
+that the right-hand argument is not evaluated if the left-hand argument
+is sufficient to determine the value of the expression.  This is
+important if the right-hand argument has side-effects or could cause an
+error.
+
+   The `?|' operator is a trinary operator, with the following syntax:
+
+     CONDITION ? TRUE-EXPR | FALSE-EXPR
+
+The result of this expression is the result of TRUE-EXPR if CONDITION
+is true, or the result of FALSE-EXPR if CONDITION is false.  See *Note
+Data Types:: for the definition of truth for `C--' data.
+
+
+File: coldmud.info,  Node: Calling Functions,  Next: Sending Messages,  Prev: Operators,  Up: Expressions
+
+Calling Functions
+-----------------
+
+   A `C--' method can call a built-in function using a *function call
+expression*, which has the following syntax:
+
+     FUNCTION-NAME(ARG1, ARG2, ...)
+
+   FUNCTION-NAME is an identifier naming the function, and ARG1, ARG2,
+... are expressions.  There do not have to be any arguments, but you
+must include the parentheses even if there are no arguments.  The
+arguments are evaluated from left to right.
+
+   As an example, the `pad()' function pads a string argument with
+spaces to a certain length.  The following expression has the value
+`"foo "':
+
+     pad("foo", 6);
+
+   Coldmud's built-in functions allow you to perform string and list
+operations, modify and retrieve information from the current object,
+perform administrative tasks, among other things.  For descriptions of
+the available functions, see *Note Function Descriptions::.
+
+   For various reasons, functions can throw errors. For instance,
+calling a function with an incorrect number of arguments causes a
+`~numargs' error, and calling a function with arguments of incorrect
+type causes a `~type' error.  See *Note Errors:: for information on how
+to handle errors.
+
+
+File: coldmud.info,  Node: Sending Messages,  Next: Passing Messages,  Prev: Calling Functions,  Up: Expressions
+
+Sending Messages
+----------------
+
+   If you want to retrieve information from or modify an object other
+than the current object, you can do so by sending it a message.  You
+can do this with a *message expression*, which has the following syntax:
+
+     RECEIVER.MESSAGE(ARG1, ARG2, ...)
+
+You may omit RECEIVER, in which case it is assumed to be the current
+object.  Otherwise, RECEIVER must be an expression of dbref or frob
+type, and MESSAGE an identifier giving the name of the message.  ARG1,
+ARG2, ... are the arguments to be sent with the message.  The arguments
+are evaluated from left to right.  You must include the parentheses
+around the argument list, even if there are no arguments.  The result
+of a message expression is the value returned by RECEIVER's method for
+the message MESSAGE.
+
+   If RECEIVER is a frob, then the message is sent to the frob's class
+object, with the frob's representation inserted as the first argument.
+If RECEIVER is a dbref, then the message is sent to the object with
+that dbref.
+
+   If RECEIVER is not an object or frob, then the interpreter throws a
+`~type' error.  If RECEIVER is a dbref which does not refer to an
+existing object, or if it is a frob whose class is not an existing
+object, then the interpreter throws an `~objnf' error.  If RECEIVER
+does not have a method defined for MESSAGE, then the interpreter throws
+a `~methodnf' error.  See *Note Errors:: for information on how to
+handle errors.
+
+   Here are some examples of message expressions:
+
+     .tell("I don't see that here.");
+     $sys.wizards()
+     loc.tell_contents(args[1]);
+
+   You can substitute an arbitrary expression for MESSAGE, by enclosing
+it in parentheses.  The syntax for sending an arbitrary message is:
+
+     RECEIVER.(MESSAGE-EXPRESSION)(ARG1, ARG2, ...)
+
+As before, RECEIVER can be omitted, in which case it is assumed to be
+the current object.  MESSAGE-EXPRESSION must be an expression of symbol
+type, or the expression will cause a `~type' error.  You must include
+the parentheses around the argument list, even if there are no
+arguments.
+
+   In order to prevent incidents of infinite recursion, Coldmud has a
+maximum calling depth for messages.  This maximum depth is `128' method
+calls in the current version.  If sending a message would exceed the
+maximum calling depth, the interpreter raises a `~maxdepth' error.
+
+
+File: coldmud.info,  Node: Passing Messages,  Next: Error-Handling Expressions,  Prev: Sending Messages,  Up: Expressions
+
+Passing Messages
+----------------
+
+   A method can pass control of a message to a different ancestor of the
+current object using a *pass expression*, which has the following
+syntax:
+
+     pass(ARG1, ARG2, ...)
+
+The arguments are evaluated from left to right.  The result of this
+expression is the result of calling the "next" method with the
+arguments ARG1, ARG2, ....  The "next" method is defined as the method
+which would be called if the current method, and any other methods
+which have already passed control of the message, were not defined.
+This method may not be defined on an ancestor of the current object;
+you should, in general, not depend on a specific method being called
+when you use a pass expression.
+
+   The called method sees the same current object, sender, and caller as
+the current method.
+
+   The pass expression can cause a `~methodnf' errors if the called
+method does not exist.  See *Note Errors:: for information on how to
+handle errors.
+
+
+File: coldmud.info,  Node: Error-Handling Expressions,  Next: Splicing,  Prev: Passing Messages,  Up: Expressions
+
+Error-Handling Expressions
+--------------------------
+
+   `C--' provides two kinds of expressions for handling errors in
+expressions.  These are the *critical expression* and the *propagation
+expression*.
+
+   The *critical expression* allows you to ignore errors which occur
+inside an expression.  It has the following syntax:
+
+     (| expression |)
+
+   If an error occurs in EXPRESSION, then the interpreter will stop
+evaluating EXPRESSION, and continue to execute the current method as if
+it had succeeded evaluating EXPRESSION.  The value of EXPRESSION will
+be the error code for the error condition which occurred.
+
+   The *propagation expression* allows you to indicate that any errors
+which occur inside an expression are the responsibility of the calling
+routine.  It has the following syntax:
+
+     (> expression <)
+
+   If an unhandled error occurs in EXPRESSION, then it will propagate
+to the calling routine as itself, instead of as `~methoderr'.
+
+   Critical expressions override the behavior of catch statements, so
+that errors which occur within critical expressions do not trigger catch
+error handlers.  Propagation expressions do not override critical
+expressions or catch statements, however; they do not prevent errors
+from being caught, but only determine how errors propagate if they are
+not caught.
+
+   For more information on how `C--' handles errors, see *Note Errors::.
+
+
+File: coldmud.info,  Node: Splicing,  Prev: Error-Handling Expressions,  Up: Expressions
+
+Splicing
+--------
+
+   Whenever you are writing an argument list or a list constructor
+expression, you can splice a list value into the sequence of expressions
+by prepending a list expression with `@'.  For instance, the following
+method returns `['foo, 4, 5, 6, 'quux]':
+
+     var a;
+     
+     a = [4, 5, 6];
+     return ['foo, @a, 'quux];
+
+   You use the splicing operator to pass a message along with all of its
+arguments:
+
+     pass(@args);
+
+   The splicing operator is not listed in the operator precedence list
+(*note Precedence::.).  This is because it is meaningless to talk about,
+say, adding a spliced list to another value.  Using the splicing
+operator never causes an ambiguity.
+
+
+File: coldmud.info,  Node: Errors,  Next: Function Descriptions,  Prev: Defining Methods,  Up: Top
+
+Errors
+******
+
+   When something goes wrong in a `C--' method, the interpreter will
+often throw an error.  Methods can also throw their own errors using the
+`throw()' function.  An error condition consists of an error code (the
+*type* of the error) and a string describing the error.  Methods can
+recognize errors using the error codes; the string appears, along with
+the error code, in the traceback obtainable through the `traceback()'
+function inside a catch handler.
+
+   When the interpreter throws an error, it checks to see how the
+current method handles that error type.  If the error occured in a
+critical expression (*note Error-Handling Expressions::.), then the
+interpreter will cease evaluating the critical expression.  Processing
+of the method will continue as if the interpreter had completed
+evaluation of the critical expression.  The value of the critical
+expression will be the error code associated with the thrown error.  In
+this case, the traceback is not accessible from `traceback()'; in order
+to get a traceback, you must use a catch statement.
+
+   If the error did not occur in a critical expression, but occurred in
+a catch statement which catches the error code (either because it is a
+`catch all' statement or because it lists the error code--*note
+Error-Handling Statements::.), then processing of the method jumps to
+the error handler, if one was provided, or to the end of the catch
+statement if not.  Inside an error handler, you can use the `error()',
+`traceback()', and `rethrow()' functions to retrieve the error or
+traceback associated with the error condition, or continue propagating
+the error.
+
+   If the error did not occur in a critical expression or in an
+appropriate catch statement, then the current method aborts, and the
+interpreter throws an error in the calling method.  Normally, the error
+thrown in the calling routine will have the error code `~methoderr',
+but if the original error occurred in a propagation expression (*note
+Error-Handling Expressions::., then the error code will be the same as
+it was for the original error.  A propagation expression has no effect
+on how an error is handled except to cause it to propagate differently
+to the calling routine.
+
+   You can throw your own errors using the `throw()' function.  This
+does not throw an error in the current method; instead, it exits the
+current method and throws an error in the calling method.  Thus a method
+cannot ignore an error which it threw itself using `throw()'.
+
+   There is one case in which a method cannot catch an
+interpreter-generated error.  Methods have a limited amount of time to
+run, measured in *ticks*.  A method will generally only run out of
+ticks if it gets stuck in an infinite loop.  If a method runs out of
+ticks, then the interpreter will throw a `~ticks' error, which the
+method cannot catch.  This causes the method to abort, which in turn
+causes the interpreter to throw a `~methoderr' error in the calling
+routine.
+
+   You should use critical expressions when you anticipate that you may
+be calling a buggy or undefined method, but you do not wish your own
+method to bomb as a result.  For instance, a method which announces a
+string to every object in a container should probably ignore errors in
+the methods for each individual object which handle receiving the
+string.  You should be careful that your critical expressions are
+correct code, however, because you will not immediately notice errors
+which occur while the interpreter is evaluating them.
+
+   You should use catch statements when you wish to handle errors with
+any kind of sophistication.  The catch statement is much more powerful
+than the critical expression, and is ideal for situations in which
+fine-grain control over error handling is required.
+
+   You should use propagation expressions when your method is an
+intermediary between an outside object and an internal feature.  For
+instance, a method which checks permissions and calls an object function
+such as `list_method()' is acting as an intermediary.  In this case,
+the method should throw the same errors as the `list_method()'
+function, so you should enclose the function call in a propagation
+expression.
+
+
+File: coldmud.info,  Node: Function Descriptions,  Next: Administration,  Prev: Errors,  Up: Top
+
+Function Descriptions
+*********************
+
+   The function descriptions are arranged by category, and
+alphabetically within their category.  You can use the function index
+to look up the description of a function by name.
+
+   Every function can throw a `~numargs' error if passed the wrong
+number of arguments, and most can throw a `~type' error if passed
+arguments of the wrong type.  If a function can throw any other type of
+error, it will be documented in the function's description.
+
+* Menu:
+
+* Data Functions::		Operations on data in general
+* String Functions::		Operations on strings
+* List Functions::		Operations on lists
+* Dictionary Functions::	Operations on dictionaries
+* Buffer Functions::		Operations on buffers
+* Method Functions::		Information about the current method
+* Error Functions::		Handling errors
+* Communication Functions::	Operations on connections
+* Object Functions::		Operations on the current object
+* Administrative Functions::	Privileged operations
+* Miscellaneous Functions::	Miscellaneous operations
+
+
+File: coldmud.info,  Node: Data Functions,  Next: String Functions,  Up: Function Descriptions
+
+Data functions
+==============
+
+   The functions described in this section allow you to perform various
+operations on data.  Operations specific to strings or lists are grouped
+in their own sections.
+
+* Menu:
+
+* class::			Get the class of a frob
+* todbref::			Convert integer or string to a dbref
+* toerr::			Convert a string to an error code
+* toint::			Convert a string or dbref to an integer
+* toliteral::			Convert any data to a literal expression
+* tostr::			Convert any data to a string
+* tosym::			Convert a string to a symbol
+* type::			Retrieve the type of a piece of data
+* valid::			Check if data is a valid dbref
+
+
+File: coldmud.info,  Node: class,  Next: todbref,  Up: Data Functions
+
+class
+-----
+
+     class(FROB)
+
+   This function returns the class of a frob.  See *Note Frobs:: for
+details on frobs.
+
+
+File: coldmud.info,  Node: todbref,  Next: toerr,  Prev: class,  Up: Data Functions
+
+todbref
+-------
+
+     todbref(NUMBER)
+
+   This function converts *number* to a dbref.
+
+   Examples:
+
+     todbref(0)
+          => #0
+
+
+File: coldmud.info,  Node: toerr,  Next: toint,  Prev: todbref,  Up: Data Functions
+
+toerr
+-----
+
+     toerr(STRING)
+
+   This function converts *string* to an error code.  *string* can be
+any string; it does not have to be a valid identifier.
+
+   Examples:
+
+     toerr("foo")
+          => ~foo
+
+
+File: coldmud.info,  Node: toint,  Next: toliteral,  Prev: toerr,  Up: Data Functions
+
+toint
+-----
+
+     toint(STRING)
+
+   This function converts *string* to an integer.  If *string* is not a
+number, the resulting integer will be `0'.
+
+   Examples:
+
+     toint("67")
+          => 67
+     toint("foo")
+          => 0
+
+
+File: coldmud.info,  Node: toliteral,  Next: tostr,  Prev: toint,  Up: Data Functions
+
+toliteral
+---------
+
+     toliteral(DATA)
+
+   This function converts any data to a `C--' literal or constructor
+expression which, when read by the interpreter, will result in the same
+data object.
+
+   Examples:
+
+     toliteral([3, "foo", 'bar, #60, ~none])
+          => "[3, \"foo\", 'bar, #60, ~none]"
+     toliteral(tosym("foo-" + tostr(3 + 4)))
+          => "tosym(\"foo-7\")"
+     toliteral(<#56, #[['type, 'obj], ['obj, #22]]>)
+          => "<#56, #[['type, 'obj], ['obj, #22]]>"
+
+
+File: coldmud.info,  Node: tostr,  Next: tosym,  Prev: toliteral,  Up: Data Functions
+
+tostr
+-----
+
+     tostr(DATA)
+
+   This function converts any data to a string representation of it.
+For strings, the string representation is the string itself; for
+symbols and error codes, the string representation is the identifier
+part of the data object converted to a string value; for lists and
+frobs, the string representations are `"<list>"' and `"<frob>"'
+respectively; for integers and dbrefs, `tostr()' is equivalent to
+`toliteral()'.
+
+   Examples:
+
+     tostr(3)
+         => "3"
+     tostr("foo")
+         => "foo"
+     tostr(#0)
+         => "#0"
+     tostr([2, 3, 4])
+         => "<list>"
+     tostr('foo)
+         => "foo"
+     tostr(~methodnf)
+         => "methodnf"
+     tostr(<#66, #[['type, 'obj], ['obj, #40]]>)
+         => "<frob>"
+
+
+File: coldmud.info,  Node: tosym,  Next: type,  Prev: tostr,  Up: Data Functions
+
+tosym
+-----
+
+     tosym(STRING)
+
+   This function converts *string* into a symbol.  *string* can be any
+string; it does not have to be a valid identifier.
+
+   Examples:
+
+     tosym("foo")
+          => 'foo
+
+
+File: coldmud.info,  Node: type,  Next: valid,  Prev: tosym,  Up: Data Functions
+
+type
+----
+
+     type(DATA)
+
+   This function returns a symbol giving the type of DATA.  The return
+value is one of `'integer', `'string', `'dbref', `'list', `'symbol', or
+`'error'.
+
+   Examples:
+
+     type(5)
+          => 'integer
+     type([6, 'foo, "bar"])
+          => 'list
+     type(<#44, #[['type, 'obj], ['obj, #20]]>)
+          => 'frob
+
+
+File: coldmud.info,  Node: valid,  Prev: type,  Up: Data Functions
+
+valid
+-----
+
+     valid(DATA)
+
+   This function returns `1' if DATA is a dbref and is valid, or `0'
+otherwise.  A dbref is valid if it refers to an object that exists in
+the database.
+
+   Examples:
+
+     valid(#0)
+          => 1
+     valid('foo)
+          => 0
+
+
+File: coldmud.info,  Node: String Functions,  Next: List Functions,  Prev: Data Functions,  Up: Function Descriptions
+
+String Functions
+================
+
+   The functions described in this section allow you to perform
+operations on strings.  All of the functions described in this section
+are case-insensitive except for `strcmp()' and, if specified,
+`match_regexp()'.
+
+* Menu:
+
+* crypt::                       Perform one-way encryption on a string
+* explode::                     Get a list of words in a string
+* lowercase::			Convert a string to lowercase
+* match_begin::                 Match against the beginnings of words
+* match_pattern::               Match against a wildcard pattern
+* match_regexp::		Match against a regular expression
+* match_template::              Match against a command template
+* pad::                         Pad a string to a given length
+* strcmp::			Case-sensitive comparison of two strings
+* strlen::			Get the length of a string
+* strsub::                      Substitute text within a string
+* substr::                      Get a substring of a string
+* uppercase::			Convert a string to uppercase
+
+
+File: coldmud.info,  Node: crypt,  Next: explode,  Up: String Functions
+
+crypt
+-----
+
+     crypt(STRING)
+     crypt(STRING, SALT)
+
+   This function performs one-way encryption on STRING, using the host
+system's `crypt()' library routine.  If SALT is specified, then it must
+be a two-character string; otherwise, a salt is chosen randomly.  The
+return value of `crypt()' is the encrypted string; the first two
+characters of the encrypted string are the salt used.
+
+   The encryption performed by this function has the property that it is
+very difficult to find a string which will produce a given result;
+however, a given string and a given salt will always yield the same
+encrypted string.
+
+   Examples:
+
+     crypt("foo", "ab")
+          => "abQ9KY.KfrYrc"
+
+
+File: coldmud.info,  Node: explode,  Next: lowercase,  Prev: crypt,  Up: String Functions
+
+explode
+-------
+
+     explode(STRING)
+     explode(STRING, SEPARATOR, [WANT-BLANKS])
+
+   This function returns a list of the words in STRING.  If the string
+SEPARATOR is specified, then it is used as the word separator;
+otherwise a space (`" "') is used.  If the optional argument
+WANT-BLANKS is specified and is true, `explode()' will include
+zero-length words in the returned list; otherwise, it will not.
+
+   Examples:
+
+     explode(" foo  bar baz")
+          => ["foo", "bar", "baz"]
+     explode("foo:bar:baz", ":")
+          => ["foo", "bar", "baz"]
+
+
+File: coldmud.info,  Node: lowercase,  Next: match_begin,  Prev: explode,  Up: String Functions
+
+lowercase
+---------
+
+     lowercase(STRING)
+
+   This function returns the result of changing each uppercase
+character in STRING to lowercase.
+
+     lowercase("fOOBAr 23")
+          => "foobar 23"
+
+
+File: coldmud.info,  Node: match_begin,  Next: match_pattern,  Prev: lowercase,  Up: String Functions
+
+match_begin
+-----------
+
+     match_begin(STRING, SEARCH)
+     match_begin(STRING, SEARCH, SEPARATOR)
+
+   This function looks for the string SEARCH at the beginning of each
+word in STRING.  The word separator is given by the string SEPARATOR if
+it is specified; otherwise, a space (`" "') is used.  The return value
+of `match_begin()' is `1' if SEARCH was found at the beginning of a
+word in STRING, or `0' if not.
+
+   Examples:
+
+     match_begin("foo:bar:baz", "fo", ":")
+          => 1
+     match_begin("foo bar baz", "ar")
+          => 0
+
+
+File: coldmud.info,  Node: match_pattern,  Next: match_regexp,  Prev: match_begin,  Up: String Functions
+
+match_pattern
+-------------
+
+     match_pattern(PATTERN, STRING)
+
+   This function matches the wildcard pattern PATTERN against STRING.
+A wildcard pattern is a string with asterixes (`*') signifying
+wildcards.  A regular character matches itself, while a wildcard
+matches any number of arbitrary characters.  The return value of
+`match_pattern()' is a list of the substrings of STRING which matched
+the wildcards in PATTERN, or `0' if the match fails.
+
+   `match_pattern()' allows you to do simple character-based matching.
+For matching against command formats, however, you should use the
+`match_template()' function.
+
+   Examples:
+
+     match_pattern("*", "foobar")
+          => ["foobar"]
+     match_pattern("foo * bar * baz", "foo quux bar quuux baz")
+          => ["quux", "quuux"]
+     match_pattern("foo * bar", "baz")
+          => 0
+
+
+File: coldmud.info,  Node: match_regexp,  Next: match_template,  Prev: match_pattern,  Up: String Functions
+
+match_regexp
+------------
+
+     match_regexp(REGEXP, STRING, [CASE_MATTERS])
+
+   This function matches the regular expression REGEXP, a
+string,against the string STRING.  If CASE_MATTERS is specified and is
+true, the match is case-sensitive; otherwise, it is case-insensitive.
+If the match succeeds, `match_regexp()' returns a ten-element list
+giving the substitutions for the match (see below); otherwise,
+`match_regexp()' returns 0.
+
+   Coldmud uses a regular expression matcher written by Henry Spencer.
+Its syntax is very similar to the regular expression syntax used by Unix
+utilities like `ed' or `egrep'.  Here is Spencer's description of his
+regular expression syntax:
+
+     A regular expression is zero or more branches, separated by `|'.
+     It matches anything that matches one of the branches.
+
+     A branch is zero or more pieces, concatenated.  It matches a match
+     for the first, followed by a match for the second, etc.
+
+     A piece is an atom possibly followed by `*', `+', or `?'.  An atom
+     followed by `*' matches a sequence of 0 or more matches of the
+     atom.  An atom followed by `+' matches a sequence of 1 or more
+     matches of the atom.  An atom followed by `?' matches a match of
+     the atom, or the null string.
+
+     An atom is a regular expression in parentheses (matching a match
+     for the regular expression), a range (see below), `.' (matching
+     any single character), `^' (matching the null string at the
+     beginning of the input string), `$' (matching the null string at
+     the end of the input string), a `\' followed by a single character
+     (matching that character), or a single character with no other
+     significance (matching that character).
+
+     A range is a sequence of characters enclosed in `[]'.  It normally
+     matches any single character from the sequence.  If the sequence
+     begins with `^', it matches any single character not from the rest
+     of the sequence.  If two characters in the sequence are separated
+     by `-', this is shorthand for the full list of ASCII characters
+     between them (e.g.  `[0-9]' matches any decimal digit).  To
+     include a literal `]' in the sequence, make it the first character
+     (following a possible `^').  To include a literal `-', make it the
+     first or last character.
+
+   The substitutions are the text in STRING which matches the
+parenthesized subexpressions in REGEXP.  The first substitution is the
+text in STRING which matches the whole regexp.  Thus, a regular
+expression can contain no more than nine parenthesized subexpressions.
+Substitutions are returned as two-element lists `[START, LEN]' giving
+the index of the matching text in STRING and the length of the text.
+When the substitutions are ambiguous, leftmost `*' matches are always
+as long as possible.
+
+   If REGEXP is not a valid regular expression, `match_regexp()' throws
+a `~regexp' error.
+
+   Examples:
+
+     match_regexp("bar", "fooBAR")
+          => [[4, 3], [0, 0], [0, 0], [0, 0], [0, 0],
+          [0, 0], [0, 0], [0, 0], [0, 0], [0, 0]]
+     match_regexp("^([^ ]+) says, \"(.*)\"$", "Greg says, \"Hello.\"")
+          => [[1, 19], [1, 4], [13, 6], [0, 0], [0, 0],
+          [0, 0], [0, 0], [0, 0], [0, 0], [0, 0]]
+     match_regexp("[0-9]+", " 300 100 200 ")
+          => [[2, 3], [0, 0], [0, 0], [0, 0], [0, 0],
+          [0, 0], [0, 0], [0, 0], [0, 0], [0, 0]]
+     match_regexp("foo", "bar")
+          => 0
+     match_regexp("foo", "Foo", 1)
+          => 0
+
+
+File: coldmud.info,  Node: match_template,  Next: pad,  Prev: match_regexp,  Up: String Functions
+
+match_template
+--------------
+
+     match_template(TEMPLATE, STRING)
+
+   This function matches the template TEMPLATE against the command
+STRING.  The return value of `match_template()' is a list of fields
+resulting from the template match, or `0' if the match fails or if
+TEMPLATE is an invalid template.
+
+   A *template* is a sequence of word-patterns and wildcards separated
+by spaces, with wildcards never occurring more than one at a time.  A
+*word-pattern* is a sequence of words separated by pipe characters
+(`|').  A word is a sequence of alphanumeric characters, with an
+optional question mark (`?') indicating the beginning of an allowed
+partial match.  A *wildcard* is either a simple wildcard, represented
+by an asterix (`*') or a *coupled wildcard*, represented by the
+three-character sequence `*=*'.
+
+   That definition of a template is confusing, so we will now go back
+and explain each component of a template in more detail.
+
+   A *word-pattern* is a list of words separated by pipe characters.  A
+word-pattern matches any of the words contained in it.  The
+word-pattern `"look|examine"' matches either of the words `"look"' or
+`"examine"'.  The word separator for template matching is always a
+space.
+
+   A word can include a question mark (`?') to indicate that partial
+matches that extend at least as far as the question mark are okay.  The
+word pattern `"look|ex?amine"' matches any of the words `"look"',
+`"ex"', `"exa"', `"exam"', `"exami"', `"examin"', and `"examine"'.
+
+   When a word-pattern successfully matches a word in STRING, it
+results in a *field*, or string in the returned list.  This field
+contains the word which matched the word-pattern.
+
+   A *simple wildcard* is represented by an asterix (`*').  A simple
+wildcard matches any number of words in *string*.  If the wildcard is
+followed by a word-pattern in *template*, then it can also match a
+*quoted wildcard match*.
+
+   A quoted wildcard match is just like a `C--' string literal: it
+begins and ends with a double quote (`"'), and can include a literal
+double quote or backslash by preceding the character with a backslash
+(`\').  If the simple wildcard is followed by a word-pattern, and the
+words in STRING that the wildcard would match begin with a double
+quote, then the match must be a quoted wildcard match or the match
+fails, even if the match would have succeeded if the words were not
+treated as a quoted wildcard match.  However, if the words that the
+wildcard would match begin with a backslash followed by a double quote,
+then the backslash is ignored and the double quote and the text
+following it are treated as regular words.
+
+   The template `"* bar"' matches any of the following strings:
+
+     foo bar
+     foo baz bar
+     "foo bar \\ \" baz" bar
+     \"foo baz bar
+
+   Matching against a simple wildcard produces one field, the words that
+the simple wildcard matched.  If the wildcard matches a quoted wildcard
+match, then the beginning and ending double quotes are stripped out of
+the resulting field, as well as any backslashes used to escape
+characters inside the double quotes.
+
+   A *coupled wildcard* is represented by the three-character sequence
+`*=*'.  It matches any sequence of words containing an equal sign
+(`='), and results in two fields, the text before the equal sign and
+the text after it.  Any spaces surrounding the equal sign are ignored
+and do not show up in the resulting fields.  The text before the equal
+sign can be a quoted wildcard match (as before, if it begins with a
+double quote, then it must be a quoted wildcard match or the match
+fails, unless the initial double quote is escaped by a backslash).  If
+the coupled wildcard is followed by a word pattern, then the text after
+the equal sign can also be a quoted wildcard match.
+
+   The coupled wildcard is a special feature intended for parsing
+TinyMUD command formats.  If possible, its use should be avoided.
+
+   If TEMPLATE is invalid, then the match usually fails, although this
+is not guaranteed.
+
+   Examples:
+
+     match_template("@desc?ribe * as *", "@descr me as foobar")
+          => ["@descr", "me", "as", "foobar"]
+     match_template("@desc?ribe * as *", "@desc \"as is\" as foobar")
+          => ["@desc", "as is", "as", "foobar"]
+     match_template("@desc?ribe * as *", "@desc \"as\" is as foobar")
+          => 0
+     match_template("@desc?ribe * as *", "@desc \\\"as\" is as foobar")
+          => ["@desc", "\"as\" is", "as", "foobar"]
+     match_template("@desc?ribe *=*", "@descr me =foobar")
+          => ["@descr", "me", "foobar"]
+     match_template("@desc?ribe *=*", "@desc \"2+2=4\"= an equation")
+          => ["@desc", "2+2=4", "an equation"]
+     match_template("l?ook|ex?amine *", "look at rose")
+          => ["look", "at rose"]
+
+
+File: coldmud.info,  Node: pad,  Next: strcmp,  Prev: match_template,  Up: String Functions
+
+pad
+---
+
+     pad(STRING, LENGTH)
+     pad(STRING, LENGTH, FILLER)
+
+   This function pads or truncates STRING to the length LENGTH.  If
+FILLER is specified, then it must be a single-character string to use
+as the filler character; otherwise, a space is used.  If LENGTH is
+greater than the length of STRING, then PAD adds filler characters on
+the right; however, you can force PAD to add filler on the left by
+specifying LENGTH as a negative number.
+
+   Examples:
+
+     pad("foo", 6)
+          => "foo   "
+     pad("foobar", 3)
+          => "foo"
+     pad(tostr(29), -4, "0")
+          => "0029"
+
+
+File: coldmud.info,  Node: strcmp,  Next: strlen,  Prev: pad,  Up: String Functions
+
+strcmp
+------
+
+     strcmp(STRING1, STRING2)
+
+   This function compares STRING1 against STRING2 and returns zero if
+they are equal, greater than zero if STRING1 is lexically greater than
+STRING2, and less than zero if STRING1 is lexically less than STRING2.
+The comparison performed by `strcmp()' is case-sensitive.
+
+     strcmp("Foo", "bar")
+          => -28
+     strcmp("cashmir", "cashmiR")
+          => 32
+     strcmp("foo", "foo")
+          => 0
+
+
+File: coldmud.info,  Node: strlen,  Next: strsub,  Prev: strcmp,  Up: String Functions
+
+strlen
+------
+
+     strlen(STRING)
+
+   This function returns the length of STRING.
+
+   Examples:
+
+     length("foo")
+          => 3
+
+
+File: coldmud.info,  Node: strsub,  Next: substr,  Prev: strlen,  Up: String Functions
+
+strsub
+------
+
+     strsub(STRING, SEARCH, REPLACE)
+
+   This function returns the result of replacing each occurrence of the
+string SEARCH in STRING with the string REPLACE.
+
+   Examples:
+
+     strsub("foobar", "bar", "baz")
+          => "foobaz"
+
+
+File: coldmud.info,  Node: substr,  Next: uppercase,  Prev: strsub,  Up: String Functions
+
+substr
+------
+
+     substr(STRING, START)
+     substr(STRING, START, LENGTH)
+
+   This function returns a substring of STRING beginning at the
+character numbered by START.  If LENGTH is specified, then the
+substring has that length; otherwise, the length is given by
+`(length(STRING) - (START - 1))'.  If START is less than `1', if the
+length of the substring is negative, or if the sum of START and LENGTH
+is greater than one more than the length of the string, then `substr()'
+throws a `~range' error.
+
+   Examples:
+
+     substr("foobar", 2, 3)
+          => "oob"
+     substr("foobar", 3)
+          => "obar"
+     substr("foobar", 7)
+          => ""
+
+
+File: coldmud.info,  Node: uppercase,  Prev: substr,  Up: String Functions
+
+uppercase
+---------
+
+     uppercase(STRING)
+
+   This function returns the result of changing each lowercase
+character in STRING to uppercase.
+
+     uppercase("fOOBAr 23")
+          => "FOOBAR 23"
+
+
+File: coldmud.info,  Node: List Functions,  Next: Dictionary Functions,  Prev: String Functions,  Up: Function Descriptions
+
+List Functions
+==============
+
+   The functions described in this section allow you to perform
+operations on list.  None of these functions actually modify the lists
+passed as arguments; instead, they return modified lists.
+
+* Menu:
+
+* delete::                      Delete an element of a list
+* insert::                      Insert an element in a list
+* listlen::			Get the length of a list
+* replace::                     Replace an element in a list
+* setadd::                      Add an element to a "set"
+* setremove::                   Remove an element from a "set"
+* sublist::                     Get a sublist of a list
+* union::			Get the union of two lists
+
+
+File: coldmud.info,  Node: delete,  Next: insert,  Up: List Functions
+
+delete
+------
+
+     delete(LIST, POSITION)
+
+   This function returns the result of deleting the element of LIST
+numbered by the integer POSITION.  If POSITION is less than `1' or is
+greater than the length of LIST, then `delete()' throws a `~range'
+error.
+
+   Examples:
+
+     delete([2, 3, 4], 2)
+          => [2, 4]
+
+
+File: coldmud.info,  Node: insert,  Next: listlen,  Prev: delete,  Up: List Functions
+
+insert
+------
+
+     insert(LIST, POSITION, DATA)
+
+   This function returns the result of inserting DATA into LIST before
+the element numbered by the integer POSITION.  If POSITION is less than
+one or is more than one more than the length of LIST, then `insert()'
+throws a `~range' error.
+
+   Examples:
+
+     insert([2, 3, 4], 3, 'foo)
+          => [2, 3, 'foo, 4]
+     insert(["foo", 'bar, ~none], 4, 'baz)
+          => ["foo", 'bar, ~none, 'baz]
+
+
+File: coldmud.info,  Node: listlen,  Next: replace,  Prev: insert,  Up: List Functions
+
+listlen
+-------
+
+     listlen(LIST)
+
+   This function returns the length of LIST.
+
+   Examples:
+
+     length([2, "foo", 'bar])
+          => 3
+
+
+File: coldmud.info,  Node: replace,  Next: setadd,  Prev: listlen,  Up: List Functions
+
+replace
+-------
+
+     replace(LIST, POSITION, DATA)
+
+   This function returns the result of replacing the element of LIST
+numbered by POSITION with DATA.  If POSITION is less than one or is
+greater than the length of LIST, then `replace()' throws a `~range'
+error.
+
+   Examples:
+
+     replace([2, 3, 4], 2, 'foo)
+          => [2, 'foo, 4]
+
+
+File: coldmud.info,  Node: setadd,  Next: setremove,  Prev: replace,  Up: List Functions
+
+setadd
+------
+
+     setadd(LIST, DATA)
+
+   This function returns the result of adding DATA to the end of LIST
+if it was not already somewhere in LIST.  If DATA was already in LIST,
+then `setadd()' returns LIST unmodified.
+
+   Examples:
+
+     setadd([2, 3, 4], 'foo)
+          => [2, 3, 4, 'foo]
+     setadd([2, 3, 4], 3)
+          => [2, 3, 4]
+
+
+File: coldmud.info,  Node: setremove,  Next: sublist,  Prev: setadd,  Up: List Functions
+
+setremove
+---------
+
+     setremove(LIST, DATA)
+
+   This function returns the result of removing the first occurrence of
+DATA from LIST if DATA exists in LIST.  If DATA does not exist in LIST,
+then `setremove()' returns LIST unmodified.
+
+   Examples:
+
+     setremove([2, 3, 4, 'foo], 'foo)
+          => [2, 3, 4]
+     setremove([2, 3, 4], 5)
+          => [2, 3, 4]
+     setremove([2, 3, 2, 4], 2)
+          => [3, 2, 4]
+
+
+File: coldmud.info,  Node: sublist,  Next: union,  Prev: setremove,  Up: List Functions
+
+sublist
+-------
+
+     sublist(LIST, START)
+     sublist(LIST, START, LENGTH)
+
+   This function returns a sublist of LIST beginning at the element
+numbered by START.  If LENGTH is specified, then the sublist has that
+length; otherwise, the length is given by `(length(LIST) - (START -
+1))'.  If START is less than `1', if the length of the sublist is
+negative, or if the sum of START and LENGTH is greater than one more
+than the length of the list, then `sublist()' throws a `~range' error.
+
+   Examples:
+
+     sublist([2, 3, 4, 5, 6, 7], 2, 3)
+          => [3, 4, 5]
+     sublist([2, 3, 4, 5, 6, 7], 3)
+          => [4, 5, 6, 7]
+     sublist([2, 3, 4, 5, 6, 7], 7)
+          => []
+
+
+File: coldmud.info,  Node: union,  Prev: sublist,  Up: List Functions
+
+union
+-----
+
+     union(LIST1, LIST2)
+
+   This function returns the result of adding each element of LIST2
+which does not already exist in LIST1 to the elements of LIST1.
+Elements which exist in LIST2 more than once will only be added once,
+but duplicate elements in LIST1 will remain.
+
+     union([2, 3, 4], [4, 5, 4, 6])
+          => [2, 3, 4, 5, 6]
+     union([2, 2, 4, 5], [4, 5, 6, 6, 7])
+          => [2, 2, 4, 5, 6, 7])
+
+
+File: coldmud.info,  Node: Dictionary Functions,  Next: Buffer Functions,  Prev: List Functions,  Up: Function Descriptions
+
+Dictionary Functions
+====================
+
+   The functions described in this section perform operations on
+dictionaries.  These options do not actually modify the dictionaries
+they accept as arguments; instead, they return the modified dictionaries
+as their return values.
+
+* Menu:
+
+* dict_add::			Add an association to a dictionary
+* dict_add_elem::		Add an element to a list value
+* dict_contains::		Determine if a key is in a dictionary
+* dict_del::			Delete an association to a dictionary
+* dict_del_elem::		Remove an element from a list value
+* dict_keys::			Get a list of keys in a dictionary
+
+
+File: coldmud.info,  Node: dict_add,  Next: dict_add_elem,  Up: Dictionary Functions
+
+dict_add
+--------
+
+     dict_add(DICTIONARY, KEY, VALUE)
+
+   This function returns the result of adding the association `[KEY,
+VALUE]' to the dictionary DICTIONARY.  If KEY already exists in
+DICTIONARY, then `dict_add()' replaces the value of that key with VALUE.
+
+   Examples:
+
+     dict_add(#[["foo", "bar"]], 3, 'quux)
+          => #[["foo", "bar"], [3, 'quux]]
+     dict_add(#[["foo", 1], ["bar", 2], ["baz", 3]], "bar", 4)
+          => #[["foo", 1], ["bar", 4], ["baz", 3]]
+
+
+File: coldmud.info,  Node: dict_add_elem,  Next: dict_contains,  Prev: dict_add,  Up: Dictionary Functions
+
+dict_add_elem
+-------------
+
+     dict_add_elem(DICTIONARY, KEY, ELEMENT)
+
+   This function returns the result of adding ELEMENT to the list value
+KEY in DICTIONARY.  If DICTIONARY has no association with key KEY, then
+`dict_add_elem()' adds an association `[KEY, [ELEMENT]]' to DICTIONARY.
+If DICTIONARY has an association with key KEY, and the value part of
+the association is a list, then `dict_add_elem()' adds ELEMENT to the
+end of that list.  If DICTIONARY has an association with key KEY, but
+the value part of the association is not a list, then `dict_add_elem()'
+throws a `~type' error.
+
+   Examples:
+
+     dict_add_elem(#[["foo", ["bar"]]], "foo", "baz")
+          => #[["foo", ["bar", "baz"]]]
+     dict_add_elem(#[], "foo", "bar")
+          => #[["foo", ["bar"]]]
+
+
+File: coldmud.info,  Node: dict_contains,  Next: dict_del,  Prev: dict_add_elem,  Up: Dictionary Functions
+
+dict_contains
+-------------
+
+     dict_contains(DICTIONARY, KEY)
+
+   This function returns 1 if there is an association in DICTIONARY
+with the key KEY, or 0 otherwise.
+
+   Examples:
+
+     dict_contains(#[["foo", "bar"]], "foo")
+          => 1
+     dict_contains(#[["foo", "bar"]], "bar")
+          => 0
+
+
+File: coldmud.info,  Node: dict_del,  Next: dict_del_elem,  Prev: dict_contains,  Up: Dictionary Functions
+
+dict_del
+--------
+
+     dict_del(DICTIONARY, KEY)
+
+   This function returns the result of removing the association in
+DICTIONARY which has the key KEY.  If there is no such association,
+then `dict_del()' raises a `~keynf' exception.
+
+     dict_del(#[["foo", 1], ["bar", 2]], "foo")
+          => #[["bar", 2]]
+
+
+File: coldmud.info,  Node: dict_del_elem,  Next: dict_keys,  Prev: dict_del,  Up: Dictionary Functions
+
+dict_del_elem
+-------------
+
+     dict_del_elem(DICTIONARY, KEY, ELEMENT)
+
+   This function returns the result of removing ELEMENT from the list
+value of KEY in DICTIONARY.  If DICTIONARY contains no association with
+key KEY, then `dict_del_elem()' throws a `~keynf' error.  If DICTIONARY
+contains an association with key KEY, and it is not a list, then
+`dict_del_elem()' throws a `~type' error.
+
+   Assuming that DICTIONARY contains an association with key KEY, and
+it is a list, `dict_del_elem()' removes the first occurrence of ELEMENT
+in the list if ELEMENT occurs in the list.  If the resulting list is an
+empty list, then `dict_del_elem()' removes the association from
+DICTIONARY altogether.  If ELEMENT does not occur in the list, then
+`dict_del_elem()' returns DICTIONARY unchanged.
+
+   Examples:
+
+     dict_del_elem(#[["foo", ["bar", "baz"]]], "foo", "bar")
+          => #[["foo", ["baz"]]]
+     dict_del_elem(#[["foo", ["baz"]]], "foo", "baz")
+          => #[]
+
+
+File: coldmud.info,  Node: dict_keys,  Prev: dict_del_elem,  Up: Dictionary Functions
+
+dict_keys
+---------
+
+     dict_keys(DICTIONARY)
+
+   This function returns a list of the keys of the associations in
+DICTIONARY.
+
+     dict_keys(#[["foo", 1"], ["bar", 2], ['baz, 3]])
+          => ["foo", "bar", 'baz]
+
+
+File: coldmud.info,  Node: Buffer Functions,  Next: Method Functions,  Prev: Dictionary Functions,  Up: Function Descriptions
+
+Buffer Functions
+================
+
+   The functions described in this section apply to buffers.  As with
+strings and lists, these functions will not actually modify any buffers
+passed as arguments, but will instead return the results of performing
+modifications on the buffers.
+
+* Menu:
+
+* buffer_add::			Add a byte value to the end of a buffer
+* buffer_append::		Append two buffers together
+* buffer_from_strings::		Convert a list of strings into a buffer
+* buffer_len::			Get the length of a buffer
+* buffer_replace::		Replace a byte value in a buffer
+* buffer_retrieve::		Retrieve a byte value from a buffer
+* buffer_to_strings::		Convert a buffer to a list of strings
+* buffer_truncate::		Truncate a buffer to a length
+
+
+File: coldmud.info,  Node: buffer_add,  Next: buffer_append,  Up: Buffer Functions
+
+buffer_add
+----------
+
+     buffer_add(BUFFER, BYTE)
+
+   This function returns the result of adding BYTE, an integer, to the
+end of BUFFER.  If BYTE is not between `0' and `255', the value
+appended to BUFFER will be the lower-order eight bits of BYTE.
+
+   Examples:
+
+     buffer_add(%[65, 66, 67], 10)
+          => %[65, 66, 67, 10]
+
+
+File: coldmud.info,  Node: buffer_append,  Next: buffer_from_strings,  Prev: buffer_add,  Up: Buffer Functions
+
+buffer_append
+-------------
+
+     buffer_append(BUFFER1, BUFFER2)
+
+   This function returns the result of appending BUFFER2 to the end of
+BUFFER1.
+
+   Examples:
+
+     buffer_append(%[65, 66, 67, 10], %[67, 66, 65, 10])
+          => %[65, 66, 67, 10, 67, 66, 65, 10]
+
+
+File: coldmud.info,  Node: buffer_from_strings,  Next: buffer_len,  Prev: buffer_append,  Up: Buffer Functions
+
+buffer_from_strings
+-------------------
+
+     buffer_from_strings(LIST-OF-STRINGS, [TERMINATOR])
+
+   This function returns a buffer constructed by appending the strings
+in LIST-OF-STRINGS together, treating the strings as sequences of ASCII
+values, with each string followed by TERMINATOR, a buffer.  If
+TERMINATOR is not specified, then `buffer_from_strings()' uses the
+buffer `%[13, 10]', a two-byte buffer containing the ASCII codes for a
+carriage return and a newline.
+
+   Examples:
+
+     buffer_from_strings(["foo", "bar"])
+          => `%[102, 111, 111, 13, 10, 98, 97, 4, 13, 10]'
+     buffer_from_strings(["foo", "bar"], %[10])
+          => `%[102, 111, 111, 10, 98, 97, 4, 10]'
+
+
+File: coldmud.info,  Node: buffer_len,  Next: buffer_replace,  Prev: buffer_from_strings,  Up: Buffer Functions
+
+buffer_len
+----------
+
+     buffer_len(BUFFER)
+
+   This function returns the length of the buffer BUFFER.
+
+   Examples:
+
+     buffer_len(%[65, 66, 67, 10])
+          => 4
+
+
+File: coldmud.info,  Node: buffer_replace,  Next: buffer_retrieve,  Prev: buffer_len,  Up: Buffer Functions
+
+buffer_replace
+--------------
+
+     buffer_replace(BUFFER, POS, VALUE)
+
+   This function returns the result of replacing the byte numbered POS
+in BUFFER with the value VALUE, with the first byte of BUFFER is
+numbered `1'.  If POS is less than `1', or greater than the length of
+BUFFER, then `buffer_replace()' throws a `~range' error.
+
+   Examples:
+
+     buffer_replace(%[65, 66, 67, 10], 3, 15)
+         => %[65, 66, 15, 10]
+
+
+File: coldmud.info,  Node: buffer_retrieve,  Next: buffer_to_strings,  Prev: buffer_replace,  Up: Buffer Functions
+
+buffer_retrieve
+---------------
+
+     buffer_retrieve(BUFFER, POS)
+
+   This function returns the byte numbered POS in BUFFER, with the
+first byte of BUFFER is numbered `1'.  If POS is less than `1', or
+greater than the length of BUFFER, then `buffer_replace()' throws a
+`~range' error.
+
+   Examples:
+
+     buffer_retrieve(%[65, 66, 67, 10], 3)
+          => 67
+
+
+File: coldmud.info,  Node: buffer_to_strings,  Next: buffer_truncate,  Prev: buffer_retrieve,  Up: Buffer Functions
+
+buffer_to_strings
+-----------------
+
+     buffer_to_strings(BUFFER, [SEPARATOR])
+
+   This function returns a list of strings constructed from BUFFER by
+splitting it around the bytes given by the buffer SEPARATOR.  If
+SEPARATOR is not specified, `buffer_to_strings()' uses the buffer
+`%[10]', a single-byte buffer containing the ASCII code for a newline.
+`buffer_to_strings()' treats the bytes in BUFFER not accounted for by
+the separator as ASCII values; unprintable ASCII values are stripped.
+The last element of the returned list is a buffer containing the bytes
+in the buffer after the last separator found; no string is included in
+the returned list for these bytes.
+
+   Examples:
+
+     buffer_to_strings(%[65, 66, 67, 13, 10, 67, 66, 65, 13, 10, 66])
+          => ["ABC", "CBA", %[66]]
+     buffer_to_strings(%[66, 10, 10, 65, 10])
+          => ["B", "", "A", %[]]
+     buffer_to_strings(%[65, 66, 67, 13, 10, 67, 66, 65, 10, 66], %[66])
+          => ["A", "CC", "A", %[]]
+
+
+File: coldmud.info,  Node: buffer_truncate,  Prev: buffer_to_strings,  Up: Buffer Functions
+
+buffer_truncate
+---------------
+
+     buffer_truncate(BUFFER, LENGTH)
+
+   This function returns the result of truncating BUFFER to the length
+LENGTH.  If LENGTH is less than `0' or greater than the length of
+BUFFER, then `buffer_truncate()' throws a `~range' error.
+
+   Examples:
+
+     buffer_truncate(%[65, 66, 67, 10], 2)
+          => %[65, 66]
+
+
+File: coldmud.info,  Node: Method Functions,  Next: Error Functions,  Prev: Buffer Functions,  Up: Function Descriptions
+
+Method Functions
+================
+
+   The functions described in this section return information about the
+objects involved in the call to the current method: the caller, the
+definer, the sender, and the current object.  If a method defined by
+object A, processing a message for object B, sends a message to object
+C, which results in a call to a method defined by object D, then A is
+the caller, B is the sender, C is the current object, and D is the
+definer.
+
+* Menu:
+
+* caller::			The definer of the calling method
+* definer::			The definer of the current method
+* sender::			The sending object
+* task_id::			ID of the current task
+* this::			The current object
+
+
+File: coldmud.info,  Node: caller,  Next: definer,  Up: Method Functions
+
+caller
+------
+
+     caller()
+
+   This function returns the dbref of the object which defines the
+method which called the current method, or `0' if the current method was
+called by the server.
+
+
+File: coldmud.info,  Node: definer,  Next: sender,  Prev: caller,  Up: Method Functions
+
+definer
+-------
+
+     definer()
+
+   This function returns the dbref of the object which defines the
+current method.
+
+
+File: coldmud.info,  Node: sender,  Next: task_id,  Prev: definer,  Up: Method Functions
+
+sender
+------
+
+     sender()
+
+   This function returns the dbref of the object which sent the current
+message, or `0' if the current method was called by the server.
+
+
+File: coldmud.info,  Node: task_id,  Next: this,  Prev: sender,  Up: Method Functions
+
+task_id
+-------
+
+     task_id()
+
+   This function returns the ID of the current task.  The task ID is an
+integer which begins at `0' for the first task and increases by `1'
+each time a task runs.
+
+
+File: coldmud.info,  Node: this,  Prev: task_id,  Up: Method Functions
+
+this
+----
+
+     this()
+
+   This function returns the dbref of the current object.
+
+
+File: coldmud.info,  Node: Error Functions,  Next: Communication Functions,  Prev: Method Functions,  Up: Function Descriptions
+
+Error Functions
+===============
+
+   The functions described in this section perform operations related to
+handling error conditions.
+
+* Menu:
+
+* error::			Get the error code, in a handler
+* error_arg::			Get the error argument, in a handler
+* error_str::			Get the error explanation, in a handler
+* rethrow::			Continue propagating an error
+* throw::			Throw an error in the calling method
+* traceback::			Get the traceback, in a handler
+
+
+File: coldmud.info,  Node: error,  Next: error_arg,  Up: Error Functions
+
+error
+-----
+
+     error()
+
+   This function, which you should only call inside an error handler
+for a catch statement (*note Error-Handling Statements::.), returns the
+error code for the error which triggered the error handler.  If you are
+not in an error handler, this function throws an `~error' error.
+
+
+File: coldmud.info,  Node: error_arg,  Next: error_str,  Prev: error,  Up: Error Functions
+
+error_arg
+---------
+
+     error_arg()
+
+   This function, which you should only call inside an error handler
+for a catch statement (*note Error-Handling Statements::.), returns the
+error argument specified in the `throw()' call which caused the error
+which triggered the error handler, or `0' if the no error argument was
+specified in the `throw()' caller or if the error was thrown by the
+interpreter.  If you are not in an error handler, this function throws
+an `~error' error.
+
+
+File: coldmud.info,  Node: error_str,  Next: rethrow,  Prev: error_arg,  Up: Error Functions
+
+error_str
+---------
+
+     error_str()
+
+   This function, which you should only call inside an error handler
+for a catch statement (*note Error-Handling Statements::.), returns the
+string argument specified in the `throw()' call which caused the error
+which triggered the error handler, or the interpreter's explanation of
+the error if the error was thrown by the interpreter.  If you are not in
+an error handler, this function throws an `~error' error.
+
+
+File: coldmud.info,  Node: rethrow,  Next: throw,  Prev: error_str,  Up: Error Functions
+
+rethrow
+-------
+
+     rethrow(ERROR-CODE)
+
+   This function, which you should only call inside an error handler
+for a catch statement (*note Error-Handling Statements::.), continues
+propagating an error condition.  The interpreter will abort the current
+method and throw an error of type ERROR-CODE in the calling method.  If
+you are not in an error handler, this function throws an `~error' error.
+
+   Examples:
+
+     rethrow(~perm);
+
+
+File: coldmud.info,  Node: throw,  Next: traceback,  Prev: rethrow,  Up: Error Functions
+
+throw
+-----
+
+     throw(ERROR-CODE, EXPLANATION, [ARG])
+
+   This function throws an error in the method which called the current
+method.  The interpreter will abort the current method and throw an
+error of type ERROR-CODE in the calling method.  The string EXPLANATION
+will appear in the traceback.  If ARG is specified, then it can be
+retrieved in an error handler by `error_arg()'.
+
+   Examples:
+
+     throw(~perm, "Sender is not the system object.");
+
+
+File: coldmud.info,  Node: traceback,  Prev: throw,  Up: Error Functions
+
+traceback
+---------
+
+     traceback()
+
+   This function, which you should only call inside an eror handler for
+a catch statement (*note Error-Handling Statements::.), returns the
+traceback for the error which triggered the error handler.  If you are
+not in an error handler, this function throws an `~error' error.
+
+
+File: coldmud.info,  Node: Communication Functions,  Next: Object Functions,  Prev: Error Functions,  Up: Function Descriptions
+
+Communication Functions
+=======================
+
+   The functions described in this section allow you to perform input
+and output to connections.  All of these functions apply to all
+connections associated with the current object; you can never refer to
+a particular connection directly using these functions.
+
+* Menu:
+
+* disconnect::                  Close connections to the current object
+* echo::                        Echo text to the current object
+* echo_file::                   Echo a file to the current object
+
+
+File: coldmud.info,  Node: disconnect,  Next: echo,  Up: Communication Functions
+
+disconnect
+----------
+
+     disconnect()
+
+   This function closes all connections associated with the current
+object, and returns the number of connections closed.
+
+
+File: coldmud.info,  Node: echo,  Next: echo_file,  Prev: disconnect,  Up: Communication Functions
+
+echo
+----
+
+     echo(BUFFER)
+
+   This function sends the bytes in BUFFER to all connections
+associated with the current object, and returns `1'.
+
+   Examples:
+
+     echo(%[65, 66, 67, 13, 10])
+          => 1
+
+
+File: coldmud.info,  Node: echo_file,  Prev: echo,  Up: Communication Functions
+
+echo_file
+---------
+
+     echo_file(NAME)
+
+   This function sends the contents of the file named by the string
+NAME to all connections associated with the current object.  The
+filename NAME must not contain the sequence `../'.  `echo_file()'
+returns `1' if NAME exists in the subdirectory "text" of the current
+directory; otherwise, the result of `echo_file()' is a `~file' error.
+
+
+File: coldmud.info,  Node: Object Functions,  Next: Administrative Functions,  Prev: Communication Functions,  Up: Function Descriptions
+
+Object Functions
+================
+
+   The functions described in this section allow you to modify or
+retrieve information from the current object.
+
+* Menu:
+
+* add_parameter::		Add a parameter
+* ancestors::			Get a list of ancestors
+* children::			Get a list of children dbrefs
+* compile::			Compile `C--' code into a method
+* del_method::			Remove a method
+* del_parameter::		Remove a parameter
+* find_method::			Find location of method definition
+* find_next_method::		Find location of next method definition
+* get_var::			Get value of a variable
+* list_method::			Decompile method into `C--' code
+* methods::			Get a list of defined method names
+* parameters::			Get a list of parameter names
+* parents::			Get a list of parent dbrefs
+* set_var::			Assign to a variable
+
+
+File: coldmud.info,  Node: add_parameter,  Next: ancestors,  Up: Object Functions
+
+add_parameter
+-------------
+
+     add_parameter(NAME)
+
+   This function adds a parameter named NAME to the current object.
+nAME must be a symbol.  If NAME is already a parameter on the current
+object, then `add_parameter' throws a `~paramexists' error.  Otherwise,
+`add_parameter()' returns 1.
+
+
+File: coldmud.info,  Node: ancestors,  Next: children,  Prev: add_parameter,  Up: Object Functions
+
+ancestors
+---------
+
+     ancestors()
+
+   This function returns a list of the dbrefs of the ancestors of the
+current object, in the order that they would normally be searched for
+methods.  The dbref of the current object will be the first element of
+the list.
+
+
+File: coldmud.info,  Node: children,  Next: compile,  Prev: ancestors,  Up: Object Functions
+
+children
+--------
+
+     children()
+
+   This function returns a list of the dbrefs of the children of the
+current object, in no particular order.
+
+
+File: coldmud.info,  Node: compile,  Next: del_method,  Prev: children,  Up: Object Functions
+
+compile
+-------
+
+     compile(CODE, NAME)
+
+   This function compiles the list of strings CODE and uses the result
+as the definition of the method named by the symbol NAME.  If there
+were errors in compiling CODE, then `compile()' returns a list of
+strings describing the errors; otherwise `compile()' returns an empty
+list.
+
+   Examples:
+
+     compile(["echo(\"foo\");"], 'foo)
+          => []
+     compile(["echo(\"foo\")"], 'foo)
+          => ["Line 2: parse error"]
+
+
+File: coldmud.info,  Node: del_method,  Next: del_parameter,  Prev: compile,  Up: Object Functions
+
+del_method
+----------
+
+     del_method(NAME)
+
+   This function removes the method named by the symbol NAME from the
+current object.  `del_method()' returns `1' if there was a method named
+NAME on the current object; otherwise, it throws a `~methodnf' error.
+
+
+File: coldmud.info,  Node: del_parameter,  Next: find_method,  Prev: del_method,  Up: Object Functions
+
+del_parameter
+-------------
+
+     del_parameter(NAME)
+
+   This function removes the parameter named by the symbol NAME from
+the current object.  `del_parameter()' returns `1' if there was a
+parameter named NAME on the current object; otherwise, it throws a
+`~paramnf' error.
+
+
+File: coldmud.info,  Node: find_method,  Next: find_next_method,  Prev: del_parameter,  Up: Object Functions
+
+find_method
+-----------
+
+     find_method(NAME)
+
+   This function returns the object which contains the method definition
+which would be used if a message NAME were sent to the current object.
+If none of the ancestors of the current object define a method NAME,
+then `find_method()' throws a `~methodnf' exception.
+
+
+File: coldmud.info,  Node: find_next_method,  Next: get_var,  Prev: find_method,  Up: Object Functions
+
+find_method
+-----------
+
+     find_next_method(NAME, AFTER)
+
+   This function returns the ancestor of the current object which
+contains the method definition which would be used if a method NAME
+defined by the object AFTER executed an inspecific `pass()'.  If no
+method would be found, then `find_method()' throws a `~methodnf'
+exception.
+
+
+File: coldmud.info,  Node: get_var,  Next: list_method,  Prev: find_next_method,  Up: Object Functions
+
+get_var
+-------
+
+     get_var(NAME)
+
+   This function returns the value of the object variable on the current
+object referred to by the parameter NAME (a symbol) on the current
+method's defining object.  If the current method's defining object does
+not have a parameter NAME, then `get_var()' throws a `~paramnf' error.
+
+
+File: coldmud.info,  Node: list_method,  Next: methods,  Prev: get_var,  Up: Object Functions
+
+list_method
+-----------
+
+     list_method(NAME)
+     list_method(NAME, INDENTATION)
+     list_method(NAME, INDENTATION, PARENTHESIZATION)
+
+   This function returns a list of strings containing a decompiled
+version of the method named by the symbol NAME.  If the method NAME is
+not defined on the current object, then `list_method()' results in a
+`~methodnf' error.  Note that NAME must be defined on the current
+object, not on its ancestors.
+
+   The decompiled code may not look exactly like the code that was
+compiled to produce the method.  The only guarantee is that it will
+compile to a method with the same behavior.
+
+   If you specify the integer INDENTATION, then the decompiler will use
+that number of spaces for indenting.  The default is 4 spaces.  If you
+specify the integer PARENTHESIZATION and it is non-zero, then the
+decompiler will put parentheses around every subexpression.  Otherwise,
+the compiler will only use parentheses when needed.
+
+
+File: coldmud.info,  Node: methods,  Next: parameters,  Prev: list_method,  Up: Object Functions
+
+methods
+-------
+
+     methods()
+
+   This function returns a list of symbols giving the names of the
+methods defined on the current object.
+
+
+File: coldmud.info,  Node: parameters,  Next: parents,  Prev: methods,  Up: Object Functions
+
+parameters
+----------
+
+     parameters()
+
+   This function returns a list of symbols giving the names of the
+parameters defined on the current object.
+
+
+File: coldmud.info,  Node: parents,  Next: set_var,  Prev: parameters,  Up: Object Functions
+
+parents
+-------
+
+     parents()
+
+   This function returns a list of the dbrefs of the parents of the
+current object.
+
+
+File: coldmud.info,  Node: set_var,  Prev: parents,  Up: Object Functions
+
+set_var
+-------
+
+     set_var(NAME, DATA)
+
+   This function assigns the value DATA to the object variable on the
+current object referred to by the parameter NAME (a symbol) on the
+current method's defining object.  If the current method's defining
+object does not have a parameter NAME, then `get_var()' throws a
+`~paramnf' error.
+
+
+File: coldmud.info,  Node: Administrative Functions,  Next: Miscellaneous Functions,  Prev: Object Functions,  Up: Function Descriptions
+
+Administrative Functions
+========================
+
+   The functions in this section allow you to perform privileged
+operations.  These functions can only be called from the system object.
+For any other object, the result of any of these functions is an
+`~perm' error.
+
+* Menu:
+
+* binary_dump::                 Bring binary database up to date
+* bind::			Begin listening on a port
+* chparents::                   Change parents of an object
+* conn_assign::                 Set the current connection's object
+* connect::			Connect to a remote server
+* create::			Create an object
+* data::			Getting the data on an object
+* destroy::			Destroy an object
+* log::                         Write a string to stderr
+* run_script::			Execute an administrative script
+* set_heartbeat_freq::		Set the heartbeat frequency
+* shutdown::                    Shut down the server
+* text_dump::                   Dump a text database image
+* unbind::			Stop listening on a port
+
+
+File: coldmud.info,  Node: binary_dump,  Next: bind,  Up: Administrative Functions
+
+binary_dump
+-----------
+
+     binary_dump()
+
+   This function writes out all modified objects in the object cache to
+the disk database.  This guarantees that the disk database files `db',
+`db.dir', and `db.pag' are consistent.
+
+
+File: coldmud.info,  Node: bind,  Next: chparents,  Prev: binary_dump,  Up: Administrative Functions
+
+bind
+----
+
+     bind(PORT, RECEIVER)
+
+   This function instructs the server to begin listening on the port
+numbered PORT, with the receiver object RECEIVER.  If the server is
+already listening on that port, then the receiver object is changed,
+with no other effect.  If the socket cannot be created, then `bind()'
+throws a `~socket' error.  If the server cannot bind to the port PORT,
+then `bind()' throws a `~bind' error.  Otherwise, `bind()' returns 1.
+
+
+File: coldmud.info,  Node: chparents,  Next: conn_assign,  Prev: bind,  Up: Administrative Functions
+
+chparents
+---------
+
+     chparents(DBREF, PARENTS)
+
+   This function changes the parents of the object referred to by DBREF
+to the list of dbrefs in PARENTS.  If any of the dbrefs in PARENTS do
+not refer to an existing object, then `chparents()' throws an `~objnf'
+error.  If any of the parents have DBREF as an ancestor, or are DBREF
+themselves, then `chparents()' throws a `~parent' error.  If DBREF
+refers to the root object, or PARENTS is an empty list, then then
+`chparents()' throws a `~perm' error.  Otherwise, `chparents()' returns
+`1'.
+
+
+File: coldmud.info,  Node: conn_assign,  Next: connect,  Prev: chparents,  Up: Administrative Functions
+
+conn_assign
+-----------
+
+     conn_assign(DBREF)
+
+   This function sets the handler object of the current connection to
+DBREF.  `conn_assign()' always returns `1'.
+
+   Examples:
+
+     conn_assign(#76)
+          => 1
+
+
+File: coldmud.info,  Node: connect,  Next: create,  Prev: conn_assign,  Up: Administrative Functions
+
+connect
+-------
+
+     connect(ADDRESS, PORT, RECEIVER)
+
+   This function establishes a connection to the remote Internet host
+named by ADDRESS (a string giving the IP address of the remote host) at
+the port PORT.
+
+   If ADDRESS is not a valid IP address, then `connect()' throw an
+`~address' error.  If a socket cannot be created for the connection,
+then `connect()' throws a `~socket' error.  Otherwise, `connect()'
+attemptes to connect to the remote host and returns 1 immediately; it
+does not wait to see if the connection attempt succeeded.
+
+   If the connection succeeds, then the server will send the object
+RECEIVER a `connect' message, with one argument the task ID of the task
+which called `connect()' (*note task_id::.).  RECEIVER then becomes the
+handler object for the connection, and receives `parse' messages when
+lines arrive from the connection, as well as a `disconnect' message
+when the connection terminates.
+
+   If the connection fails, then the object RECEIVER will receive a
+`failed' message with two arguments, the task ID of the task which
+called `connect()', and an error code: `~refused' indicates that the
+connection was refused, `~net' indicates that the network of the remote
+host could not be reached, `~timeout' indicates that the connection
+attempt timed out, and `~other' indicates that some other error
+occurred.
+
+
+File: coldmud.info,  Node: create,  Next: data,  Prev: connect,  Up: Administrative Functions
+
+create
+------
+
+     create(DBREF, PARENTS)
+
+   This function creates an object with the dbref DBREF and the parents
+PARENTS, which should be a list of dbrefs referring to existing
+objects.  If any of the parent dbrefs do not refer to existing objects,
+then `create()' throws a `~objnf' error.  If an object with the dbref
+DBREF already exists, `create()' throws a `~perm' error.  Otherwise,
+`create()' returns DBREF.
+
+
+File: coldmud.info,  Node: data,  Next: destroy,  Prev: create,  Up: Administrative Functions
+
+data
+----
+
+     data(DBREF)
+
+   This function retrieves all the variables on the object given by the
+dbref DBREF.  The return value is a dictionary whose associations are
+between ancestors of the object and subdictionaries giving the variable
+values for each ancestor's parameters.  Each subdictionary's
+associations are between parameters (expressed as symbols) of the
+ancestor in question (as symbols) and the values of the variables
+corresponding to those parameters.  Thus, if the object given by DBREF
+defines a variable corresponding to a parameter PARAMETER on an
+ancestor ANCESTOR, then `data(DBREF)[ANCESTOR][PARAMETER])' is the value
+of that variable.
+
+   The subdictionaries in the dictionary returned by `data()' only
+contains `[PARAMETER, VALUE]' associations for variables which have
+been assigned values on the object given by DBREF, not variables which
+have never been assigned values and which still have the default value
+`0'.  Also, if no variables have been assigned values for any
+parameters on an ancestor of the object given by DBREF (as is the case
+when the ancestor has no parameters), then there will not be an
+association for that ancestor in the dictionary returned by `data()'.
+Neither the keys in the dictionary returned by `data()' nor the
+parameters in the subdictionaries have any particular ordering.
+
+   If DBREF is not the dbref of an object, then `data()' throws an
+`~objnf' error.
+
+
+File: coldmud.info,  Node: destroy,  Next: log,  Prev: data,  Up: Administrative Functions
+
+destroy
+-------
+
+     destroy(DBREF)
+
+   This function destroys the object given by the dbref DBREF.  If any
+methods are currently executing on that object, or any methods are
+executing which are defined by that object, then it will not be
+destroyed immediately.  If no object exists with the dbref DBREF, then
+`destroy()' throws a `~objnf' error.
+
+   Objects left orphaned by the destruction of their only parent are
+reparented to the parents of the parent which was destroyed.
+
+   `destroy()' throws a `~perm' error if you attempt to destroy the
+root object or system object, which is not allowed.  Otherwise,
+`destroy()' returns `1'.
+
+
+File: coldmud.info,  Node: log,  Next: run_script,  Prev: destroy,  Up: Administrative Functions
+
+log
+---
+
+     log(STRING)
+
+   This function sends STRING to the standard error string, prefixed by
+the date.  `log()' always returns `1'.
+
+   Examples:
+
+     log("foo")
+          => 1
+
+
+File: coldmud.info,  Node: run_script,  Next: set_heartbeat_freq,  Prev: log,  Up: Administrative Functions
+
+run_script
+----------
+
+     run_script(NAME, ARGUMENTS)
+     run_script(NAME, ARGUMENTS, BACKGROUND-FLAG)
+
+   This function executes the script named by string NAME, passing it
+the arguments in the list ARGUMENTS.  Each element of ARGUMENTS must be
+a string.  Coldmud looks for the script named by NAME in the directory
+`scripts' in the current directory.  NAME cannot contain a `../'
+sequence; that is, it cannot walk back down the directory hierarchy.
+
+   If BACKGROUND-FLAG is specified, it must be an integer.  If it is
+non-zero, then SCRIPT is run in the background.  Otherwise, Coldmud
+waits for the script to execute.
+
+   If BACKGROUND-FLAG is not specified, `run_script()' returns the
+return status of the script, or `-1' if it does not successfully
+execute the script.  If BACKGROUND-FLAG is specified, then
+`run_script()' might return `-1' if the script is not successfully
+executed, and it may even return the return status of the script if the
+script executes extremely quickly, but it will usually return `0'.
+
+
+File: coldmud.info,  Node: set_heartbeat_freq,  Next: shutdown,  Prev: run_script,  Up: Administrative Functions
+
+set_heartbeat_freq
+------------------
+
+     set_heartbeat_freq(SECONDS)
+
+   This function sets the frequency of the server heartbeat to SECONDS
+seconds.  If SECONDS is less than or equal to zero, then the heartbeat
+is turned off; otherwise, the system object will receive a `heartbeat'
+message approximately every SECONDS seconds.
+
+
+File: coldmud.info,  Node: shutdown,  Next: text_dump,  Prev: set_heartbeat_freq,  Up: Administrative Functions
+
+shutdown
+--------
+
+     shutdown()
+
+   This function updates the binary database in the same manner as
+`binary_dump()', and causes the server to shut down at the next cycle
+of the main loop.
+
+
+File: coldmud.info,  Node: text_dump,  Next: unbind,  Prev: shutdown,  Up: Administrative Functions
+
+text_dump
+---------
+
+     text_dump()
+
+   This function writes a text database dump to the file `textdump'.
+`text_dump()' returns `1' if it is successful, or `0' if it cannot
+write the text dump.  `text_dump()' uses a temporary file
+`textdump.new' to avoid overwriting the old `textdump' until it has
+finished; thus, if there is a server or machine crash while the text
+dump is in progress, the partial text dump will be in `textdump.new',
+and the old `textdump' will be unmodified.
+
+
+File: coldmud.info,  Node: unbind,  Prev: text_dump,  Up: Administrative Functions
+
+unbind
+------
+
+     unbind(PORT)
+
+   This function instructs the server to stop listening on the port
+numbered PORT.  If the server was not already listening on that port,
+then `unbind()' throws a `~servnf' error; otherwise, `unbind()' returns
+1.
+
+
+File: coldmud.info,  Node: Miscellaneous Functions,  Prev: Administrative Functions,  Up: Function Descriptions
+
+Miscellaneous Functions
+=======================
+
+   The functions in this section perform operations which do not fit
+into any other category.
+
+* Menu:
+
+* abs::				Take the absolute value of a number
+* ctime::			Convert the time to string format
+* max::				Find the maximum of several values
+* min::				Find the minimum of several values
+* random::			Get a random number
+* time::			Get the current time
+* version::			Get the server version number
+
+
+File: coldmud.info,  Node: abs,  Next: ctime,  Up: Miscellaneous Functions
+
+abs
+---
+
+     abs(NUMBER)
+
+   This function returns the absolute value of NUMBER.
+
+   Examples:
+
+     abs(-6)
+          => 6
+     abs(7)
+          => 7
+
+
+File: coldmud.info,  Node: ctime,  Next: max,  Prev: abs,  Up: Miscellaneous Functions
+
+ctime
+-----
+
+     ctime()
+     ctime(TIME)
+
+   This function converts the integer TIME into a string format.  If
+TIME is not specified, then `ctime()' uses the current time.
+
+   Examples:
+
+     ctime(739180536)
+          => "Fri Jun  4 03:55:36 1993\n"
+
+
+File: coldmud.info,  Node: max,  Next: min,  Prev: ctime,  Up: Miscellaneous Functions
+
+max
+---
+
+     max(VALUE1, VALUE2, ...)
+
+   This function returns the maximum of its arguments.  All of the
+arguments must be of the same type, and must be integers or strings.
+
+     max(3, 7, 9, 5)
+         => 9
+     max("Foo", "aardvark", "bar", "Quux")
+         => "Quux"
+
+
+File: coldmud.info,  Node: min,  Next: random,  Prev: max,  Up: Miscellaneous Functions
+
+min
+---
+
+     min(VALUE1, VALUE2, ...)
+
+   This function returns the minimum of its arguments.  All of the
+arguments must be of the same type, and must be integers or strings.
+
+     min(3, 7, 9, 5)
+         => 3
+     min("Foo", "aardvark", "bar", "Quux")
+         => "aardvark"
+
+
+File: coldmud.info,  Node: random,  Next: time,  Prev: min,  Up: Miscellaneous Functions
+
+random
+------
+
+     random(MAX)
+
+   This function returns a random integer between one and MAX.
+
+
+File: coldmud.info,  Node: time,  Next: version,  Prev: random,  Up: Miscellaneous Functions
+
+time
+----
+
+     time()
+
+   This function returns the system time in seconds since midnight GMT,
+January 1, 1970.  You can use `ctime()' to turn this number into a
+string.
+
+
+File: coldmud.info,  Node: version,  Prev: time,  Up: Miscellaneous Functions
+
+version
+-------
+
+     version()
+
+   This function returns the version number of the Coldmud server as a
+list of three numbers.  The first two numbers are the major and minor
+release numbers; the third number is a bug-fix release number.
+
+   Examples:
+
+     version()
+          => [0, 10, 0]
+
+
+File: coldmud.info,  Node: Administration,  Next: Function Index,  Prev: Function Descriptions,  Up: Top
+
+Running and Maintaining Coldmud
+*******************************
+
+   This chapter is intended for Coldmud adminstrators.  It documents
+Coldmud's behavior on startup, how Coldmud databases should be
+maintained, and how Coldmud manages network connections.  All of the
+functions referred to in this chapter are administrative functions, and
+only work if called by the system object (*note System Object::.).
+
+* Menu:
+
+* Starting::                    Starting up the server
+* Disk Database::               Managing the disk database
+* Connections::                 How Coldmud manages network connections
+
+
+File: coldmud.info,  Node: Starting,  Next: Disk Database,  Up: Administration
+
+Starting the Server
+===================
+
+   Coldmud has the following usage:
+
+     coldmud DIRECTORY [OTHER ARGUMENTS]
+
+   The first argument specifies the database directory, which can be
+relative to the current directory.  You can specify any number of
+arguments after DIRECTORY; these will be visible to the `startup'
+method on the system object.
+
+
+File: coldmud.info,  Node: Disk Database,  Next: Connections,  Prev: Starting,  Up: Administration
+
+Disk Database
+=============
+
+   Coldmud normally operates using a binary disk-based database, storing
+only a small number of objects in memory at any given time.  This number
+is usually no more than the product of the cache width and the cache
+depth (fixed at 7 and 23 in this version).
+
+   Coldmud's database is normally stored in binary format in the file
+`binary/objects' (relative to the database directory) and in an ndbm
+database with the prefix `binary/index'.  The file `binary/clean'
+exists when the database is consistent.  The functions `binary_dump()'
+and `shutdown()' force binary database consistency.
+
+   Because ndbm databases are usually byte-order-dependent, a binary
+database generated by a Coldmud process on one machine cannot be
+guaranteed to work with a process on another machine.  Binary databases
+are also heavily version-dependent; small changes in the internal format
+of an object in a new version of the server will invalidate old binary
+databases, even if the `C--' language and the conceptual structure of a
+Coldmud object remain the same in the new version.
+
+   Coldmud also supports a text format for databases.  The
+`text_dump()' function stores a text database dump in the file
+`textdump'.  Text dumps specify the database in terms of the `C--'
+language and a few simple directives, so they are compatible with any
+version of Coldmud which can understand the `C--' code contained in it.
+Text dumps are also simple enough to be written and edited by humans,
+so they provide a good mechanism for distribution of core databases.
+
+   At startup time, Coldmud looks for the file `binary/clean' to
+determine if a consistent binary database exists and was generated by
+the same version of Coldmud as the running process.  If a clean binary
+database exists, Coldmud will start up very quickly, pausing only to
+read in the root object and system object.  Otherwise, Coldmud tries to
+read in a text dump from the file `textdump'.  You can force the use of
+a text dump by simple removing the file `binary/clean'.  Coldmud will
+fail to start if it cannot find a consistent binary database or a text
+dump.
+
+
+File: coldmud.info,  Node: Connections,  Prev: Disk Database,  Up: Administration
+
+Connections
+===========
+
+   As a network server, Coldmud has the ability to listen for Internet
+connections on ports.  The `bind()' function instructs Coldmud to
+listen on a port, with some object acting as a *receiver object* for
+that port.
+
+   Network connections have associated with them a *handler object*.
+When a connection occurs on a port, Coldmud initially uses the receiver
+object for the port as the handler object for the connection, and sends
+a `connect' message to the handler object, with two arguments: a string
+giving the IP address of the remote host, and an integer giving the
+port of the connection on the remote host.  Because there is no way to
+distinguish between connections with the same handler object, the
+`connect' method on the handler object should arrange to have the
+system object change either the receiver object for the port (using
+`bind()') or the handler object for the connection (using
+`conn_assign()').
+
+   When text arrives from a network connection, Coldmud sends a `parse'
+message to the handler object for that connection, with the text as a
+buffer argument.  The `parse' method can then use `buffer_to_strings()'
+to convert the buffer to a list of text lines, if that is the usual
+form of input.
+
+   When a network connection is terminated, Coldmud sends a
+`disconnect' message to the handler object for that connection.
+
+   Coldmud can also make make connections actively, using the
+`connect()' function.  The third argument to `connect()' specifies a
+receiver object for the new connection; the server sends a `connect'
+message to the receiver object upon success, or a `failed' message to
+the receiver object upon failure, as described in *Note connect::.
+
+
+File: coldmud.info,  Node: Function Index,  Next: Concept Index,  Prev: Administration,  Up: Top
+
+Function Index
+**************
+
+* Menu:
+
+* abs:                                  abs.
+* add_parameter:                        add_parameter.
+* ancestors:                            ancestors.
+* binary_dump:                          binary_dump.
+* bind:                                 bind.
+* buffer_add:                           buffer_add.
+* buffer_append:                        buffer_append.
+* buffer_from_strings:                  buffer_from_strings.
+* buffer_len:                           buffer_len.
+* buffer_replace:                       buffer_replace.
+* buffer_retrieve:                      buffer_retrieve.
+* buffer_to_strings:                    buffer_to_strings.
+* buffer_truncate:                      buffer_truncate.
+* caller:                               caller.
+* children:                             children.
+* chparents:                            chparents.
+* class:                                class.
+* compile:                              compile.
+* connect:                              connect.
+* conn_assign:                          conn_assign.
+* create:                               create.
+* crypt:                                crypt.
+* ctime:                                ctime.
+* data:                                 data.
+* definer:                              definer.
+* delete:                               delete.
+* del_method:                           del_method.
+* del_parameter:                        del_parameter.
+* destroy:                              destroy.
+* dict_add:                             dict_add.
+* dict_add_elem:                        dict_add_elem.
+* dict_contains:                        dict_contains.
+* dict_del:                             dict_del.
+* dict_del_elem:                        dict_del_elem.
+* dict_keys:                            dict_keys.
+* disconnect:                           disconnect.
+* echo:                                 echo.
+* echo_file:                            echo_file.
+* error:                                error.
+* error_arg:                            error_arg.
+* error_str:                            error_str.
+* explode:                              explode.
+* find_method:                          find_next_method.
+* find_method:                          find_method.
+* get_var:                              get_var.
+* insert:                               insert.
+* listlen:                              listlen.
+* list_method:                          list_method.
+* log:                                  log.
+* lowercase:                            lowercase.
+* match_begin:                          match_begin.
+* match_pattern:                        match_pattern.
+* match_regexp:                         match_regexp.
+* match_template:                       match_template.
+* max:                                  max.
+* methods:                              methods.
+* min:                                  min.
+* pad:                                  pad.
+* parameters:                           parameters.
+* parents:                              parents.
+* pass:                                 Passing Messages.
+* random:                               random.
+* replace:                              replace.
+* rethrow:                              rethrow.
+* run_script:                           run_script.
+* sender:                               sender.
+* setadd:                               setadd.
+* setremove:                            setremove.
+* set_heartbeat_freq:                   set_heartbeat_freq.
+* set_var:                              set_var.
+* shutdown:                             shutdown.
+* strcmp:                               strcmp.
+* strlen:                               strlen.
+* strsub:                               strsub.
+* sublist:                              sublist.
+* substr:                               substr.
+* task_id:                              task_id.
+* text_dump:                            text_dump.
+* this:                                 this.
+* throw:                                throw.
+* time:                                 time.
+* todbref:                              todbref.
+* toerr:                                toerr.
+* toint:                                toint.
+* toliteral:                            toliteral.
+* tostr:                                tostr.
+* tosym:                                tosym.
+* traceback:                            traceback.
+* type:                                 type.
+* unbind:                               unbind.
+* union:                                union.
+* uppercase:                            uppercase.
+* valid:                                valid.
+* version:                              version.
+
+
+File: coldmud.info,  Node: Concept Index,  Prev: Function Index,  Up: Top
+
+Concept Index
+*************
+
+* Menu:
+
+* C- data:                              Data Types.
+* C- language:                          Defining Methods.
+* Addition:                             Arithmetic.
+* Administrative functions:             Administrative Functions.
+* Ambiguous operator expressions:       Precedence.
+* Ancestor precedence:                  Inheritance.
+* And operator:                         Conditional Operators.
+* Argument list splicing:               Splicing.
+* Arithmetic expressions:               Arithmetic.
+* Assigning to variables:               Variables.
+* Assignment statement:                 Simple Statements.
+* Associating objects with connections: Connections.
+* Association of operators:             Precedence.
+* Associative arrays:                   Dictionaries.
+* Behavior of objects:                  Inheritance.
+* Binary operators:                     Operators.
+* Binding precedence of operators:      Precedence.
+* Break statement:                      Looping Statements.
+* Buffer data type:                     Data Types.
+* Buffer functions:                     Buffer Functions.
+* Buffers:                              Buffers.
+* Built-in function calls:              Calling Functions.
+* Built-in functions:                   Function Descriptions.
+* Built-in local variables:             Variables.
+* Calling functions:                    Calling Functions.
+* Calling methods:                      Sending Messages.
+* Case-insensitivity of strings:        Logic.
+* Case-sensitivity of identifiers:      Tokens.
+* Cases:                                Conditional Statements.
+* Catch statement:                      Error-Handling Statements.
+* Characteristics of objects:           Objects.
+* Checkpoint databases:                 Disk Database.
+* Closed connections:                   Connections.
+* Coldmud Overview:                     Overview.
+* Combining data into lists:            Lists.
+* Comment statement:                    Simple Statements.
+* Communicating with the server:        System Object.
+* Communicating with users:             Communication Functions.
+* Comparing data:                       Logic.
+* Components of a method:               Method Structure.
+* Compound statement:                   Simple Statements.
+* Conditional operator:                 Conditional Operators.
+* Conditional statements:               Conditional Statements.
+* Connecting to remote hosts:           Connections.
+* Connections:                          Connections.
+* Consistency of databases:             Disk Database.
+* Constant expressions:                 Data Types.
+* Continue statement:                   Looping Statements.
+* Counting:                             Looping Statements.
+* Critical expression:                  Error-Handling Expressions.
+* Current object:                       Messages.
+* Current object:                       Method Functions.
+* Data functions:                       Data Functions.
+* Data types:                           Data Types.
+* Database:                             Disk Database.
+* Database references:                  Dbrefs.
+* Dbref data type:                      Data Types.
+* Dbref names:                          Names.
+* dbrefs:                               Dbrefs.
+* Declaring local variables:            Method Structure.
+* Defining methods:                     Defining Methods.
+* Defining object behavior:             Defining Methods.
+* Descriptions of functions:            Function Descriptions.
+* Dictionaries:                         Dictionaries.
+* Dictionary data type:                 Data Types.
+* Dictionary functions:                 Dictionary Functions.
+* Disallowing overrides in a method:    Method Structure.
+* Disk database:                        Disk Database.
+* Division:                             Arithmetic.
+* Equality of data:                     Logic.
+* Error data type:                      Data Types.
+* Error functions:                      Error Functions.
+* Error handlers:                       Error-Handling Statements.
+* Error propagation:                    Error-Handling Expressions.
+* Error-handling expressions:           Error-Handling Expressions.
+* Error-handling statements:            Error-Handling Statements.
+* Errors:                               Errors.
+* Event notification:                   System Object.
+* Example method:                       Example Method.
+* Executing statements conditionally:   Conditional Statements.
+* Exiting loops prematurely:            Looping Statements.
+* Expression statement:                 Simple Statements.
+* Expressions:                          Expressions.
+* Files used by Coldmud:                Disk Database.
+* Files, sending to users:              Communication Functions.
+* For-list statement:                   Looping Statements.
+* For-range statement:                  Looping Statements.
+* Frob constructors:                    Frobs.
+* Frob data type:                       Data Types.
+* Frobs:                                Frobs.
+* Function calls:                       Calling Functions.
+* Function descriptions:                Function Descriptions.
+* Functions to handle errors:           Error Functions.
+* Greater or equal to operator:         Logic.
+* Greater than operator:                Logic.
+* Handling error conditions:            Errors.
+* Handling specific errors:             Error-Handling Statements.
+* I/O data type for networks:           Buffers.
+* If statement:                         Conditional Statements.
+* If-else statement:                    Conditional Statements.
+* Ignoring errors:                      Method Structure.
+* Ignoring errors:                      Error-Handling Expressions.
+* Including lists in arguments:         Splicing.
+* Indexing lists:                       Lists.
+* Inequality of data:                   Logic.
+* Infix expressions:                    Operators.
+* Information about the current method: Method Functions.
+* Inheritance:                          Inheritance.
+* Input and output functions:           Communication Functions.
+* Integer data type:                    Data Types.
+* Invoking the server:                  Starting.
+* Less than operator:                   Logic.
+* Less than or equal to operator:       Logic.
+* Lightweight objects:                  Frobs.
+* List comparison:                      Logic.
+* List constructors:                    Lists.
+* List data type:                       Data Types.
+* List functions:                       List Functions.
+* Lists:                                Lists.
+* Literal expressions:                  Data Types.
+* Local variable declarations:          Method Structure.
+* Local variables:                      Variables.
+* Logic operators:                      Logic.
+* Looping statements:                   Looping Statements.
+* Making connections to remote hosts:   Connections.
+* Making lists:                         Lists.
+* Managing connections:                 Connections.
+* Manipulating data:                    Data Functions.
+* Manipulating dictionaries:            Dictionary Functions.
+* Manipulating lists:                   List Functions.
+* Manipulating objects:                 Object Functions.
+* Manipulating strings:                 String Functions.
+* Mappings:                             Dictionaries.
+* Message expressions:                  Sending Messages.
+* Messages from the server:             Messages.
+* Messages to objects:                  Messages.
+* Messages to the system object:        System Object.
+* Method functions:                     Method Functions.
+* Method structure:                     Method Structure.
+* Methods:                              Defining Methods.
+* Miscellaneous functions:              Miscellaneous Functions.
+* Modifying default methods:            Passing Messages.
+* Modulo operations:                    Arithmetic.
+* Multiple inheritance:                 Inheritance.
+* Multiplication:                       Arithmetic.
+* Names:                                Names.
+* Negation:                             Arithmetic.
+* Network I/O data type:                Buffers.
+* New connections:                      Connections.
+* Non-overridable methods:              Inheritance.
+* Non-overridable methods, declaring:   Method Structure.
+* Not operator:                         Logic.
+* Object functions:                     Object Functions.
+* Object IDs:                           Dbrefs.
+* Object names:                         Names.
+* Object variables:                     Variables.
+* Object variables:                     Variables and Parameters.
+* Objects:                              Objects.
+* Octet vectors:                        Buffers.
+* Operations on buffers:                Buffer Functions.
+* Operations on data:                   Data Functions.
+* Operations on lists:                  List Functions.
+* Operations on objects:                Object Functions.
+* Operations on strings:                String Functions.
+* Operators:                            Operators.
+* Operators for arithmetic:             Arithmetic.
+* Options to the server:                Starting.
+* Or operator:                          Conditional Operators.
+* Output to a connection:               Communication Functions.
+* Override blocking in a method:        Method Structure.
+* Overview of Coldmud:                  Overview.
+* Parameters on objects:                Variables and Parameters.
+* Parents:                              Inheritance.
+* Parsing text from connections:        Connections.
+* Passing errors as themselves:         Error-Handling Expressions.
+* Passing messages:                     Passing Messages.
+* Performing arithmetic:                Arithmetic.
+* Precedence of ancestors:              Inheritance.
+* Precedence of operators:              Precedence.
+* Premature loop exits:                 Looping Statements.
+* Privileged operations:                Administrative Functions.
+* Processing messages:                  Messages.
+* Propagation expression:               Error-Handling Expressions.
+* Raw byte vectors:                     Buffers.
+* Reading text from connections:        Connections.
+* Receiving text from connections:      Connections.
+* Referring to objects:                 Dbrefs.
+* Relational operators:                 Logic.
+* Resolving ambiguous expressions:      Precedence.
+* Retrieving data from lists:           Lists.
+* Retrieving variable contents:         Variables.
+* Return statement:                     Simple Statements.
+* Runnning the server:                  Starting.
+* Searching lists:                      Lists.
+* Sending messages:                     Sending Messages.
+* Sending object:                       Method Functions.
+* Sending text to users:                Communication Functions.
+* Server operations:                    Administrative Functions.
+* Simple statements:                    Simple Statements.
+* Slots (variables) on objects:         Variables and Parameters.
+* Splicing:                             Splicing.
+* Starting the server:                  Starting.
+* Startup event notification:           System Object.
+* Statements:                           Statements.
+* Stopping loops:                       Looping Statements.
+* Storing information on objects:       Variables and Parameters.
+* String comparison:                    Logic.
+* String data type:                     Data Types.
+* String functions:                     String Functions.
+* Structure of methods:                 Method Structure.
+* Subtraction:                          Arithmetic.
+* Switch statement:                     Conditional Statements.
+* Symbol comparison:                    Logic.
+* Symbol data type:                     Data Types.
+* Symbol translation to dbrefs:         Names.
+* Symbolic names:                       Names.
+* Syntax of methods:                    Method Structure.
+* Syntax of operators:                  Operators.
+* System object:                        System Object.
+* Text database dumps:                  Disk Database.
+* Text files, sending to users:         Communication Functions.
+* Throwing errors:                      Error Functions.
+* Ticks:                                Defining Methods.
+* Tokens:                               Tokens.
+* Tracebacks, getting:                  Error Functions.
+* Translating symbolic names to dbrefs: Names.
+* Traversing lists:                     Looping Statements.
+* Types of C- data:                     Data Types.
+* Types of C- operators:                Operators.
+* Unary operators:                      Operators.
+* Unprintable characters:               Buffers.
+* User communication:                   Communication Functions.
+* Using default methods:                Passing Messages.
+* Using operators in expressions:       Operators.
+* Using variables:                      Variables.
+* Variable expressions:                 Variables.
+* Variables:                            Variables.
+* Variables on objects:                 Variables and Parameters.
+* While statement:                      Looping Statements.
+
+
+
+Tag Table:
+Node: Top309
+Node: Overview8400
+Node: Objects10374
+Node: Dbrefs11587
+Node: Inheritance12195
+Node: Messages14091
+Node: Variables and Parameters16049
+Node: System Object17304
+Node: Defining Methods18170
+Node: Example Method19441
+Node: Tokens20551
+Node: Method Structure23144
+Node: Statements24528
+Node: Simple Statements25572
+Node: Conditional Statements27468
+Node: Looping Statements32009
+Node: Error-Handling Statements35125
+Node: Expressions37324
+Node: Data Types38388
+Node: Names42773
+Node: Lists43676
+Node: Dictionaries46005
+Node: Buffers47573
+Node: Frobs48921
+Node: Variables50390
+Node: Operators52123
+Node: Precedence53549
+Node: Arithmetic54786
+Node: Logic56091
+Node: Conditional Operators57341
+Node: Calling Functions58348
+Node: Sending Messages59627
+Node: Passing Messages62095
+Node: Error-Handling Expressions63186
+Node: Splicing64697
+Node: Errors65481
+Node: Function Descriptions69770
+Node: Data Functions70910
+Node: class71633
+Node: todbref71825
+Node: toerr72046
+Node: toint72343
+Node: toliteral72662
+Node: tostr73237
+Node: tosym74079
+Node: type74370
+Node: valid74800
+Node: String Functions75132
+Node: crypt76275
+Node: explode77036
+Node: lowercase77686
+Node: match_begin77982
+Node: match_pattern78629
+Node: match_regexp79579
+Node: match_template83168
+Node: pad88022
+Node: strcmp88714
+Node: strlen89253
+Node: strsub89476
+Node: substr89814
+Node: uppercase90559
+Node: List Functions90834
+Node: delete91632
+Node: insert92023
+Node: listlen92560
+Node: replace92793
+Node: setadd93223
+Node: setremove93660
+Node: sublist94173
+Node: union94946
+Node: Dictionary Functions95447
+Node: dict_add96175
+Node: dict_add_elem96743
+Node: dict_contains97630
+Node: dict_del98044
+Node: dict_del_elem98464
+Node: dict_keys99542
+Node: Buffer Functions99849
+Node: buffer_add100702
+Node: buffer_append101122
+Node: buffer_from_strings101503
+Node: buffer_len102305
+Node: buffer_replace102592
+Node: buffer_retrieve103130
+Node: buffer_to_strings103609
+Node: buffer_truncate104707
+Node: Method Functions105150
+Node: caller105940
+Node: definer106209
+Node: sender106417
+Node: task_id106676
+Node: this106962
+Node: Error Functions107119
+Node: error107689
+Node: error_arg108071
+Node: error_str108645
+Node: rethrow109195
+Node: throw109723
+Node: traceback110270
+Node: Communication Functions110662
+Node: disconnect111316
+Node: echo111565
+Node: echo_file111876
+Node: Object Functions112341
+Node: add_parameter113254
+Node: ancestors113634
+Node: children113997
+Node: compile114239
+Node: del_method114806
+Node: del_parameter115167
+Node: find_method115549
+Node: find_next_method115977
+Node: get_var116423
+Node: list_method116850
+Node: methods117904
+Node: parameters118144
+Node: parents118392
+Node: set_var118606
+Node: Administrative Functions119015
+Node: binary_dump120117
+Node: bind120431
+Node: chparents120991
+Node: conn_assign121642
+Node: connect121966
+Node: create123418
+Node: data123933
+Node: destroy125450
+Node: log126182
+Node: run_script126467
+Node: set_heartbeat_freq127602
+Node: shutdown128050
+Node: text_dump128357
+Node: unbind128944
+Node: Miscellaneous Functions129278
+Node: abs129841
+Node: ctime130072
+Node: max130416
+Node: min130781
+Node: random131151
+Node: time131340
+Node: version131608
+Node: Administration131981
+Node: Starting132691
+Node: Disk Database133124
+Node: Connections135355
+Node: Function Index137145
+Node: Concept Index142014
+
+End Tag Table

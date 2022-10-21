@@ -1,0 +1,41 @@
+<TITLE>coldmud.info: Method Structure</TITLE>
+Next: <A HREF="Statements.html">Statements</A><P>
+Prev: <A HREF="Tokens.html">Tokens</A><P>
+
+<H2>Method Structure</H2>
+
+A <CODE>C--</CODE> method has the following structure:<P>
+<P>
+<PRE>
+disallow_overrides;
+arg <VAR>arg1</VAR>, <VAR>arg2</VAR>, <VAR>...</VAR>, [<VAR>rest</VAR>];
+var <VAR>var1</VAR>, <VAR>var2</VAR>, <VAR>...</VAR>;<P>
+<VAR>statement1</VAR>
+<VAR>statement2</VAR>
+<VAR>.</VAR>
+<VAR>.</VAR>
+<VAR>.</VAR>
+</PRE
+>
+The <CODE>disallow_overrides;</CODE> declaration indicates a non-overridable
+method (see <A HREF="Inheritance.html">Inheritance</A>).  Normally, you should omit this
+declaration.<P>
+<P>
+The <CODE>arg</CODE> declaration gives a list of argument variables, whose
+values will correspond to the arguments passed with the message.  You
+may omit the <CODE>arg</CODE> declaration if the method does not take any
+arguments.  If the final argument variable is given in square brackets
+(that is, if you specify <VAR>rest</VAR>), then the method can accept a
+variable number of argments; <VAR>rest</VAR> will contain a list of the
+arguments beyond the ones corresponding to the argument variables.  If
+you do not specify <VAR>rest</VAR>, then the method can accept only the
+number of arguments specified by the argument variables, no more.<P>
+<P>
+The <CODE>var</CODE> declaration tells the compiler that the listed
+identifiers should refer to local variables.  You may omit the
+<CODE>var</CODE> declaration if you do not wish to declare any local
+variables.<P>
+<P>
+The statements <VAR>statement1</VAR>, <VAR>statement2</VAR>, <VAR>...</VAR> are the
+body of the method.  They tell the interpreter what the method does.<P>
+<P>

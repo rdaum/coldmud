@@ -1,0 +1,21 @@
+<TITLE>coldmud.info: buffer_add</TITLE>
+Next: <A HREF="buffer_append.html">buffer_append</A><P>
+
+<H3>buffer_add</H3>
+
+<PRE>
+buffer_add(<VAR>buffer</VAR>, <VAR>byte</VAR>)
+</PRE
+>
+This function returns the result of adding <VAR>byte</VAR>, an integer, to
+the end of <VAR>buffer</VAR>.  If <VAR>byte</VAR> is not between <CODE>0</CODE> and
+<CODE>255</CODE>, the value appended to <VAR>buffer</VAR> will be the lower-order
+eight bits of <VAR>byte</VAR>.<P>
+<P>
+Examples:<P>
+<P>
+<PRE>
+buffer_add(%[65, 66, 67], 10)
+     => %[65, 66, 67, 10]
+</PRE
+>

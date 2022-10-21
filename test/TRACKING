@@ -1,0 +1,447 @@
+
+----
+0.6-1
+
+Dictionary comparison was returning true if and only if the key lists
+were different but the value lists were equivalent, e.g.
+
+	#[] == #[] ==> 0
+	#[[1, 2]] == #[[1, 2]] ==> 0
+	#[[1, 2]] == #[[3, 2]] ==> 1
+	#[[1, 2]] == #[[3, 4]] ==> 0
+
+Fixed in 0.7; problem was caused by a simple logic error in
+dict_cmp().
+
+----
+0.6-2
+
+Frob comparison was wrong because of the above dictionary comparison
+problem, and it was also inversed, so you'd get:
+
+	$lock$[] == $lock$[] ==> 1
+	$lock$[[1, 2]] == $lock$[] ==> 1
+	$lock$[[1, 2]] == $lock$[[1, 2]] ==> 1
+	$lock$[[1, 2]] == $lock$[[3, 4]] ==> 1
+	$lock$[[1, 2]] == $lock$[[3, 2]] ==> 0
+
+Fixed in 0.7; problem was caused by a simple logic error in data_cmp().
+
+----
+0.7-1
+
+Starting the program with no binary database results in a panic
+loading the dbm database file.  Reported by mentor@io.com.
+
+11/7/93: I can't reproduce this under Ultrix on a local file system;
+following up to mentor.
+
+----
+0.7-2
+
+size() appears to return 7 bytes larger each time you call it, if you
+call it through a method.  Reported by Jordan Baker.
+
+11/7/93: Fixed in 0.7.1; problem was caused by object_discard_ident()
+in object.c setting .id to 1 instead of -1 when the refcount hits
+zero.
+
+----
+0.7-3
+
+Output buffer is not flushed on a disconnect.  Reported by Jordan.
+
+11/6/93: Fixed in 0.7.1 by adding a few conditionals to io.c and net.c.
+
+----
+0.7-4
+
+The periodic dump done by the Cold World database crashes the server
+(leaving a truncated dump), reportedly after just digging two rooms.
+Reported by gregb@amber.ecst.csuchico.edu, running Coldmud under
+Linux.
+
+11/7/93: I think this was caused by 0.7-6 below, which has been fixed.
+Following up to gregb to see if the new code solves his problem.
+
+11/11/93: I'm pretty sure this was the same as 0.7-6.
+
+---
+0.7-5
+
+11/6/93: Including <sys/file.h> in db.c (a _POSIX_SOURCE'd file) causes
+trouble on some systems.  Reported by gregb@amber.ecst.csuchico.edu,
+while trying to compile Coldmud on a Univel SysVr4 system.
+
+11/6/93: Fixed in 0.7.1 by removing the #include.
+
+---
+0.7-6
+
+11/7/93: Possibly related to 0.7-4: traversals of the ndbm database
+dump core under Linux.  Probable cause: the gdbm-based ndbm routines
+only allocate just enough space for the identifier, so loc_first() and
+loc_next() corrupt memory while null-terminating the string.
+
+11/7/93: Fixed in 0.7.1 by using the string with its null-terminator as
+the key.
+
+---
+0.7-7
+
+11/10/93: NEXTSTEP 3.1 compile: adminop.c fails because pid_t is
+undefined.  loc.c fails because S_IRUSR and S_IWUSR are undefined.
+net.c fails because FD_CLOEXEC is undefined.  Fails at link time, not
+finding waitpid(), sigemptyset, or sigaction.
+
+11/10/93: Compile-time problems fixed in 0.7.1: In adminop.c, I forgot
+to define _POSIX_SOURCE.  In loc.c, I put in an #ifdef S_IRUSR, and
+used typical Unix constants if it's not defined.  In net.c, I wrapped
+the FD_CLOEXEC code in an #ifdef FD_CLOEXEC; this isn't optimal, but
+it'll do.
+
+11/11/93: Link-time problems fixed with code replacements documented in
+README file in source directory.
+
+---
+0.7-8
+
+11/11/93: The line
+
+	matches = matches + [[this(), template, fields, @info]];
+
+reportedly decompiles into
+
+	matches = matches + [[this(), template, fields, @@info]];
+
+It also doesn't work right.  Reported by stewarta@netcom.com.
+
+11/11/93: Fixed in 0.7.1: the problem was that codegen.c was doing
+SPLICE_ADD optimization for splices at the *end* of a list, instead of
+the beginning.
+
+---
+0.7-9
+
+11/11/93: Line numbers in tracebacks are reportedly wrong from time to
+time.  Reported by stewarta@netcom.com.
+
+11/11/93: Following up to stewarta for a more specific example.
+
+11/11/93: Specific case:
+
+	catch any {
+	} with handler {
+	    // line 3
+	    // line 4
+	    // line 5
+	}
+	this().error("line 7");
+
+11/11/93: Fixed in 0.7.1: Catch handler in count_lines was using end
+instead of body_end in a couple of places, and it was also falling
+through into the next case.
+
+---
+0.7-10
+
+11/11/93: Destroying an object doesn't remove it from the children list
+of its parents.  Reported by brandon@cc.usu.edu.
+
+11/11/93: Can't reproduce this; following up to brandon.
+
+---
+0.7-11
+
+11/11/93: The following method produces an error:
+
+	var x;
+
+	for x in ([1, 2, 3])
+	    union([], []);
+
+	ERROR: Domain (1) is not a list or dictionary.
+	Thrown by interpreter opcode FOR_LIST.
+
+Reported by stewarta@netcom.com.
+
+11/11/93: Fixed in 0.7.1; the short-circuit on the second argument
+being empty in op_union() wasn't popping the second argument.  In
+fact, that was a pretty silly short-circuit to have in the first
+place.
+
+---
+0.7.1-1
+
+11/13/93: .foo() decompiles into this().foo().
+
+11/13/93: Fixed in 0.8; is_this() in decode.c was checking expr->u.args
+instead of expr->u.function.args.
+
+---
+0.7.1-2
+
+11/13/93: An object with parents [$programmer, $root] can't find
+methods on $command_handling.  Reported by brandon@cc.usu.edu.
+
+11/13/93: Fixed in 0.8; search_object() in object.c was referring to
+parents->el[0] instead of parents->el[i] when looping over the parents
+of the object being searched.
+
+---
+0.7.1-3
+
+11/13/93: Connection objects hang around when they're not supposed to.
+Reported by brandon@cc.usu.edu.
+
+11/15/93: Can't reproduce this in any of the three cases in which
+connection objects are destroyed; following up to coldstuff.  I think
+this is a database bug.
+
+---
+0.8-1
+
+11/15/93: chparents(), destroy(), conn_assign() leak stack frames.
+Reported by brandon@cc.usu.edu.
+
+11/15/93: Fixed in 0.8.1.
+
+---
+0.8-2
+
+11/19/93: Reading in frobs from text dump fails.  Reported by
+gregb@amber.ecst.csuchico.edu.
+
+11/19/93: Fixed in 0.8.1.  I forgot to assign the dict field in the
+frob structure in data_from_literal() in data.c.
+
+---
+0.8.1-1
+
+11/21/93: pad() can easily crash the server by specifying a large
+length.  Reported by quinn@dus.mountain.net.
+
+---
+0.8.1-2
+
+11/21/93: shutdown() doesn't flush output buffers.  Reported by
+Jordan.
+
+---
+0.8.1-3
+
+11/21/93: has_ancestor() fails in the case of, say,
+;has_ancestor($player).  Reported by Jordan.
+
+11/21/93: Fixed in 0.9, recursive call was checking (dbref, ancestor)
+instead of (parent dbref, ancestor).  Also, it wasn't checking for
+dbref == ancestor in initial case.
+
+---
+0.8.1-4
+
+11/22/93: Objects' search fields are uninitialized, and so is the
+initial bitmap.  Reported by dougo@pure.com, using Purify.
+
+11/22/93: Fixed in 0.9, added initialization for search fields in
+object_new() and for bitmap in db.c.
+
+---
+0.8.1-5
+
+11/22/93: Memory leaks in text dump reader and other places.  Reported
+by dougo@pure.com, using Purify on the regression tests.
+
+11/22/93: In 0.9, eliminated memory leaks in text_dump_get_method()
+(forgot to discard code list) and in object_free (forgot to discard
+identifiers).  Should follow up to dougo to retry Purify.
+
+11/23/93: Followed up to dougo; there was one remaining memory leak,
+traced to text_dump_read(), which was forgetting to discard the
+methods it added to objects.
+
+---
+0.9-1
+
+11/26/93: Error message for data() is missing a "not".  Reported by
+Andrew.Wilson@cm.cf.ac.uk.
+
+11/26/93: Fixed in 0.10; was also wrong in bind(), unbind(), connect(),
+and set_heartbeat_freq().
+
+---
+0.9-2
+
+11/26/93: Error-checking in op_index() is wrong.  Found in the source.
+
+11/26/93: Fixed in 0.10.
+
+---
+0.9-3
+
+12/7/93: explode() doesn't work on multi-character separators when the
+first character of the separator appears in the string.  Found in the
+source.
+
+12/7/93: Fixed in 0.10; start was being changed when a candidate
+separator didn't match.
+
+---
+0.9-4
+
+12/7/93: chparents() checking for changing parents of the root object
+is wrong.  Found in the source.
+
+12/7/93: Fixed in 0.10; it was checking the current object's dbref
+instead of the target object.
+
+---
+0.9-5
+
+12/17/93: explode() doesn't check for 0-length separators.  Found in
+the source.
+
+12/17/93: Fixed by adding a check and throwing ~range.
+
+---
+0.9-6
+
+12/17/93: data_tostr() had the wrong length for "<dict>".  Found in
+the source.
+
+12/17/93: Fixed by changing the length from 9 to 6.
+
+---
+0.9-7
+
+circa 12/10/93: Dictionaries seem to be unable to find their 27th
+elements under some circumstances.
+
+12/21/93: Reproduced a likely candidate for the bug:
+
+	var a, b;
+
+	a = dict_add(#[], 1, 2);
+	b = a;
+	b = dict_del(b, 1);
+	a[1];
+
+12/21/93: I'm not at all sure that this is what caused the bug, but
+the effects are certainly the same.
+
+---
+0.9-8
+
+12/18/93: echo() was returning 0 instead of 1.  Found in the source.
+
+12/18/93: Fixed by changing "push_int(0)" to "push_int(1)" in
+op_echo().
+
+---
+0.9-9
+
+12/18/93: When starting up, a child of $connection (from children())
+didn't actually exist.  Reported by ghudson@mit.edu.
+
+12/19/93: db_del() wasn't marking the db as dirty when it deletes an
+object.  This sounds like the cause of the problem.  Fixed in 0.10.
+
+---
+0.9-10
+
+12/21/93: A call to data() was crashing the server (active objects at
+start of main loop).  (0.10 sanity-checking code.)  Found when Cold
+World crashed.
+
+12/21/93: Fixed in 0.10 by adding a cache_discard(obj) at the end of
+op_data() in adminop.c.
+
+---
+0.9-11
+
+12/23/93: Frob hashing for dictionaries was using the identifier
+number for the class; this is not guaranteed to stay the same.  Found
+in the source.
+
+12/23/93: Fixed in 0.10 when dbrefs went numeric.
+
+---
+0.9-12
+
+12/23/93: class() was leaking a reference count on the dbref it
+returned.  Found in the source.
+
+12/23/93: Fixed in 0.10 when dbrefs went numeric.
+
+---
+0.9-13
+
+12/23/93: Error message from op_message() and op_expr_message() was
+using an identifier that it had possibly discarded.  Found in the
+source.
+
+12/23/93: Fixed in 0.10 when dbrefs went numeric.
+
+---
+0.9-14
+
+12/27/93: delete() was failing to copy elements properly for sublists.
+Found in the source.
+
+12/27/93: Fixed by getting rid of the "- sublist->start" term in the
+MEMCPY() call in op_delete() in listop.c.
+
+---
+0.9-15
+
+12/29/93: When creating a dictionary, checking for duplicates is
+faulty.  Found in the source.
+
+12/93/93: Fixed by rewriting the duplicate-checking.
+
+---
+0.10-1
+
+1/8/94: crypt() wasn't checking for invalid salt string.  Found in the
+source.
+
+1/8/94: Fixed in 0.11 in the restructuring.
+
+---
+0.10-2
+
+1/8/94: run_script() was leaking the memory used in the argument list.
+Found in the source.
+
+1/8/94: Fixed in 0.11 by freeing the argument list in the parent
+process in op_run_script() in adminop.c.
+
+---
+0.10-3
+
+1/9/94: Passing a symbol message to a frob with a list representation
+would probably crash.  Found in the source.
+
+1/9/94: Fixed in 0.11 by setting message_data's list value, instead of
+target's list value, to the frob's representation list, in
+op_expr_message() in syntaxop.c.
+
+---
+0.10-4
+
+1/9/94: A return statement in the body of, say, an if statement, has
+braces around it.  This is wrong, and messes up the line counter.
+Reported by Jordan Baker.
+
+1/9/94: Fixed in 0.11 by adding a check for type != RETURN in
+is_complex_type() in decode.c.
+
+---
+0.10-5
+
+1/15/94: Taking modulo 0 will crash the server.  Reported by
+brandon@cc.usu.edu.
+
+1/15/94: Fixed in 0.11; op_modulo() in arithop.c was checking d2->type
+rather than d2->u.val against 0.
+

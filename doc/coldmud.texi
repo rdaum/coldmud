@@ -1,0 +1,4378 @@
+\input /mit/ghudson/tools/ncstexinfo.tex  @c -*-texinfo-*-
+@c %**start of header
+@setfilename coldmud.info
+@settitle Coldmud Programmer's Reference
+@setchapternewpage odd
+@c %**end of header
+
+@ifinfo
+This file documents Coldmud and the @code{C--} programming language.
+
+Copyright @copyright{} 1993 Greg Hudson.
+
+Permission is granted with no restrictions to make and distribute this
+manual in verbatim or modified form.
+@end ifinfo
+
+@titlepage
+@title Coldmud Programmer's Reference
+@subtitle For Coldmud version 0.10
+@subtitle Revision 1
+@author Greg Hudson
+
+@page
+@vskip 0pt plus 1filll
+Copyright @copyright{} 1993 Greg Hudson.
+
+Permission is granted with no restrictions to produce and distribute
+this file in verbatim or modified form.
+@end titlepage
+
+@node Top, Overview, (dir), (dir)
+@ifinfo
+
+Coldmud is a multi-user network server featuring an object-oriented
+database and programming language.  This Info file documents the Coldmud
+server version 0.10 and the @code{C--} programming language.
+
+This manual does not document the features of any Coldmud object
+database, or any object database's interface for defining methods on
+objects.
+
+@menu
+* Overview::			Overview of Coldmud
+* Objects::			Objects in Coldmud
+* Defining Methods::		Writing methods in @code{C--}
+* Errors::			Error conditions in Coldmud
+* Function Descriptions::	Descriptions of Coldmud functions
+* Administration::		Running and maintaining the server
+
+* Function Index::		Index of built-in Coldmud functions
+* Concept Index::		Index of concepts
+
+ --- The Detailed Node Listing ---
+
+Objects in Coldmud
+
+* Dbrefs::			Database references
+* Inheritance::			Parents and inheritance
+* Messages::			Interactions between objects
+* Variables and Parameters::	Information stored in objects
+* System Object::		The system object
+
+Methods: Writing methods in @code{C--}
+
+* Example Method::		Example of a @code{C--} method
+* Tokens::			The building blocks of methods
+* Method Structure::		Structure of a method
+* Statements::			Telling the interpreter what to do
+* Expressions::			Expressing values in @code{C--}
+
+Statements: Telling the interpreter what to do
+
+* Simple Statements::		Performing simple actions
+* Conditional Statements::	Executing instructions conditionally
+* Looping Statements::		Executing instructions repeatedly
+* Error-Handling Statements::	Handling errors
+
+Expressions: Expressing values in methods
+
+* Data Types::			Data types and literal expressions
+* Names::			Referring to objects indirectly
+* Lists::			Constructing and retrieving from lists
+* Dictionaries::		Associating values with data
+* Buffers::			Raw byte values for network I/O
+* Frobs::			Constructing and using frobs
+* Variables::			Local and object variables
+* Operators::			Operator syntax and precedence
+* Calling Functions::		Making calls to built-in functions
+* Sending Messages::		Sending messages to other objects
+* Passing Messages::		Passing messages to parents
+* Error-Handling Expressions::	Handling errors
+* Splicing::			Splicing lists into argument lists
+
+Operators: Operator syntax and precedence
+
+* Precedence::			Resolving ambiguous expressions
+* Arithmetic::			Arithmetic operators
+* Logic::			Logical and relational operators
+* Conditional Operators::	Conditional operators
+
+Function Descriptions: Descriptions of Coldmud Functions
+
+* Data Functions::		Operations on data in general
+* String Functions::		Operations on strings
+* List Functions::		Operations on lists
+* Dictionary Functions::	Operations on dictionaries
+* Buffer Functions::		Operations on buffers
+* Method Functions::		Information about the current method
+* Error Functions::		Handling errors
+* Communication Functions::	Communicating with the user
+* Object Functions::		Operations on the current object
+* Administrative Functions::	Privileged operations
+* Miscellaneous Functions::	Miscellaneous operations
+
+Data Functions: Operations on data in general
+
+* todbref::			Convert an integer or string to a dbref
+* toerr::			Convert a string to an error code
+* toint::			Convert a string or dbref to an integer
+* tostr::			Convert any data to a string
+* tosym::			Convert a string to a symbol
+* type::			Retrieve the type of a piece of data
+* valid::			Check if data is a valid dbref
+
+String Functions: Operations on strings
+
+* crypt::			Perform one-way encryption on a string
+* explode::			Get a list of words in a string
+* lowercase::			Convert a string to lowercase
+* match_begin::			Match against the beginnings of words
+* match_pattern::		Match against a wildcard pattern
+* match_regexp::		Match against a regular expression
+* match_template::		Match against a command template
+* pad::				Pad a string to a given length
+* strcmp::			Case-sensitive comparison of two strings
+* strlen::			Get the length of a string
+* strsub::			Substitute text within a string
+* substr::			Get a substring of a string
+* uppercase::			Convert a string to uppercase
+
+List Functions: Operations on lists
+
+* delete::			Delete an element of a list
+* insert::			Insert an element in a list
+* listlen::			Get the length of a list
+* replace::			Replace an element in a list
+* setadd::			Add an element to a "set"
+* setremove::			Remove an element from a "set"
+* sublist::			Get a sublist of a list
+
+Dictionary Functions: Operations on dictionaries
+
+* dict_add::			Add an association to a dictionary
+* dict_add_elem::		Add an element to a list value
+* dict_contains::		Determine if a key is in a dictionary
+* dict_del::			Delete an association to a dictionary
+* dict_del_elem::		Remove an element from a list value
+* dict_keys::			Get a list of keys in a dictionary
+
+Buffer Functions: Operations on buffers
+
+* buffer_add::			Add a byte value to the end of a buffer
+* buffer_append::		Append two buffers together
+* buffer_from_strings::		Convert a list of strings into a buffer
+* buffer_len::			Get the length of a buffer
+* buffer_replace::		Replace a byte value in a buffer
+* buffer_retrieve::		Retrieve a byte value from a buffer
+* buffer_to_strings::		Convert a buffer to a list of strings
+* buffer_truncate::		Truncate a buffer to a length
+
+Method Functions: Information about the current method
+
+* caller::			The definer of the calling method
+* definer::			The definer of the current method
+* sender::			The sending object
+* task_id::			ID of the current task
+* this::			The current object
+
+Error Functions: Handling errors
+
+* error::			Get the error code, in a handler
+* error_arg::			Get the error argument, in a handler
+* error_str::			Get the error explanation, in a handler
+* rethrow::			Continue propagating an error
+* throw::			Throw an error in the calling method
+* traceback::			Get the traceback, in a handler
+
+Communication Functions: Communicating with the user
+
+* disconnect::			Close connections to the current object
+* echo::			Echo text to the current object
+* echo_file::			Echo a file to the current object
+
+Object Functions: Operations on the current object
+
+* add_parameter::		Add a parameter
+* ancestors::			Get a list of ancestors
+* children::			Get a list of children dbrefs
+* compile::			Compile @code{C--} code into a method
+* del_method::			Remove a method
+* del_parameter::		Remove a parameter
+* find_method::			Find location of method definition
+* find_next_method::		Find location of next method definition
+* get_var::			Get value of a variable
+* list_method::			Decompile method into @code{C--} code
+* methods::			Get a list of defined method names
+* parameters::			Get a list of parameter names
+* parents::			Get a list of parent dbrefs
+* set_var::			Assign to a variable
+
+Administrative Functions: Privileged operations
+
+* binary_dump::                 Bring binary database up to date
+* bind::			Begin listening on a port
+* chparents::                   Change parents of an object
+* conn_assign::                 Set the current connection's object
+* connect::			Connect to a remote server
+* create::			Create an object
+* data::			Getting the data on an object
+* destroy::			Destroy an object
+* log::                         Write a string to stderr
+* run_script::			Execute an administrative script
+* set_heartbeat_freq::		Set the heartbeat frequency
+* shutdown::                    Shut down the server
+* text_dump::                   Dump a text database image
+* unbind::			Stop listening on a port
+
+Miscellaneous Functions: Miscellaneous operations
+
+* abs::				Take the absolute value of a number
+* ctime::			Convert the time to string format
+* max::				Find the maximum of several values
+* min::				Find the minimum of several values
+* random::			Get a random number
+* run_script::			Execute an administrative script
+* time::			Get the current time
+* version::			Get the server version number
+
+Administration: Running and maintaining the server
+
+* Starting::			Starting up the server
+* Disk Database::		Managing the disk database
+* Connections::			How Coldmud manages network connections
+
+@end menu
+@end ifinfo
+
+@node Overview, Objects, Top, Top
+@chapter Overview
+@cindex Overview of Coldmud
+@cindex Coldmud Overview
+
+Coldmud is an object-oriented multi-user network database server with a
+@code{C}-like programming language for defining object behavior.
+
+The components of Coldmud's database are @emph{objects}, which together
+comprise the @emph{object hierarchy}.  Objects have @emph{variables},
+which determine their state, @emph{methods}, which determine their
+behavior in response to @emph{messages} from other objects, and
+@emph{parameters}, which give the names of the variables used by the
+object's methods.
+
+Coldmud objects also have @emph{parents}, which are other objects.  An
+object's behavior is determined by its @emph{inherited} methods, which
+it gets from its parents, and its @emph{overridden} methods, which it
+defines itself.  One object, the @emph{root object}, has no parents; all
+other objects have at least one parent.
+
+Methods determine objects' responses to messages using a @code{C}-like
+language called @code{C--}.  The philosophy of @code{C--} stresses
+simplicity, readability, and vertical code organization.
+
+Encapsulation is an important feature of Coldmud's object system.  An
+object cannot directly access another object's data; it must send a
+message to perform the required action.  Moreover, an object cannot
+directly access the data used by its parents' or its children's methods.
+
+Coldmud uses a disk-based database; only a limited number of objects
+exist in memory at any time.  As long as the bulk of the object database
+is not concentrated in a few objects, Coldmud's process size should not
+grow beyond a certain point even if the database gets very large.
+
+This manual is intended as a reference for programmers and
+administrators.  It does not document any object database, and may not
+be appropriate as a tutorial.  The best way to get started learning
+@code{C--} is to look at existing code, such as code in a core database,
+and refer to this manual when you don't understand how a piece of code
+works.
+
+@node Objects, Defining Methods, Overview, top
+@chapter Objects
+@cindex Objects
+@cindex Characteristics of objects
+
+Objects in Coldmud have four characteristics: a @emph{database
+reference} (called a @emph{dbref}) which identifies the object, a list
+of @emph{parent} dbrefs which determine what default behavior the object
+inherits, @emph{variables} which store information, and @emph{methods}
+which determine how the object responds to messages.  Objects refer to
+each other using dbrefs, and interact with each other by sending
+messages.  The objects which a Coldmud server has to work with are known
+collectively as the @emph{object database}.
+
+Coldmud gives special status to two objects, the @emph{system object}
+and the @emph{root object}.  The system object is allowed to call
+administrative functions and receives @code{startup} and
+@code{heartbeat} messages from the server.  The root object is the only
+object without parents, and is thus an ancestor of every object.
+
+@menu
+* Dbrefs::                      Database references
+* Inheritance::                 Parents and inheritance
+* Messages::                    Interaction between objects
+* Variables and Parameters::	Information stored in objects
+* System Object::               The system object
+@end menu
+
+@node Dbrefs, Inheritance, , Objects
+@section Database References
+@cindex Database references
+@cindex dbrefs
+@cindex Referring to objects
+@cindex Object IDs
+
+Database references are numbers which refer to objects.  When an object
+is created, it is assigned a unique database reference.  Database
+references cannot be changed after an object is created.
+
+In @code{C--}, you indicate a database reference by preceding a number
+with a hash mark (@samp{#}).  For instance, @code{#126} refers to the
+object with the dbref 126.
+
+In general, programmers should not have to be concerned with database
+references.  See @ref{Names} for information on naming objects.
+
+@node Inheritance, Messages, Dbrefs, Objects
+@section Inheritance
+@cindex Inheritance
+@cindex Parents
+@cindex Precedence of ancestors
+@cindex Ancestor precedence
+@cindex Multiple inheritance
+@cindex Behavior of objects
+@cindex Non-overridable methods
+
+In addition to the methods an object defines for itself, objects inherit
+methods from their @emph{parents}.  An object can override a parent's
+method by defining its own methods with the same name.
+
+The root object has no parents.  All other objects have at least one
+parent, and eventually inherit from the root object.  The root object
+has the dbref @code{1}.
+
+It is easy to determine how an object with one parent will react to a
+message; either the object defines its own method for that message, or
+it uses the inherited method from its parent.
+
+Objects with more than one parent are more complicated.  Ancestors of
+such an object take precedence over each other according to the
+following rules:
+
+@enumerate
+@item
+Any ancestor object has higher precedence than its own ancestors.
+@item
+The first parent of an object and the first parent's ancestors have
+higher precedence than the second parent and the second parent's
+ancestors, and so on, except when this conflicts with the first rule.
+@end enumerate
+
+Normally, an object's response to a message is determined by checking
+its own method definitions, and then those of its ancestors in order of
+decreasing precedence@footnote{Because of Coldmud's precedence rules,
+its multiple-inheritance scheme can be described loosely as
+``left-to-right, up-to-join''.  That is, Coldmud performs a depth-first
+traversal of the ancestors digraph, ordering the parents from left to
+right, stopping at an ancestor if it will reach the ancestor again later
+in the traversal.}.  However, it is possible for a method to disallow
+overrides.  If one or more ancestors of an object define non-overridable
+methods, then Coldmud will select the non-overridable method defined on
+the ancestor with the least precedence.
+
+@node Messages, Variables and Parameters, Inheritance, Objects
+@section Messages and Methods
+@cindex Messages to objects
+@cindex Current object
+@cindex Processing messages
+@cindex Messages from the server
+
+Objects interact with each other by sending @emph{messages}.  Messages
+have two components, a name and a list of arguments.  To see how to send
+a message in a @code{C--} method, see @ref{Sending Messages}.
+
+Coldmud processes a message by looking on the recipient object and its
+ancestors for a method with the same name as the message, following the
+rules given in the previous section.  The recipient's method processes
+the message according to its @code{C--} instructions, and returns a
+value to the calling object.
+
+While a message is being processed, the object which received the
+message is called the @emph{current object}.  Only the current object's
+variables can be accessed or changed by the method which processes the
+message; to examine or modify another object, the method must send a
+message to that object.
+
+If a method definition overrides a definition on an ancestor of the
+current object with lower precedence, the overriding method can
+@emph{pass} the message to the ancestor; see @ref{Passing Messages} for
+details.
+
+Methods can use the functions @code{this()} and @code{sender()} to
+determine the dbrefs of the current object and the object which sent the
+message to the current object.  The functions @code{definer()} and
+@code{caller()} allow methods to determine the dbrefs of the objects
+which define the current method and the calling method.
+
+Messages to an object are not always sent by another object; they can
+also come from the server.  Coldmud sends @code{parse}, @code{connect},
+and @code{disconnect} messages to handler objects of connections,
+@code{startup} and @code{heartbeat} messages to the system object, and
+@code{connect} and @code{failed} messages to receiver objects of pending
+connections generated by the @code{connect()} function.  When Coldmud
+sends a message to an object, @code{sender()} and @code{caller()} return
+the integer @code{0}.
+
+@node Variables and Parameters, System Object, Messages, Objects
+@section Variables and Parameters
+@cindex Variables on objects
+@cindex Object variables
+@cindex Slots (variables) on objects
+@cindex Storing information on objects
+@cindex Parameters on objects
+
+An object's @emph{parameters} gives the names of the variables its
+methods have access to.  An object's @emph{variables} correspond to
+parameters on that object or one of its ancestors.
+
+The function @code{add_parameter()} adds a parameter to an object.  Once
+you have created a parameter on an object, the methods on that object
+can use it to refer to a variable on that object or any of its
+descendents, using the @code{C--} constructs described in
+@ref{Variables}.
+
+Two objects can have parameters of the same name; a third object which
+inherits from both of them will contain two separate variables for
+those parameters.  Methods on the first object will refer to one
+variable, and methods on the second object will refer to the other.
+Likewise, variables on separate objects are distinct, even though the
+methods which can access them and the parameter used by the method are
+the same.
+
+Note that this system does not permit children to access the variables
+used by their ancestors directly.  Objects can build on the abstractions
+of their parent objects, but not their internal representations.
+
+@node System Object, , Variables and Parameters, Objects
+@section The System Object
+@cindex System object
+@cindex Communicating with the server
+@cindex Messages to the system object
+@cindex Event notification
+@cindex Startup event notification
+
+The system object is a special object for communicating with the Coldmud
+server.  The system object has the dbref @code{0}.
+
+At startup time, the server sends a @code{startup} message to the system
+object, with one argument, a list of strings giving the arguments passed
+on the command line when the server was invoked.
+
+If you use the @code{set_heartbeat_freq()} function to enable the
+heartbeat, then the server will send a @code{heartbeat} message to the
+system object periodically.
+
+Methods on the system object can call administrative functions such as
+@code{shutdown()} which ordinary objects are not permitted to call.  In
+most databases, the system object will define methods which allow
+certain authorized objects to access these functions.
+
+@node Defining Methods, Errors, Objects, Top
+@chapter Defining methods
+@cindex Methods
+@cindex Defining methods
+@cindex @code{C--} language
+@cindex Defining object behavior
+@cindex Ticks
+
+A method in Coldmud is an object's definition of how to handle a
+message.  Methods are written in a language called @emph{@code{C--}},
+which resembles @code{C} at first glance.  However, @code{C--} is a
+simpler language, and it stresses readability instead of conciseness.
+
+The building blocks of methods are character sequences called
+@emph{tokens}.  From these tokens you can assemble a sequence of
+instructions to the interpreter called @emph{statements}.  You express
+values in statements using @emph{expressions}.
+
+Methods can return values using a @code{return} statement.  If a method
+does not explicitly return a value, its return value is the dbref of the
+current object.
+
+Methods have a limited amount of running time; if a method executes too
+many instructions before returning, it will abort with a @code{~ticks}
+error, which it cannot catch.  @xref{Errors}
+
+@menu
+* Example Method::              An example @code{C--} method
+* Tokens::                      The building blocks of methods
+* Method Structure::            Structure of a method
+* Statements::                  Telling the interpreter what to do
+* Expressions::                 Expressing values in @code{C--}
+@end menu
+
+@node Example Method, Tokens, , Defining Methods
+@section Example Method
+@cindex Example method
+
+Here is an example of a simple @code{C--} method.  This method might be
+used in a mud server to handle a @code{tell_contents} message sent to a
+container object.  Here is the code for the method:
+
+@example
+@group
+arg str;
+var obj;
+
+for obj in (contents) @{
+    // Tell the string to the object.
+    (| obj.tell(str) |);
+@}
+@end group
+@end example
+
+@noindent
+
+This method takes one argument, @code{str}, a string to send to each
+object in the room.  The method uses a local variable @code{obj} to
+traverse the list stored in the object variable @code{contents}.  The
+body of the method is a for loop, which traverses the contents list.
+For each element in the for list, this method sends a @code{tell}
+message with the string.  The parenthesis and vertical bar delimiters
+(@samp{(|} and @samp{|)}) surrounding the message expression mark it as
+a @emph{critical expression}.  Errors which occur inside a critical
+expression are ignored; thus, errors which occur during the processing
+of the @code{tell} messages won't cause the @code{tell_contents} method
+to abort.
+
+@node Tokens, Method Structure, Example Method, Defining Methods
+@section Tokens
+@cindex Tokens
+@cindex Case-sensitivity of identifiers
+
+The building blocks of @code{C--} methods are character sequences called
+@emph{tokens}.  There are many different types of tokens, ranging from
+single characters to lines of text.  @code{C--} methods are assembled
+from sequences of tokens.
+
+The following characters and pairs of characters are tokens:
+
+@example
+@{ @} [ ] #[ %[ ( ) (| |) (> <) .. ; , = !
+- + * / % == != > >= < <= . || && ? | : @@
+@end example
+
+@noindent
+These tokens are used as operators and as punctuation in various types
+of expressions.
+
+You can use @emph{identifiers} as tokens and as parts of tokens.  An
+identifier is a sequence of alphabetical and numeric characters or
+underlines beginning with an alphabetical character or an underline.
+Identifiers in @code{C--} are case-sensitive, so the identifiers
+@code{car} and @code{CAr} are not equivalent.  The following are valid
+identifiers:
+
+@example
+@group
+we_3_kings
+obj
+a
+@end group
+@end example
+
+@noindent
+By themselves, identifiers usually represent variables.  However,
+certain identifiers have special meanings to the parser.  These
+@emph{reserved words} are used in writing certain kinds of statements
+and expressions.  They are:
+
+@example
+var if else while for switch case default break continue return
+catch any with handler pass to in fork atomic non_atomic
+@end example
+
+(@code{fork}, @code{atomic}, and @code{non_atomic} are not actually used
+by the current version of Coldmud, but are reserved for future use.)
+
+There are several kinds of tokens for denoting literal expressions of
+various data types.  These are @emph{integers}, denoted by a sequence of
+digits; @emph{strings}, denoted by a sequence of characters enclosed in
+double quotes; @emph{dbrefs}, denoted by a sharp (@samp{#}) and a
+number; @emph{symbols}, denoted by a single forward quote (@samp{'}) and
+an identifier or string; and @emph{error codes}, denoted by a tilde
+(@samp{~}) and an identifier or string.  These literals are described
+more fully in @ref{Data Types}, along with the data types they
+represent.
+
+A @emph{name token} is a dollar sign (@samp{$}) followed by an
+identifier or string.  Names refer to objects indirectly; see
+@ref{Names}.
+
+Tokens which contain identifiers but begin with a distinguishing
+character (that is, symbol tokens, error code tokens, and name tokens)
+relax the restriction that identifiers not begin with an integer.  Thus,
+@code{$23a} is a valid name token, even though @code{23a} is not an
+identifier.
+
+Finally, a @emph{comment token} is any text on a line after a pair of
+slashes (@samp{//}).  Comment tokens can be used as statements in
+methods; such statements are ignored by the interpreter.
+
+@node Method Structure, Statements, Tokens, Defining Methods
+@section Method Structure
+@cindex Method structure
+@cindex Structure of methods
+@cindex Syntax of methods
+@cindex Components of a method
+@cindex Ignoring errors
+@cindex Local variable declarations
+@cindex Declaring local variables
+@cindex Non-overridable methods, declaring
+@cindex Disallowing overrides in a method
+@cindex Override blocking in a method
+
+A @code{C--} method has the following structure:
+
+@example
+@group
+disallow_overrides;
+arg @var{arg1}, @var{arg2}, @var{...}, [@var{rest}];
+var @var{var1}, @var{var2}, @var{...};
+
+@var{statement1}
+@var{statement2}
+@var{.}
+@var{.}
+@var{.}
+@end group
+@end example
+
+@noindent
+The @code{disallow_overrides;} declaration indicates a non-overridable
+method (@pxref{Inheritance}).  Normally, you should omit this
+declaration.
+
+The @code{arg} declaration gives a list of argument variables, whose
+values will correspond to the arguments passed with the message.  You
+may omit the @code{arg} declaration if the method does not take any
+arguments.  If the final argument variable is given in square brackets
+(that is, if you specify @var{rest}), then the method can accept a
+variable number of argments; @var{rest} will contain a list of the
+arguments beyond the ones corresponding to the argument variables.  If
+you do not specify @var{rest}, then the method can accept only the
+number of arguments specified by the argument variables, no more.
+
+The @code{var} declaration tells the compiler that the listed
+identifiers should refer to local variables.  You may omit the
+@code{var} declaration if you do not wish to declare any local
+variables.
+
+The statements @var{statement1}, @var{statement2}, @var{...} are the
+body of the method.  They tell the interpreter what the method does.
+
+@node Statements, Expressions, Method Structure, Defining Methods
+@section Statements
+@cindex Statements
+
+@emph{Statements} are instructions to the interpreter.  Statements can
+be as simple as comments, or they can be complex loops and conditionals.
+However, most statement types in @code{C--} have simple structures.
+Because statements can include other statements, you can use these
+simple statement types to build complex directives.
+
+The following sections describe simple statements, which perform simple
+actions once, conditional statements, which perform different actions
+depending on the value of an expression, looping statements, which
+perform an action multiple times, and error-handling statements, which
+affect how the interpreter handles error conditions.
+
+@menu
+* Simple Statements::           Performing simple actions
+* Conditional Statements::      Executing instructions conditionally
+* Looping Statements::          Executing instructions repeatedly
+* Error-Handling Statements::	Handling errors
+@end menu
+
+@node Simple Statements, Conditional Statements, , Statements
+@subsection Simple Statements
+@cindex Simple statements
+@cindex Comment statement
+@cindex Expression statement
+@cindex Assignment statement
+@cindex Compound statement
+@cindex Return statement
+
+The @emph{comment statement} does nothing at all.  A comment statement
+is just a comment token, which is a sequence of two slashes (@samp{//})
+followed by any characters up to the end of the lines.  For instance:
+
+@example
+// This is a comment.
+@end example
+
+@noindent
+The interpreter ignores comment statements completely; they are for the
+benefit of human readers.  Note that comments in @code{C--} are actual
+statements, unlike comments in @code{C}, which are filtered out by the
+preprocessor.
+
+The @emph{expression statement} evaluates an expression and discards its
+value.  The syntax of the expression statement is:
+
+@example
+@var{expression};
+@end example
+
+@noindent
+The following are expression statements:
+
+@example
+3;
+sender().tell($sys.who());
+@end example
+
+The @emph{assignment statement} evaluates an expression and assigns the
+value to a variable.  The syntax of the assignment statement is:
+
+@example
+@var{variable} = @var{expression};
+@end example
+
+@noindent
+The interpreter assigns the value of @var{expression} to @var{variable},
+which is a local variable if it has been declared as one, or an object
+variable on the current object if it has not been declared.
+@xref{Variables}.
+
+The @emph{compound statement} allows you to treat one or more statements
+as a single statement.  The compound statement has the following syntax:
+
+@example
+@group
+@{
+    @var{statement1}
+    @var{statement2}
+    @var{.}
+    @var{.}
+    @var{.}
+@}
+@end group
+@end example
+
+@noindent
+The interpreter executes each of @var{statement1}, @var{statement2},
+@var{...} in turn.
+
+The @emph{return statement} allows a method to stop exeuting statements
+and to return a value other than the default return value of
+@code{this()}.  The return statement can have either of the following
+two forms:
+
+@example
+@group
+return @var{expression};
+return;
+@end group
+@end example
+
+@noindent
+The interpreter stops executing statements in the method and returns the
+value of @var{expression}, or the dbref of the current object if
+@var{expression} is not given.
+
+@node Conditional Statements, Looping Statements, Simple Statements, Statements
+@subsection Conditional Statements
+@cindex Conditional statements
+@cindex If statement
+@cindex If-else statement
+@cindex Switch statement
+@cindex Cases
+@cindex Executing statements conditionally
+
+There are three types of conditional statements in @code{C--}.  The
+@emph{if statement} has the following syntax:
+
+@example
+@group
+if (@var{expression})
+    @var{statement}
+@end group
+@end example
+
+@noindent
+The interpreter evaluates @var{expression}.  If the value of
+@var{expression} is true (@pxref{Data Types}), then the interpreter
+executes @var{statement}.
+
+The @emph{if-else statement} is similar to the if statement.  The
+if-else statement has the following syntax:
+
+@example
+@group
+if (@var{expression})
+    @var{true-statement}
+else
+    @var{false-statement}
+@end group
+@end example
+
+@noindent
+The interpreter evaluates @var{expression}, as before.  If the value of
+@var{expression} is true, then the interpreter executes
+@var{true-statement}; otherwise, it executes @var{false-statement}.
+
+Because the if statement and the if-else statement are similar, they can
+sometimes be ambiguous.  The following code will produce unexpected
+results:
+
+@example
+@group
+if (a)
+    if (b) c;
+else
+    d;
+@end group
+@end example
+
+The indentation suggests that the @code{else} clause should apply to the
+first @code{if} clause, but in fact it applies to the more recent one.
+You can avoid ambiguities like this by using braces to create compound
+statements out of conditional and looping statements, even if there is
+only one of them.  In this case, you might write:
+
+@example
+@group
+if (a) @{
+    if (b)
+        c;
+@} else @{
+    d;
+@}
+@end group
+@end example
+
+The third type of conditional statement is the @emph{switch statement},
+which allows you to compare one value against a series of other values.
+The switch statement is the most complicated statement type in
+@code{C--}, so we'll start with an example:
+
+@example
+@group
+switch (val) @{
+    case 0:
+        echo("The value is zero.");
+    case 1 .. 10:
+        echo("The value is between one and ten inclusive.");
+    case 11 .. a:
+        echo("The value is between eleven and a inclusive.");
+    case "foo", "bar".."baz":
+	echo("The value is \"foo\" or between \"bar\" and \"baz\"");
+    case a .. b, c .. d, 42:
+        count = count + 1;
+        echo("The value is in the counted area.");
+    case ~perm:
+        echo("Permission denied while getting the value.");
+    default:
+        echo("Did not recognize value.");
+@}
+@end group
+@end example
+
+@noindent
+This example illustrates all of the capabilities of the switch
+statement.  The expression given by @code{val} in the example is the
+@emph{controlling expression}, and is compared against each of the cases
+inside the switch body.  Each case has a value or list of values to
+compare against.  The values can be of any type, and need not be
+constant expressions.  You can also specify ranges, using two dots
+(@samp{..}) to separate the lower and upper bounds.  The keyword
+@code{default} specifies an action to perform if no cases were matched
+by the controlling expression.
+
+Here is a more formal description of the syntax of the switch statement:
+
+@example
+@group
+switch (@var{controlling-expression}) @{
+    case @var{expr-or-range}, @var{expr-or-range}, @var{...}:
+        @var{statements}
+    case @var{expr-or-range}, @var{expr-or-range}, @var{...}:
+        @var{statements}
+    @var{.}
+    @var{.}
+    @var{.}
+    default:
+        @var{default-statement}
+@}
+@end group
+@end example
+
+@noindent
+When executing a switch statement, the interpreter scans through the
+list of cases and compares @var{controlling-expression} against each of
+the lists of values in the cases, evaluating the value lists from left
+to right until there is a match.  The lower and upper bounds of ranges
+must be of the same type and must be either integers or strings, or the
+interpreter will throw a @code{~type} error.  When the interpreter finds
+a match, it will execute the statement for that case.  The interpreter
+will not continue checking cases after a match.
+
+If the interpreter does not find a match, it will execute
+@var{default-statement}, the statement corresponding to the default
+case.  You do not need to provide a default case if you do not wish to
+provide a default action.
+
+@code{C} programmers should note that switch statements in @code{C--}
+differ from switch statements in @code{C} in several respects.  Because
+case values do not have to be constants, they may conflict, in which
+case the first match will take precedence.  Also, there is no
+fall-through in @code{C--} switch statements; only the statements
+corresponding to the matching case will be executed.  Because there is
+no fall-through, the @code{break} statement does not apply to switch
+statements.  Finally, the default case must be placed last in the list
+of cases if it is given.
+
+@node Looping Statements, Error-Handling Statements, Conditional Statements, Statements
+@subsection Looping Statements
+@cindex Looping statements
+@cindex For-list statement
+@cindex For-range statement
+@cindex While statement
+@cindex Break statement
+@cindex Continue statement
+@cindex Exiting loops prematurely
+@cindex Premature loop exits
+@cindex Stopping loops
+@cindex Traversing lists
+@cindex Counting
+
+@code{C--} provides three kinds of looping statements.  These statements
+allow you to traverse a list or a range of numbers, or to execute a
+statement as long as a certain condition is true.  @code{C--} also
+provides two kinds of jump statements which allow you to prematurely
+exit from a loop or continue onto the next iteration.
+
+The @emph{for-list statement} allows you to traverse a list.  It has the
+following syntax:
+
+@example
+@group
+for @var{variable} in (@var{list})
+    @var{statement}
+@end group
+@end example
+
+@noindent
+@var{variable} must be the name of a local variable, and @var{list} must
+be an expression of list type.  The interpreter executes @var{statement}
+once for each element of @var{list}. @var{variable} contains the list
+element that the interpreter is at.  Here is an example of a method
+using a for-list statement:
+
+@example
+@group
+var a, s;
+
+a = ["foo", "bar", "baz"];
+for s in (a)
+    .tell(s);
+@end group
+@end example
+
+You can also iterate over the associations in a dictionary with the
+for-list statement; see @ref{Dictionaries}.
+
+The @emph{for-range statement} allows you to traverse a range of
+integers.  It has the following syntax:
+
+@example
+@group
+for @var{variable} in [@var{lower} .. @var{upper}]
+    @var{statement}
+@end group
+@end example
+
+As before, @var{variable} must be the name of a local variable.
+@var{lower} and @var{upper} must be expressions of integer type.  The
+interpreter executes @var{statement} once for each number from
+@var{lower} to @var{upper} inclusive.  @var{variable} contains the
+number that the interpreter is at.  Assigning to @var{variable} within
+the loop body will not change the status of the loop; the interpreter
+remembers what number it is at independently of the loop index.  Here is
+an example of a method using a for-range statement:
+
+@example
+@group
+var i;
+
+for i in [1 .. 10]
+    .tell(tostr(i));
+@end group
+@end example
+
+The @emph{while statement} allows you to execute code as long as a
+condition expression is true.  The while statement has the following
+syntax:
+
+@example
+@group
+while (@var{expression})
+    @var{statement}
+@end group
+@end example
+
+@noindent
+The interpreter continually evaluates @var{expression} and executes
+@var{statement} until the value of @var{expression} is false, according
+to the rules in @ref{Data Types}.  Here is an example of a method using
+a while statement:
+
+@example
+@group
+var a;
+
+a = 1;
+while (a < 35)
+    a = a * 2;
+.tell(tostr(a));
+@end group
+@end example
+
+The @emph{break statement} allows you to exit a loop prematurely.  The
+break statement has the following syntax:
+
+@example
+break;
+@end example
+
+The interpreter jumps to the end of the innermost for-list, for-range,
+or while statement.
+
+The @emph{continue statement} allows you to jump to the next iteration
+of a loop.  The continue statement has the following syntax:
+
+@example
+continue;
+@end example
+
+The interpreter skips the remainder of the loop body and begins another
+iteration of the innermost for-list, for-range, or while statement.
+
+The break and continue statements do not allow you to break out of two
+loops at once.  @code{C--} does not provide any general jump mechanism.
+If you find that you require jumps other than break or continue
+statements, then you probably need to reorganize your code.
+
+@node Error-Handling Statements, , Looping Statements, Statements
+@section Error-Handling Statements
+@cindex Error-handling statements
+@cindex Catch statement
+@cindex Error handlers
+@cindex Handling specific errors
+
+The @emph{catch statement} allows you to indicate how errors should be
+handled in a block.  You can use this statement when you anticipate that
+an error might occur for reasons other than your programming errors.
+For instance, you may anticipate being denied permission to perform an
+operation, and use a catch statement to handle this error explicitly.
+You can also use the catch statement to make sure that cleanup
+operations are performed if an error occurs.
+
+The catch statement has the following syntax:
+
+@example
+@group
+catch @var{error code}, @var{error code}, @var{...}
+    @var{body-statement}
+with handler
+    @var{handler-statement}
+@end group
+@end example
+
+@noindent
+You can substitute the keyword @code{any} for the list of errors to
+indicate that you wish to catch all errors.  You can leave out the
+@code{with handler} and the handler statement if you do not wish to do
+anything in the handler.
+
+If an error listed in the error list is thrown inside
+@var{body-statement}, the interpreter will execute the handler rather
+than aborting the method.  After the handler is done, control continues
+after the end of the catch statement, as if @var{body-statement} had
+completed with no errors.
+
+Inside the handler, you can use the function @code{error()} to determine
+the error code which triggered the handler, the function
+@code{error_arg()} to retrieve the error argument specified by
+@code{throw()} if one weas given, and the function @code{traceback()} to
+retrieve a list of strings describing the propagation of the error down
+the call stack.  You can use the function @code{rethrow()} to continue
+propagating an error.
+
+Here is an example of how you might use a catch statement to
+intelligently handle a @code{~methodnf} error from the
+@code{list_method()} function:
+
+@example
+@group
+catch ~methodnf @{
+    code = list_method(method_name);
+@} with handler @{
+    .tell("There is no method named " + tostr(method_name) + ".");
+@}
+@end group
+@end example
+
+Note that critical expressions (@pxref{Error-Handling Expressions})
+inside @var{body-statement} will override the behavior of the catch
+statement.  For more detail on errors in @code{C--}, see @ref{Errors}.
+
+@node Expressions, , Statements, Defining Methods
+@section Expressions
+@cindex Expressions
+
+You can express values in @code{C--} methods using @var{expressions}.
+The following sections document the various types of expressions in
+@code{C--}, as well as the types of values they can have when evaluated.
+
+@menu
+* Data Types::                  Data types and literal expressions
+* Names::			Referring to objects indirectly
+* Lists::                       Constructing and retrieving from lists
+* Dictionaries::		Associating values with data
+* Buffers::			Raw byte values for network I/O
+* Frobs::			Constructing and using frobs
+* Variables::                   Local and object variables
+* Operators::                   Operator syntax and precedence
+* Calling Functions::           Making calls to built-in functions
+* Sending Messages::            Sending messages to other objects
+* Passing Messages::            Passing messages to parents
+* Error-Handling Expressions::	Handling errors
+* Splicing::                    Splicing lists into argument lists
+@end menu
+
+@node Data Types, Names, , Expressions
+@subsection Data Types
+@cindex Data types
+@cindex @code{C--} data
+@cindex Literal expressions
+@cindex Integer data type
+@cindex String data type
+@cindex Dbref data type
+@cindex List data type
+@cindex Dictionary data type
+@cindex Symbol data type
+@cindex Error data type
+@cindex Frob data type
+@cindex Buffer data type
+@cindex Types of @code{C--} data
+@cindex Constant expressions
+
+Every piece of data in @code{C--} has a type.  This section documents
+the data types in @code{C--}.  You can produce values of the simpler
+data types (integers, strings, dbrefs, symbols, error codes) can be
+produced with @var{literal} expressions; you can produce values of the
+more complex data types (lists, dictionaries, frobs, buffers) with
+@var{constructor} expressions.  As we go, we will explain how to specify
+or construct values of each of the data types, and explain what it means
+for a value of each data type to be true.
+
+@need 1500
+Every piece of data in @code{C--} has a type and a truth value.  The
+type can be one of:
+
+@itemize @bullet
+@item Integer
+@item String
+@item Dbref
+@item List
+@item Symbol
+@item Error type
+@item Frob
+@item Dictionary
+@item Buffer
+@end itemize
+
+An @emph{integer} is just a number.  Integers can reliably be from
+-2147483648 to +2147483647.  An integer is true if it is not zero.  You
+can denote integer literals in @code{C--} by writing a sequence of
+digits, optionally preceded by a @samp{-} or @samp{+} sign.
+
+A @emph{string} is a sequence of printable characters.  A string is true
+if it is not empty.  You can denote string literals in @code{C--} by
+enclosing a sequence of characters in double quotes (@samp{"}).  To
+include a double quote or backslash character in a string literal,
+precede it by a backslash (@samp{\}).  The following are string
+literals:
+
+@example
+@group
+"foo"
+"\"foo\" is a metasyntactic variable."
+"The backslash (`\\') is a much-abused character in many languages."
+@end group
+@end example
+
+A @emph{dbref} is a reference to an object, which may or may not exist.
+Database references are always true, whether or not they refer to actual
+objects.  You can denote dbref literals in @code{C--} by preceding a
+number with a sharp (@samp{#}); for example, @code{#1} and @code{#267}
+are valid dbref literals.
+
+A @emph{list} is a collection of objects of any type.  Lists are useful
+for manipulating several objects at once.  A list is true if it is not
+empty.  You can construct a list value by enclosing a comma-separated
+series of expressions in square brackets; for example, @code{[1, 2, 3]}
+and @code{[1, ["foo", 'bar], #23]} are valid list construction
+expressions.
+
+A @emph{symbol} is a symbolic value.  You can denote symbols in
+@code{C--} by preceding an identifier or string with an apostrophe
+(@samp{'}).  @code{'remote}, @code{'template}, and @code{'object} are
+valid symbol literals.  Symbols are always true.
+
+An @emph{error code} identifies a type of error condition.  Both the
+@code{C--} interpreter and @code{C--} methods use error codes to
+identify types of errors when they occur.  See @ref{Errors} for
+information about how Coldmud handles errors.  You can denote error code
+literals in @code{C--} by preceding an identifier or string with a tilde
+(@samp{~}).  Error codes are always false.
+
+A @emph{frob} consists of a @emph{class}, the dbref of an object, and a
+@emph{representation}, a list or dictionary.  Frobs are intended to
+serve as lightweight objects.  You can construct a frob value by
+enclosing expressions for the class and representation in triangular
+brackets, separated by a comma; for instance, @code{<#73, [1, 2]>} is a
+valid frob construction expression.  Frobs are always true.
+
+A @emph{dictionary} is a collection of @emph{associations}, each of
+which has a @emph{key} and a @emph{value}.  Dictionaries take up more
+space than lists, but searching for a data value in a dictionary is
+generally faster than searching for data values in lists.  You can
+construct a dictionary by enclosing a comma-separated series of
+associations in square brackets, where each association is a two-element
+list giving a key and a value, and preceding the whole thing with a hash
+mark (@samp{#}).  For instance, @code{#[["foo", 3], ["bar", 'baz]]} is a
+valid dictionary construction expression.  A dictionary is true if it is
+not empty.
+
+a @emph{buffer} is an array of unsigned eight-bit values, intended for
+network I/O.  You can construct a buffer by enclosing a comma-separated
+series of integer expressions in square brackets, preceded by a percent
+sign (@samp{%}).  For instance, @code{%[65, 66, 67, 10]} is a valid
+buffer construction expression.  A buffer is true if it is not empty.
+
+You can get the type of a piece of @code{C--} data using the
+@code{type()} function.  The @code{type()} function returns a symbol
+corresponding to the type of its argument.  This symbol can be
+@code{'integer}, @code{'string}, @code{'dbref}, @code{'list},
+@code{'symbol}, @code{'error}, @code{'frob}, or @code{'dictionary}.
+
+@node Names, Lists, Data Types, Expressions
+@subsection Names
+@cindex Names
+@cindex Symbolic names
+@cindex Object names
+@cindex Symbol translation to dbrefs
+@cindex Dbref names
+@cindex Translating symbolic names to dbrefs
+
+A @var{name} is an indirect reference to an object.  Coldmud translates
+names into dbrefs during method interpretation according to the
+associations made using the administrative function @code{set_name()}.
+A @var{name expression} is simply a name token, an identifier or string
+following a dollar sign (@samp{$}).
+
+When the interpreter encounters a name expression, it looks up the name
+to see what dbref it has been assigned by the @code{set_name()}
+function.  If no such assignment has been made, then the interpreter
+throws a @code{~namenf} error; otherwise, the value of the name
+expression is the dbref assigned to the name by @code{set_name()}.
+
+You can also use the (non-administrative) function @code{get_name()} to
+look up a symbol as a name.
+
+The administrative function @code{del_name()} deletes the association
+for a name.
+
+@node Lists, Dictionaries, Names, Expressions
+@subsection Lists
+@cindex Lists
+@cindex List constructors
+@cindex Indexing lists
+@cindex Retrieving data from lists
+@cindex Making lists
+@cindex Searching lists
+@cindex Combining data into lists
+
+A @emph{list} is a collection of pieces of data of any type.  You can
+create a list in @code{C--} using a @emph{list construction expression}.
+A list construction expression has the following syntax:
+
+@example
+[@var{expression1}, @var{expression2}, ...]
+@end example
+
+@noindent
+@var{expression1}, @var{expression2}, @var{...} are the elements of the
+list.  You can also splice a list into a list construction expression;
+see @ref{Splicing}.  The result of a list construction expression is a
+list containing the values of the expressions.  Here are some examples
+of list construction expressions:
+
+@example
+@group
+[1, 2, 3]
+[a + 5, 'string, [3, "b"], tostr(~none)]
+[]
+@end group
+@end example
+
+To retrieve an element of a list, you can use a @emph{list selection
+expression}, which has the following syntax:
+
+@example
+@var{list}[@var{element}]
+@end example
+
+@noindent
+@var{list} must be an expression of list type (or string type; see
+below) and @var{element} is an expression of integer type whose value is
+between one and the length of the list.  The value of a list selection
+expression is the value of the element of @var{list} numbered by
+@var{element}, where the elements of @var{list} are numbered starting
+from one.  For example, the following method returns @code{3}:
+
+@example
+@group
+var a;
+
+a = ["foo", 2, 'bar, 3, ~parents];
+return a[4];
+@end group
+@end example
+
+@noindent
+You can use the list selection expression with strings as well as with
+lists.  In this case, @code{C--} treats the string as if it were a list
+of one-character strings.  The following method returns @code{"p"}:
+
+@example
+@group
+var a;
+
+a = "Depth";
+return a[3];
+@end group
+@end example
+
+You can also use the list selection expression with dictionaries; we
+will describe this usage in the next section.
+
+You can look for a piece of data in a list, you can use a @var{list
+search expression}, which has the following syntax:
+
+@example
+@var{element} in @var{list}
+@end example
+
+@noindent
+The value of this expression is the index of the first occurrance of
+@var{element} in @var{list}, or @code{0} if @var{element} does not occur
+in @var{list}.  The following method returns @code{[3, 0]}:
+
+@example
+@group
+var a;
+
+a = ['foo, "bar", 4 + 2, #77];
+return [6 in a, 'quux in a];
+@end group
+@end example
+
+@noindent
+As with the list selection expression, you can use the list search
+expression with strings as well as with lists.  In this case, both
+@var{element} and @var{list} must be strings, and the result is the
+first position at which @var{element} occurs in @var{list}, or 0 if it
+does not occur.
+
+@node Dictionaries, Buffers, Lists, Expressions
+@subsection Dictionaries
+@cindex Dictionaries
+@cindex Associative arrays
+@cindex Mappings
+
+A @emph{dictionary} is a list of @emph{associations}.  Each association
+contains a @emph{key} and a @emph{value}, both arbitrary @code{C--} data
+values.  Dictionaries take up more space than lists, but allow fast
+searches.  Only one association in a dictionary may have a given key.
+
+Dictionary construction expressions have the following syntax:
+
+@example
+#[[@var{key1}, @var{value1}], [@var{key2}, @var{value2}], @var{...}]
+@end example
+
+The result of a dictionary construction expression is a dictionary with
+the keys @var{key1}, @var{key2}, @var{...} and the associated values
+@var{value1}, @var{value2}, @var{...}.  The following are valid
+dictionary construction expressions:
+
+@example
+#[["foo", 3], ['bar, 4], [8, [#0, 'startup]]]
+#[['type, 'and], ['lhs, 3], ['rhs, 0]]
+@end example
+
+You can search for the value associated with a key in a dictionary using
+the list selection expression:
+
+@example
+@var{dict}[@var{key}]
+@end example
+
+If any of the associations in @var{dict} have the key @var{key}, the
+result of this expression is the value associated with that key.  If
+@var{key} is not the key of any of the associations in @var{dict}, then
+the interpreter raises a @code{~keynf} error.
+
+You can iterate over a dictionary's associations using the for-list
+statement; at each step of the for-list statement, the loop index will
+contain a list @code{[@var{key}, @var{value}]} for the current
+association.
+
+The four dictionary manipulation functions @code{dict_keys()},
+@code{dict_contains()}, @code{dict_add()}, and @code{dict_del()} allow
+you to manipulate dictionaries in other ways; see the descriptions of
+each function for details.
+
+@node Buffers, Frobs, Dictionaries, Expressions
+@subsection Buffers
+@cindex Buffers
+@cindex Raw byte vectors
+@cindex Unprintable characters
+@cindex Octet vectors
+@cindex Network I/O data type
+@cindex I/O data type for networks
+
+A @emph{buffer} is a vector of unsigned eight-bit values, intended
+primarily for network I/O.  Although they are not as convenient to use
+as strings, they can contain any character value, while strings can
+contain only printable characters.
+
+You can construct a buffer using a @emph{buffer construction
+expression}, which has the following syntax:
+
+@example
+%[@var{byte1}, @var{byte2}, @var{...}]
+@end example
+
+The result of a buffer construction expression is a buffer containing
+the byte values expressed by @var{byte1}, @var{byte2}, @var{...}, all of
+which must be integers.  If any of the values of @var{byte1},
+@var{byte2}, @var{...} cannot fit inside an unsigned eight-bit number,
+then that byte will contain the lower order eight bits of the specified
+number.
+
+Apart from operations which apply to all data types, the only language
+operations which apply to buffers are the functions whose names begin
+with @samp{buffer_}: @code{buffer_len()}, @code{buffer_retrieve()},
+@code{buffer_append()}, @code{buffer_replace()}, @code{buffer_add()},
+@code{buffer_truncate()}, @code{buffer_to_strings()}, and
+@code{buffer_from_strings()}.  The last two functions allow you to
+convert between buffers and lists of strings.
+
+Coldmud passes data between the object heirarchy and network connections
+in terms of buffers; see @ref{Connections} for details.
+
+@node Frobs, Variables, Buffers, Expressions
+@subsection Frobs
+@cindex Frobs
+@cindex Lightweight objects
+@cindex Frob constructors
+
+A @emph{frob} is a dictionary or list (its @emph{representation})
+associated with a dbref (its @emph{class}).  Frobs represent a kind of
+lightweight object, with less overhead than real objects.  The
+encapsulation around frobs is not as strong as the encapsulation around
+real objects, and in some respects frobs are not as convenient to work
+with as real objects.  In general, objects should be used for
+long-lasting, complicated, changing entities, while frobs should be used
+for small pieces of data.
+
+Frob construction expressions have the following syntax:
+
+@example
+<@var{class}, @var{representation}>
+@end example
+
+The result of a frob construction expression is a frob of class
+@var{class}, which must be a dbref, with a representation
+@var{representation}, which must be a list or dictionary.  In general,
+you should only use the frob construction expression to construct frobs
+of class @code{this()}, but this is not enforced.  The following are
+valid frob construction expressions:
+
+@example
+<#76, #[['type, 'true]]>
+<#89, ["You cannot go that way."]>
+@end example
+
+Apart from operations which apply to all data types, the only operations
+supported on frobs are message-passing and the @code{class()} function.
+When you send a message to a frob, the interpreter treats it as a
+message to the frob's class, with the frob's representation inserted as
+the first argument.  The @code{class()} function returns the class of a
+frob.
+
+@node Variables, Operators, Frobs, Expressions
+@subsection Variables
+@cindex Variables
+@cindex Variable expressions
+@cindex Assigning to variables
+@cindex Local variables
+@cindex Object variables
+@cindex Using variables
+@cindex Retrieving variable contents
+@cindex Built-in local variables
+
+@code{C--} provides two kinds of variables, @emph{local variables} and
+@emph{object variables}.
+
+@emph{Local variables} allow methods to temporarily store information.
+To use a local variable in a method, declare the local variable's name
+(an identifier) at the top of the method in a @code{var} declaration
+(@pxref{Method Structure}).  The variable's name is then an expression
+whose value is the contents of the variable.  The variable initially
+contains the integer @code{0}.
+
+To set the variable's contents, use an @emph{assignment statement},
+which has the following syntax:
+
+@example
+@var{variable} = @var{value};
+@end example
+
+This assigns the value @emph{value} to the variable @emph{variable}. The
+values of a method's local variables are specific to the processing of a
+particular message call; when the method is invoked another time, all of
+its local variables begin with the value @code{0} again.
+
+The following example method returns @code{6}:
+
+@example
+@group
+var a;
+
+a = 3;
+return a + 3;
+@end group
+@end example
+
+@emph{Object variables} store information for an indefinite period of
+time.  You refer to object variables through parameters, which are
+defined on the current method's defining object (@emph{not} the current
+object).  As with local variables, you can retrieve the value of an
+object variable by writing the name of the parameter which refers to
+that variable, and you can assign to an object variable using an
+assignment statement.  You can also use the @code{get_var()} and
+@code{set_var()} functions to perform these operations.  It is an error
+of type @code{~paramnf} to refer to a parameter which does not exist on
+the current method's defining object.  Object variables begin with the
+value @code{0}.
+
+@node Operators, Calling Functions, Variables, Expressions
+@subsection Operators
+@cindex Operators
+@cindex Infix expressions
+@cindex Unary operators
+@cindex Binary operators
+@cindex Syntax of operators
+@cindex Using operators in expressions
+@cindex Types of @code{C--} operators
+
+Operators are used to perform simple operations on expression values,
+such as adding two values together.  @code{C--} provides a variety of
+operators to perform arithmetic and logical operations on data.  Most of
+these operators fall into two syntactical categories: @emph{unary
+operators} and @emph{binary operators}.
+
+@emph{Unary operators} act on a single expression value.  In @code{C--},
+all unary operators are single characters which precede expressions.
+For example, @code{!a} is the logical negation of the value of the
+variable @code{a}.
+
+@emph{Binary operators} act on two expression values.  For example,
+@code{a + b} is the sum of the values of the variables @code{a} and
+@code{b}.
+
+Several operators are neither unary nor binary.  The message operator
+(@code{.}) acts on a value on the left but a message name and an
+argument list on the right (@pxref{Sending Messages}).  The index
+operator (@code{[]}) uses two punctuation marks to delimit the beginning
+and end of the offset (@pxref{Lists}).  The conditional operator
+(@code{?|}) operates on three data values (@pxref{Conditional
+Operators}).
+
+@menu
+* Precedence::                  Resolving ambiguous expressions
+* Arithmetic::                  Arithmetic operators
+* Logic::                       Logical and relational operators
+* Conditional Operators::       Conditional operators
+@end menu
+
+@node Precedence, Arithmetic, , Operators
+@subsubsection Precedence
+@cindex Precedence of operators
+@cindex Association of operators
+@cindex Ambiguous operator expressions
+@cindex Resolving ambiguous expressions
+@cindex Binding precedence of operators
+
+It is easy to write an expression whose order of evaluation is unclear.
+For instance, the expression @code{a - b + c} could be parsed as
+@code{(a - b) + c} or as @code{a - (b + c)}.  To resolve these
+conflicts, each operator has two properties: @emph{precedence} and
+@emph{association}.
+
+@emph{Precedence} determines whether an operator binds more tightly than
+another operator; for instance, @code{a + b * c} is equivalent to
+@code{a + (b * c)} because multiplication has higher precedence than
+addition.
+
+@emph{Association} determines whether operators at the same precedence
+level associate left to right or right to left; @code{a - b - c} is
+equivalent to @code{(a - b) - c} because subtraction associates left to
+right.
+
+Here is a list of operators grouped by precedence, in order from highest
+precedence to lowest:
+
+@itemize @bullet
+@item @code{.}
+@item @code{[]}
+@item @code{!} and unary @code{-}
+@item @code{* / %}
+@item @code{+ -}
+@item @code{== != > >= < <=}
+@item @code{in}
+@item @code{&&}
+@item @code{||}
+@item @code{?|}
+@end itemize
+
+All operators associate from left to right except the @code{&&},
+@code{||}, and @code{?|} operators, which associate from right to left.
+You can always use parentheses (@samp{(} and @samp{)}) to specify the
+order of evaluation explicitly.
+
+@node Arithmetic, Logic, Precedence, Operators
+@subsubsection Arithmetic
+@cindex Arithmetic expressions
+@cindex Performing arithmetic
+@cindex Addition
+@cindex Subtraction
+@cindex Multiplication
+@cindex Division
+@cindex Modulo operations
+@cindex Negation
+@cindex Operators for arithmetic
+
+@code{C--} provides seven operators for doing arithmetic, two unary
+operators and five binary operators.  These operators apply primarily to
+integers, but the addition operator also applies to strings.  Using
+these operators on inappropriate data is an error of type @code{~type}.
+
+The unary @code{-} operator takes the negative of an integer value.  The
+expression @code{-(3 + 4)} has the value @code{-7}.  The unary @code{+}
+operator has no effect on its argument, and is provided only for
+completeness.
+
+The binary operator @code{*} performs multiplication on its arguments.
+The expression @code{(3 * 4)} has the value @code{12}.  The binary
+operators @code{/} and @code{%} perform integer division and modulus,
+respectively, on their arguments.  The expressions @code{(13 / 5)} and
+@code{(13 % 5)} have the values @code{2} and @code{3} respectively.
+
+The binary operators @code{+} and @code{-} perform addition and
+subtraction.  The expressions @code{(3 + 4)} and @code{(3 - 4)} have the
+values @code{7} and @code{-1} respectively.  The binary @code{+}
+operator can also apply to strings and lists, in which case it performs
+concatenation; the expression @code{("foo" + "bar")} has the value
+@code{"foobar"}, and the expression @code{(["foo", "bar"] + ["baz"])}
+has the value @code{["foo", "bar", "baz"]}.
+
+@node Logic, Conditional Operators, Arithmetic, Operators
+@subsubsection Logic
+@cindex Logic operators
+@cindex Relational operators
+@cindex Equality of data
+@cindex Inequality of data
+@cindex Greater than operator
+@cindex Greater or equal to operator
+@cindex Less than operator
+@cindex Less than or equal to operator
+@cindex Not operator
+@cindex Comparing data
+@cindex String comparison
+@cindex Symbol comparison
+@cindex List comparison
+@cindex Case-insensitivity of strings
+
+@code{C--} provides a number of relational and logical operators.  These
+operators are primarily useful for expressing conditions, since they
+return either true or false, represented by the integers @code{1} and
+@code{0}.
+
+The @code{==} and @code{!=} operators test for equality and inequality,
+respectively, of their arguments.  Two pieces of data are equal if they
+have the same type and contain the same value.  Equality of strings is
+not case-sensitive, but equality of symbols is, so @code{("foo" ==
+"fOo")} is true, but @code{('car == 'CAr)} is false.  Lists are equal if
+all of their elements are equal.
+
+The @code{<}, @code{<=}, @code{>=}, and @code{>} operators test whether
+their left-hand arguments are less than, less than or equal to, greater
+than or equal to, or greater than their right-hand arguments,
+respectively.  Arguments to these operators must both be of the same
+type, and must be of integer, string, or dbref type.  String comparison
+is not case-sensitive, so @code{("fooa" < "fooB")} is true, even though
+the ASCII value of @samp{a} is greater than that of @samp{B}.
+
+The unary @code{!} operator tests whether its argument is false, thus
+acting as a logical not operation.
+
+@node Conditional Operators, , Logic, Operators
+@subsubsection Conditional Operators
+@cindex Conditional operator
+@cindex And operator
+@cindex Or operator
+
+The @code{||} and @code{&&} operators act as logical or and and
+operators, respectively.  The expression @code{(a || b)} has the value
+of @code{a} if @code{a} is true, or the value of @code{b} if @code{a} is
+false.  The expression @code{(a && b)} has the value of @code{a} if
+@code{a} is false, and the value of @code{b} if @code{a} is true.
+@code{C--}'s logical operators are @emph{short-circuit operators},
+meaning that the right-hand argument is not evaluated if the left-hand
+argument is sufficient to determine the value of the expression.  This
+is important if the right-hand argument has side-effects or could cause
+an error.
+
+The @code{?|} operator is a trinary operator, with the following syntax:
+
+@example
+@var{condition} ? @var{true-expr} | @var{false-expr}
+@end example
+
+@noindent
+The result of this expression is the result of @var{true-expr} if
+@var{condition} is true, or the result of @var{false-expr} if
+@var{condition} is false.  See @ref{Data Types} for the definition of
+truth for @code{C--} data.
+
+@node Calling Functions, Sending Messages, Operators, Expressions
+@subsection Calling Functions
+@cindex Calling functions
+@cindex Function calls
+@cindex Built-in function calls
+
+A @code{C--} method can call a built-in function using a @emph{function
+call expression}, which has the following syntax:
+
+@example
+@var{function-name}(@var{arg1}, @var{arg2}, @var{...})
+@end example
+
+@var{function-name} is an identifier naming the function, and
+@var{arg1}, @var{arg2}, @var{...} are expressions.  There do not have to
+be any arguments, but you must include the parentheses even if there are
+no arguments.  The arguments are evaluated from left to right.
+
+As an example, the @code{pad()} function pads a string argument with
+spaces to a certain length.  The following expression has the value
+@code{"foo "}:
+
+@example
+pad("foo", 6);
+@end example
+
+Coldmud's built-in functions allow you to perform string and list
+operations, modify and retrieve information from the current object,
+perform administrative tasks, among other things.  For descriptions of
+the available functions, see @ref{Function Descriptions}.
+
+For various reasons, functions can throw errors. For instance, calling a
+function with an incorrect number of arguments causes a @code{~numargs}
+error, and calling a function with arguments of incorrect type causes a
+@code{~type} error.  See @ref{Errors} for information on how to handle
+errors.
+
+@node Sending Messages, Passing Messages, Calling Functions, Expressions
+@subsection Sending Messages
+@cindex Sending messages
+@cindex Message expressions
+@cindex Calling methods
+
+If you want to retrieve information from or modify an object other than
+the current object, you can do so by sending it a message.  You can do
+this with a @emph{message expression}, which has the following syntax:
+
+@example
+@var{receiver}.@var{message}(@var{arg1}, @var{arg2}, @var{...})
+@end example
+
+@noindent
+You may omit @var{receiver}, in which case it is assumed to be the
+current object.  Otherwise, @var{receiver} must be an expression of
+dbref or frob type, and @var{message} an identifier giving the name of
+the message.  @var{arg1}, @var{arg2}, @var{...} are the arguments to be
+sent with the message.  The arguments are evaluated from left to right.
+You must include the parentheses around the argument list, even if there
+are no arguments.  The result of a message expression is the value
+returned by @var{receiver}'s method for the message @var{message}.
+
+If @var{receiver} is a frob, then the message is sent to the frob's
+class object, with the frob's representation inserted as the first
+argument.  If @var{receiver} is a dbref, then the message is sent to
+the object with that dbref.
+
+If @var{receiver} is not an object or frob, then the interpreter
+throws a @code{~type} error.  If @var{receiver} is a dbref which does
+not refer to an existing object, or if it is a frob whose class is not
+an existing object, then the interpreter throws an @code{~objnf}
+error.  If @var{receiver} does not have a method defined for
+@var{message}, then the interpreter throws a @code{~methodnf} error.
+See @ref{Errors} for information on how to handle errors.
+
+Here are some examples of message expressions:
+
+@example
+@group
+.tell("I don't see that here.");
+$sys.wizards()
+loc.tell_contents(args[1]);
+@end group
+@end example
+
+You can substitute an arbitrary expression for @var{message}, by
+enclosing it in parentheses.  The syntax for sending an arbitrary
+message is:
+
+@example
+@var{receiver}.(@var{message-expression})(@var{arg1}, @var{arg2}, @var{...})
+@end example
+
+@noindent
+As before, @var{receiver} can be omitted, in which case it is assumed to
+be the current object.  @var{message-expression} must be an expression
+of symbol type, or the expression will cause a @code{~type} error.  You
+must include the parentheses around the argument list, even if there are
+no arguments.
+
+In order to prevent incidents of infinite recursion, Coldmud has a
+maximum calling depth for messages.  This maximum depth is @code{128}
+method calls in the current version.  If sending a message would exceed
+the maximum calling depth, the interpreter raises a @code{~maxdepth}
+error.
+
+@node Passing Messages, Error-Handling Expressions, Sending Messages, Expressions
+@subsection Passing Messages
+@cindex Passing messages
+@cindex Using default methods
+@cindex Modifying default methods
+@findex pass
+
+A method can pass control of a message to a different ancestor of the
+current object using a @emph{pass expression}, which has the following
+syntax:
+
+@example
+pass(@var{arg1}, @var{arg2}, @var{...})
+@end example
+
+@noindent
+The arguments are evaluated from left to right.  The result of this
+expression is the result of calling the ``next'' method with the
+arguments @var{arg1}, @var{arg2}, @var{...}.  The ``next'' method is
+defined as the method which would be called if the current method, and
+any other methods which have already passed control of the message, were
+not defined.  This method may not be defined on an ancestor of the
+current object; you should, in general, not depend on a specific method
+being called when you use a pass expression.
+
+The called method sees the same current object, sender, and caller as
+the current method.
+
+The pass expression can cause a @code{~methodnf} errors if the called
+method does not exist.  See @ref{Errors} for information on how to
+handle errors.
+
+@node Error-Handling Expressions, Splicing, Passing Messages, Expressions
+@subsection Error-Handling Expressions
+@cindex Error-handling expressions
+@cindex Critical expression
+@cindex Propagation expression
+@cindex Ignoring errors
+@cindex Passing errors as themselves
+@cindex Error propagation
+
+@code{C--} provides two kinds of expressions for handling errors in
+expressions.  These are the @emph{critical expression} and the
+@emph{propagation expression}.
+
+The @emph{critical expression} allows you to ignore errors which occur
+inside an expression.  It has the following syntax:
+
+@example
+(| expression |)
+@end example
+
+If an error occurs in @var{expression}, then the interpreter will stop
+evaluating @var{expression}, and continue to execute the current method
+as if it had succeeded evaluating @var{expression}.  The value of
+@var{expression} will be the error code for the error condition which
+occurred.
+
+The @emph{propagation expression} allows you to indicate that any errors
+which occur inside an expression are the responsibility of the calling
+routine.  It has the following syntax:
+
+@example
+(> expression <)
+@end example
+
+If an unhandled error occurs in @var{expression}, then it will propagate
+to the calling routine as itself, instead of as @code{~methoderr}.
+
+Critical expressions override the behavior of catch statements, so that
+errors which occur within critical expressions do not trigger catch
+error handlers.  Propagation expressions do not override critical
+expressions or catch statements, however; they do not prevent errors
+from being caught, but only determine how errors propagate if they are
+not caught.
+
+For more information on how @code{C--} handles errors, see @ref{Errors}.
+
+@node Splicing, , Error-Handling Expressions, Expressions
+@subsection Splicing
+@cindex Splicing
+@cindex Including lists in arguments
+@cindex Argument list splicing
+
+Whenever you are writing an argument list or a list constructor
+expression, you can splice a list value into the sequence of expressions
+by prepending a list expression with @samp{@@}.  For instance, the
+following method returns @code{['foo, 4, 5, 6, 'quux]}:
+
+@example
+@group
+var a;
+
+a = [4, 5, 6];
+return ['foo, @@a, 'quux];
+@end group
+@end example
+
+You use the splicing operator to pass a message along with all of its
+arguments:
+
+@example
+pass(@@args);
+@end example
+
+The splicing operator is not listed in the operator precedence list
+(@pxref{Precedence}).  This is because it is meaningless to talk about,
+say, adding a spliced list to another value.  Using the splicing
+operator never causes an ambiguity.
+
+@node Errors, Function Descriptions, Defining Methods, Top
+@chapter Errors
+@cindex Errors
+@cindex Handling error conditions
+
+When something goes wrong in a @code{C--} method, the interpreter will
+often throw an error.  Methods can also throw their own errors using the
+@code{throw()} function.  An error condition consists of an error code
+(the @emph{type} of the error) and a string describing the error.
+Methods can recognize errors using the error codes; the string appears,
+along with the error code, in the traceback obtainable through the
+@code{traceback()} function inside a catch handler.
+
+When the interpreter throws an error, it checks to see how the current
+method handles that error type.  If the error occured in a critical
+expression (@pxref{Error-Handling Expressions}), then the interpreter
+will cease evaluating the critical expression.  Processing of the method
+will continue as if the interpreter had completed evaluation of the
+critical expression.  The value of the critical expression will be the
+error code associated with the thrown error.  In this case, the
+traceback is not accessible from @code{traceback()}; in order to get a
+traceback, you must use a catch statement.
+
+If the error did not occur in a critical expression, but occurred in a
+catch statement which catches the error code (either because it is a
+@code{catch all} statement or because it lists the error
+code---@pxref{Error-Handling Statements}), then processing of the method
+jumps to the error handler, if one was provided, or to the end of the
+catch statement if not.  Inside an error handler, you can use the
+@code{error()}, @code{traceback()}, and @code{rethrow()} functions to
+retrieve the error or traceback associated with the error condition, or
+continue propagating the error.
+
+If the error did not occur in a critical expression or in an appropriate
+catch statement, then the current method aborts, and the interpreter
+throws an error in the calling method.  Normally, the error thrown in
+the calling routine will have the error code @code{~methoderr}, but if
+the original error occurred in a propagation expression
+(@pxref{Error-Handling Expressions}, then the error code will be the
+same as it was for the original error.  A propagation expression has no
+effect on how an error is handled except to cause it to propagate
+differently to the calling routine.
+
+You can throw your own errors using the @code{throw()} function.  This
+does not throw an error in the current method; instead, it exits the
+current method and throws an error in the calling method.  Thus a method
+cannot ignore an error which it threw itself using @code{throw()}.
+
+There is one case in which a method cannot catch an
+interpreter-generated error.  Methods have a limited amount of time to
+run, measured in @emph{ticks}.  A method will generally only run out of
+ticks if it gets stuck in an infinite loop.  If a method runs out of
+ticks, then the interpreter will throw a @code{~ticks} error, which the
+method cannot catch.  This causes the method to abort, which in turn
+causes the interpreter to throw a @code{~methoderr} error in the calling
+routine.
+
+You should use critical expressions when you anticipate that you may be
+calling a buggy or undefined method, but you do not wish your own method
+to bomb as a result.  For instance, a method which announces a string to
+every object in a container should probably ignore errors in the methods
+for each individual object which handle receiving the string.  You
+should be careful that your critical expressions are correct code,
+however, because you will not immediately notice errors which occur
+while the interpreter is evaluating them.
+
+You should use catch statements when you wish to handle errors with any
+kind of sophistication.  The catch statement is much more powerful than
+the critical expression, and is ideal for situations in which fine-grain
+control over error handling is required.
+
+You should use propagation expressions when your method is an
+intermediary between an outside object and an internal feature.  For
+instance, a method which checks permissions and calls an object function
+such as @code{list_method()} is acting as an intermediary.  In this
+case, the method should throw the same errors as the
+@code{list_method()} function, so you should enclose the function call
+in a propagation expression.
+
+@node Function Descriptions, Administration, Errors, Top
+@chapter Function Descriptions
+@cindex Function descriptions
+@cindex Descriptions of functions
+@cindex Built-in functions
+
+The function descriptions are arranged by category, and alphabetically
+within their category.  You can use the function index to look up the
+description of a function by name.
+
+Every function can throw a @code{~numargs} error if passed the wrong
+number of arguments, and most can throw a @code{~type} error if passed
+arguments of the wrong type.  If a function can throw any other type of
+error, it will be documented in the function's description.
+
+@menu
+* Data Functions::		Operations on data in general
+* String Functions::		Operations on strings
+* List Functions::		Operations on lists
+* Dictionary Functions::	Operations on dictionaries
+* Buffer Functions::		Operations on buffers
+* Method Functions::		Information about the current method
+* Error Functions::		Handling errors
+* Communication Functions::	Operations on connections
+* Object Functions::		Operations on the current object
+* Administrative Functions::	Privileged operations
+* Miscellaneous Functions::	Miscellaneous operations
+@end menu
+
+@node Data Functions, String Functions, , Function Descriptions
+@section Data functions
+@cindex Data functions
+@cindex Manipulating data
+@cindex Operations on data
+
+The functions described in this section allow you to perform various
+operations on data.  Operations specific to strings or lists are grouped
+in their own sections.
+
+@menu
+* class::			Get the class of a frob
+* todbref::			Convert integer or string to a dbref
+* toerr::			Convert a string to an error code
+* toint::			Convert a string or dbref to an integer
+* toliteral::			Convert any data to a literal expression
+* tostr::			Convert any data to a string
+* tosym::			Convert a string to a symbol
+* type::			Retrieve the type of a piece of data
+* valid::			Check if data is a valid dbref
+@end menu
+
+@node class, todbref, , Data Functions
+@unnumberedsubsec class
+@findex class
+
+@example
+class(@var{frob})
+@end example
+
+This function returns the class of a frob.  See @ref{Frobs} for details
+on frobs.
+
+@node todbref, toerr, class, Data Functions
+@unnumberedsubsec todbref
+@findex todbref
+
+@example
+todbref(@var{number})
+@end example
+
+This function converts @emph{number} to a dbref.
+
+Examples:
+
+@example
+todbref(0)
+     @result{} #0
+@end example
+
+@node toerr, toint, todbref, Data Functions
+@unnumberedsubsec toerr
+@findex toerr
+
+@example
+toerr(@var{string})
+@end example
+
+This function converts @emph{string} to an error code.  @emph{string}
+can be any string; it does not have to be a valid identifier.
+
+Examples:
+
+@example
+toerr("foo")
+     @result{} ~foo
+@end example
+
+@node toint, toliteral, toerr, Data Functions
+@unnumberedsubsec toint
+@findex toint
+
+@example
+toint(@var{string})
+@end example
+
+This function converts @emph{string} to an integer.  If @emph{string} is
+not a number, the resulting integer will be @code{0}.
+
+Examples:
+
+@example
+toint("67")
+     @result{} 67
+toint("foo")
+     @result{} 0
+@end example
+
+@node toliteral, tostr, toint, Data Functions
+@unnumberedsubsec toliteral
+@findex toliteral
+
+@example
+toliteral(@var{data})
+@end example
+
+This function converts any data to a @code{C--} literal or constructor
+expression which, when read by the interpreter, will result in the same
+data object.
+
+Examples:
+
+@example
+toliteral([3, "foo", 'bar, #60, ~none])
+     @result{} "[3, \"foo\", 'bar, #60, ~none]"
+toliteral(tosym("foo-" + tostr(3 + 4)))
+     @result{} "tosym(\"foo-7\")"
+toliteral(<#56, #[['type, 'obj], ['obj, #22]]>)
+     @result{} "<#56, #[['type, 'obj], ['obj, #22]]>"
+@end example
+
+@node tostr, tosym, toliteral, Data Functions
+@unnumberedsubsec tostr
+@findex tostr
+
+@example
+tostr(@var{data})
+@end example
+
+This function converts any data to a string representation of it.  For
+strings, the string representation is the string itself; for symbols and
+error codes, the string representation is the identifier part of the
+data object converted to a string value; for lists and frobs, the string
+representations are @code{"<list>"} and @code{"<frob>"} respectively;
+for integers and dbrefs, @code{tostr()} is equivalent to
+@code{toliteral()}.
+
+Examples:
+
+@example
+tostr(3)
+    @result{} "3"
+tostr("foo")
+    @result{} "foo"
+tostr(#0)
+    @result{} "#0"
+tostr([2, 3, 4])
+    @result{} "<list>"
+tostr('foo)
+    @result{} "foo"
+tostr(~methodnf)
+    @result{} "methodnf"
+tostr(<#66, #[['type, 'obj], ['obj, #40]]>)
+    @result{} "<frob>"
+@end example
+
+@node tosym, type, tostr, Data Functions
+@unnumberedsubsec tosym
+@findex tosym
+
+@example
+tosym(@var{string})
+@end example
+
+This function converts @emph{string} into a symbol.  @emph{string} can
+be any string; it does not have to be a valid identifier.
+
+Examples:
+
+@example
+tosym("foo")
+     @result{} 'foo
+@end example
+
+@node type, valid, tosym, Data Functions
+@unnumberedsubsec type
+@findex type
+
+@example
+type(@var{data})
+@end example
+
+This function returns a symbol giving the type of @var{data}.  The
+return value is one of @code{'integer}, @code{'string}, @code{'dbref},
+@code{'list}, @code{'symbol}, or @code{'error}.
+
+Examples:
+
+@example
+type(5)
+     @result{} 'integer
+type([6, 'foo, "bar"])
+     @result{} 'list
+type(<#44, #[['type, 'obj], ['obj, #20]]>)
+     @result{} 'frob
+@end example
+
+@node valid, , type, Data Functions
+@unnumberedsubsec valid
+@findex valid
+
+@example
+valid(@var{data})
+@end example
+
+This function returns @code{1} if @var{data} is a dbref and is valid, or
+@code{0} otherwise.  A dbref is valid if it refers to an object that
+exists in the database.
+
+Examples:
+
+@example
+valid(#0)
+     @result{} 1
+valid('foo)
+     @result{} 0
+@end example
+
+@node String Functions, List Functions, Data Functions, Function Descriptions
+@section String Functions
+@cindex String functions
+@cindex Manipulating strings
+@cindex Operations on strings
+
+The functions described in this section allow you to perform operations
+on strings.  All of the functions described in this section are
+case-insensitive except for @code{strcmp()} and, if specified,
+@code{match_regexp()}.
+
+@menu
+* crypt::                       Perform one-way encryption on a string
+* explode::                     Get a list of words in a string
+* lowercase::			Convert a string to lowercase
+* match_begin::                 Match against the beginnings of words
+* match_pattern::               Match against a wildcard pattern
+* match_regexp::		Match against a regular expression
+* match_template::              Match against a command template
+* pad::                         Pad a string to a given length
+* strcmp::			Case-sensitive comparison of two strings
+* strlen::			Get the length of a string
+* strsub::                      Substitute text within a string
+* substr::                      Get a substring of a string
+* uppercase::			Convert a string to uppercase
+@end menu
+
+@node crypt, explode, , String Functions
+@unnumberedsubsec crypt
+@findex crypt
+
+@example
+crypt(@var{string})
+crypt(@var{string}, @var{salt})
+@end example
+
+This function performs one-way encryption on @var{string}, using the
+host system's @code{crypt()} library routine.  If @var{salt} is
+specified, then it must be a two-character string; otherwise, a salt is
+chosen randomly.  The return value of @code{crypt()} is the encrypted
+string; the first two characters of the encrypted string are the salt
+used.
+
+The encryption performed by this function has the property that it is
+very difficult to find a string which will produce a given result;
+however, a given string and a given salt will always yield the same
+encrypted string.
+
+Examples:
+
+@example
+crypt("foo", "ab")
+     @result{} "abQ9KY.KfrYrc"
+@end example
+
+@node explode, lowercase, crypt, String Functions
+@unnumberedsubsec explode
+@findex explode
+
+@example
+explode(@var{string})
+explode(@var{string}, @var{separator}, [@var{want-blanks}])
+@end example
+
+This function returns a list of the words in @var{string}.  If the
+string @var{separator} is specified, then it is used as the word
+separator; otherwise a space (@code{" "}) is used.  If the optional
+argument @var{want-blanks} is specified and is true, @code{explode()}
+will include zero-length words in the returned list; otherwise, it will
+not.
+
+Examples:
+
+@example
+explode(" foo  bar baz")
+     @result{} ["foo", "bar", "baz"]
+explode("foo:bar:baz", ":")
+     @result{} ["foo", "bar", "baz"]
+@end example
+
+@node lowercase, match_begin, explode, String Functions
+@unnumberedsubsec lowercase
+@findex lowercase
+
+@example
+lowercase(@var{string})
+@end example
+
+This function returns the result of changing each uppercase character in
+@var{string} to lowercase.
+
+@example
+lowercase("fOOBAr 23")
+     @result{} "foobar 23"
+@end example
+
+@node match_begin, match_pattern, lowercase, String Functions
+@unnumberedsubsec match_begin
+@findex match_begin
+
+@example
+match_begin(@var{string}, @var{search})
+match_begin(@var{string}, @var{search}, @var{separator})
+@end example
+
+This function looks for the string @var{search} at the beginning of each
+word in @var{string}.  The word separator is given by the string
+@var{separator} if it is specified; otherwise, a space (@code{" "}) is
+used.  The return value of @code{match_begin()} is @code{1} if
+@var{search} was found at the beginning of a word in @var{string}, or
+@code{0} if not.
+
+Examples:
+
+@example
+match_begin("foo:bar:baz", "fo", ":")
+     @result{} 1
+match_begin("foo bar baz", "ar")
+     @result{} 0
+@end example
+
+@node match_pattern, match_regexp, match_begin, String Functions
+@unnumberedsubsec match_pattern
+@findex match_pattern
+
+@example
+match_pattern(@var{pattern}, @var{string})
+@end example
+
+This function matches the wildcard pattern @var{pattern} against
+@var{string}.  A wildcard pattern is a string with asterixes (@samp{*})
+signifying wildcards.  A regular character matches itself, while a
+wildcard matches any number of arbitrary characters.  The return value
+of @code{match_pattern()} is a list of the substrings of @var{string}
+which matched the wildcards in @var{pattern}, or @code{0} if the match
+fails.
+
+@code{match_pattern()} allows you to do simple character-based matching.
+For matching against command formats, however, you should use the
+@code{match_template()} function.
+
+Examples:
+
+@example
+match_pattern("*", "foobar")
+     @result{} ["foobar"]
+match_pattern("foo * bar * baz", "foo quux bar quuux baz")
+     @result{} ["quux", "quuux"]
+match_pattern("foo * bar", "baz")
+     @result{} 0
+@end example
+
+@node match_regexp, match_template, match_pattern, String Functions
+@unnumberedsubsec match_regexp
+@findex match_regexp
+
+@example
+match_regexp(@var{regexp}, @var{string}, [@var{case_matters}])
+@end example
+
+This function matches the regular expression @var{regexp}, a
+string,against the string @var{string}.  If @var{case_matters} is
+specified and is true, the match is case-sensitive; otherwise, it is
+case-insensitive.  If the match succeeds, @code{match_regexp()} returns
+a ten-element list giving the substitutions for the match (see below);
+otherwise, @code{match_regexp()} returns 0.
+
+Coldmud uses a regular expression matcher written by Henry Spencer.  Its
+syntax is very similar to the regular expression syntax used by Unix
+utilities like @code{ed} or @code{egrep}.  Here is Spencer's description
+of his regular expression syntax:
+
+@quotation
+A regular expression is zero or more branches, separated by @samp{|}.
+It matches anything that matches one of the branches.
+
+A branch is zero or more pieces, concatenated.  It matches a match for
+the first, followed by a match for the second, etc.
+
+A piece is an atom possibly followed by @samp{*}, @samp{+}, or @samp{?}.
+An atom followed by @samp{*} matches a sequence of 0 or more matches of
+the atom.  An atom followed by @samp{+} matches a sequence of 1 or more
+matches of the atom.  An atom followed by @samp{?} matches a match of
+the atom, or the null string.
+
+An atom is a regular expression in parentheses (matching a match for the
+regular expression), a range (see below), @samp{.} (matching any single
+character), @samp{^} (matching the null string at the beginning of the
+input string), @samp{$} (matching the null string at the end of the
+input string), a @samp{\} followed by a single character (matching that
+character), or a single character with no other significance (matching
+that character).
+
+A range is a sequence of characters enclosed in @samp{[]}.  It normally
+matches any single character from the sequence.  If the sequence begins
+with @samp{^}, it matches any single character not from the rest of the
+sequence.  If two characters in the sequence are separated by @samp{-},
+this is shorthand for the full list of ASCII characters between them
+(e.g.  @code{[0-9]} matches any decimal digit).  To include a literal
+@samp{]} in the sequence, make it the first character (following a
+possible @samp{^}).  To include a literal @samp{-}, make it the first or
+last character.
+@end quotation
+
+The substitutions are the text in @var{string} which matches the
+parenthesized subexpressions in @var{regexp}.  The first substitution is
+the text in @var{string} which matches the whole regexp.  Thus, a
+regular expression can contain no more than nine parenthesized
+subexpressions.  Substitutions are returned as two-element lists
+@code{[@var{start}, @var{len}]} giving the index of the matching text in
+@var{string} and the length of the text.  When the substitutions are
+ambiguous, leftmost @samp{*} matches are always as long as possible.
+
+If @var{regexp} is not a valid regular expression, @code{match_regexp()}
+throws a @code{~regexp} error.
+
+Examples:
+
+@example
+match_regexp("bar", "fooBAR")
+     @result{} [[4, 3], [0, 0], [0, 0], [0, 0], [0, 0],
+     [0, 0], [0, 0], [0, 0], [0, 0], [0, 0]]
+match_regexp("^([^ ]+) says, \"(.*)\"$", "Greg says, \"Hello.\"")
+     @result{} [[1, 19], [1, 4], [13, 6], [0, 0], [0, 0],
+     [0, 0], [0, 0], [0, 0], [0, 0], [0, 0]]
+match_regexp("[0-9]+", " 300 100 200 ")
+     @result{} [[2, 3], [0, 0], [0, 0], [0, 0], [0, 0],
+     [0, 0], [0, 0], [0, 0], [0, 0], [0, 0]]
+match_regexp("foo", "bar")
+     @result{} 0
+match_regexp("foo", "Foo", 1)
+     @result{} 0
+@end example
+
+@node match_template, pad, match_regexp, String Functions
+@unnumberedsubsec match_template
+@findex match_template
+
+@example
+match_template(@var{template}, @var{string})
+@end example
+
+This function matches the template @var{template} against the command
+@var{string}.  The return value of @code{match_template()} is a list of
+fields resulting from the template match, or @code{0} if the match fails
+or if @var{template} is an invalid template.
+
+A @emph{template} is a sequence of word-patterns and wildcards separated
+by spaces, with wildcards never occurring more than one at a time.  A
+@emph{word-pattern} is a sequence of words separated by pipe characters
+(@samp{|}).  A word is a sequence of alphanumeric characters, with an
+optional question mark (@samp{?}) indicating the beginning of an allowed
+partial match.  A @emph{wildcard} is either a simple wildcard,
+represented by an asterix (@samp{*}) or a @emph{coupled wildcard},
+represented by the three-character sequence @samp{*=*}.
+
+That definition of a template is confusing, so we will now go back and
+explain each component of a template in more detail.
+
+A @emph{word-pattern} is a list of words separated by pipe characters.
+A word-pattern matches any of the words contained in it.  The
+word-pattern @code{"look|examine"} matches either of the words
+@code{"look"} or @code{"examine"}.  The word separator for template
+matching is always a space.
+
+A word can include a question mark (@samp{?}) to indicate that partial
+matches that extend at least as far as the question mark are okay.  The
+word pattern @code{"look|ex?amine"} matches any of the words
+@code{"look"}, @code{"ex"}, @code{"exa"}, @code{"exam"}, @code{"exami"},
+@code{"examin"}, and @code{"examine"}.
+
+When a word-pattern successfully matches a word in @var{string}, it
+results in a @emph{field}, or string in the returned list.  This field
+contains the word which matched the word-pattern.
+
+A @emph{simple wildcard} is represented by an asterix (@samp{*}).  A
+simple wildcard matches any number of words in @emph{string}.  If the
+wildcard is followed by a word-pattern in @emph{template}, then it can
+also match a @emph{quoted wildcard match}.
+
+A quoted wildcard match is just like a @code{C--} string literal: it
+begins and ends with a double quote (@samp{"}), and can include a
+literal double quote or backslash by preceding the character with a
+backslash (@samp{\}).  If the simple wildcard is followed by a
+word-pattern, and the words in @var{string} that the wildcard would
+match begin with a double quote, then the match must be a quoted
+wildcard match or the match fails, even if the match would have
+succeeded if the words were not treated as a quoted wildcard match.
+However, if the words that the wildcard would match begin with a
+backslash followed by a double quote, then the backslash is ignored and
+the double quote and the text following it are treated as regular words.
+
+The template @code{"* bar"} matches any of the following strings:
+
+@example
+foo bar
+foo baz bar
+"foo bar \\ \" baz" bar
+\"foo baz bar
+@end example
+
+Matching against a simple wildcard produces one field, the words that
+the simple wildcard matched.  If the wildcard matches a quoted wildcard
+match, then the beginning and ending double quotes are stripped out of
+the resulting field, as well as any backslashes used to escape
+characters inside the double quotes.
+
+A @emph{coupled wildcard} is represented by the three-character sequence
+@samp{*=*}.  It matches any sequence of words containing an equal sign
+(@samp{=}), and results in two fields, the text before the equal sign
+and the text after it.  Any spaces surrounding the equal sign are
+ignored and do not show up in the resulting fields.  The text before the
+equal sign can be a quoted wildcard match (as before, if it begins with
+a double quote, then it must be a quoted wildcard match or the match
+fails, unless the initial double quote is escaped by a backslash).  If
+the coupled wildcard is followed by a word pattern, then the text after
+the equal sign can also be a quoted wildcard match.
+
+The coupled wildcard is a special feature intended for parsing 
+TinyMUD command formats.  If possible, its use should be avoided.
+
+If @var{template} is invalid, then the match usually fails, although
+this is not guaranteed.
+
+Examples:
+
+@example
+match_template("@@desc?ribe * as *", "@@descr me as foobar")
+     @result{} ["@@descr", "me", "as", "foobar"]
+match_template("@@desc?ribe * as *", "@@desc \"as is\" as foobar")
+     @result{} ["@@desc", "as is", "as", "foobar"]
+match_template("@@desc?ribe * as *", "@@desc \"as\" is as foobar")
+     @result{} 0
+match_template("@@desc?ribe * as *", "@@desc \\\"as\" is as foobar")
+     @result{} ["@@desc", "\"as\" is", "as", "foobar"]
+match_template("@@desc?ribe *=*", "@@descr me =foobar")
+     @result{} ["@@descr", "me", "foobar"]
+match_template("@@desc?ribe *=*", "@@desc \"2+2=4\"= an equation")
+     @result{} ["@@desc", "2+2=4", "an equation"]
+match_template("l?ook|ex?amine *", "look at rose")
+     @result{} ["look", "at rose"]
+@end example
+
+@node pad, strcmp, match_template, String Functions
+@unnumberedsubsec pad
+@findex pad
+
+@example
+pad(@var{string}, @var{length})
+pad(@var{string}, @var{length}, @var{filler})
+@end example
+
+This function pads or truncates @var{string} to the length @var{length}.
+If @var{filler} is specified, then it must be a single-character string
+to use as the filler character; otherwise, a space is used.  If
+@var{length} is greater than the length of @var{string}, then @var{pad}
+adds filler characters on the right; however, you can force @var{pad} to
+add filler on the left by specifying @var{length} as a negative number.
+
+Examples:
+
+@example
+pad("foo", 6)
+     @result{} "foo   "
+pad("foobar", 3)
+     @result{} "foo"
+pad(tostr(29), -4, "0")
+     @result{} "0029"
+@end example
+
+@node strcmp, strlen, pad, String Functions
+@unnumberedsubsec strcmp
+@findex strcmp
+
+@example
+strcmp(@var{string1}, @var{string2})
+@end example
+
+This function compares @var{string1} against @var{string2} and returns
+zero if they are equal, greater than zero if @var{string1} is lexically
+greater than @var{string2}, and less than zero if @var{string1} is
+lexically less than @var{string2}.  The comparison performed by
+@code{strcmp()} is case-sensitive.
+
+@example
+strcmp("Foo", "bar")
+     @result{} -28
+strcmp("cashmir", "cashmiR")
+     @result{} 32
+strcmp("foo", "foo")
+     @result{} 0
+@end example
+
+@node strlen, strsub, strcmp, String Functions
+@unnumberedsubsec strlen
+@findex strlen
+
+@example
+strlen(@var{string})
+@end example
+
+This function returns the length of @var{string}.
+
+Examples:
+
+@example
+strlen("foo")
+     @result{} 3
+@end example
+
+@node strsub, substr, strlen, String Functions
+@unnumberedsubsec strsub
+@findex strsub
+
+@example
+strsub(@var{string}, @var{search}, @var{replace})
+@end example
+
+This function returns the result of replacing each occurrence of the
+string @var{search} in @var{string} with the string @var{replace}.
+
+Examples:
+
+@example
+strsub("foobar", "bar", "baz")
+     @result{} "foobaz"
+@end example
+
+@node substr, uppercase, strsub, String Functions
+@unnumberedsubsec substr
+@findex substr
+
+@example
+substr(@var{string}, @var{start})
+substr(@var{string}, @var{start}, @var{length})
+@end example
+
+This function returns a substring of @var{string} beginning at the
+character numbered by @var{start}.  If @var{length} is specified, then
+the substring has that length; otherwise, the length is given by
+@code{(length(@var{string}) - (@var{start} - 1))}.  If @var{start} is
+less than @code{1}, if the length of the substring is negative, or if
+the sum of @var{start} and @var{length} is greater than one more than
+the length of the string, then @code{substr()} throws a @code{~range}
+error.
+
+Examples:
+
+@example
+substr("foobar", 2, 3)
+     @result{} "oob"
+substr("foobar", 3)
+     @result{} "obar"
+substr("foobar", 7)
+     @result{} ""
+@end example
+
+@node uppercase, , substr, String Functions
+@unnumberedsubsec uppercase
+@findex uppercase
+
+@example
+uppercase(@var{string})
+@end example
+
+This function returns the result of changing each lowercase character in
+@var{string} to uppercase.
+
+@example
+uppercase("fOOBAr 23")
+     @result{} "FOOBAR 23"
+@end example
+
+@node List Functions, Dictionary Functions, String Functions, Function Descriptions
+@section List Functions
+@cindex List functions
+@cindex Manipulating lists
+@cindex Operations on lists
+
+The functions described in this section allow you to perform operations
+on list.  None of these functions actually modify the lists passed as
+arguments; instead, they return modified lists.
+
+@menu
+* delete::                      Delete an element of a list
+* insert::                      Insert an element in a list
+* listlen::			Get the length of a list
+* replace::                     Replace an element in a list
+* setadd::                      Add an element to a "set"
+* setremove::                   Remove an element from a "set"
+* sublist::                     Get a sublist of a list
+* union::			Get the union of two lists
+@end menu
+
+@node delete, insert, , List Functions
+@unnumberedsubsec delete
+@findex delete
+
+@example
+delete(@var{list}, @var{position})
+@end example
+
+This function returns the result of deleting the element of @var{list}
+numbered by the integer @var{position}.  If @var{position} is less than
+@code{1} or is greater than the length of @var{list}, then
+@code{delete()} throws a @code{~range} error.
+
+Examples:
+
+@example
+delete([2, 3, 4], 2)
+     @result{} [2, 4]
+@end example
+
+@node insert, listlen, delete, List Functions
+@unnumberedsubsec insert
+@findex insert
+
+@example
+insert(@var{list}, @var{position}, @var{data})
+@end example
+
+This function returns the result of inserting @var{data} into @var{list}
+before the element numbered by the integer @var{position}.  If
+@var{position} is less than one or is more than one more than the length
+of @var{list}, then @code{insert()} throws a @code{~range} error.
+
+Examples:
+
+@example
+insert([2, 3, 4], 3, 'foo)
+     @result{} [2, 3, 'foo, 4]
+insert(["foo", 'bar, ~none], 4, 'baz)
+     @result{} ["foo", 'bar, ~none, 'baz]
+@end example
+
+@node listlen, replace, insert, List Functions
+@unnumberedsubsec listlen
+@findex listlen
+
+@example
+listlen(@var{list})
+@end example
+
+This function returns the length of @var{list}.
+
+Examples:
+
+@example
+length([2, "foo", 'bar])
+     @result{} 3
+@end example
+
+@node replace, setadd, listlen, List Functions
+@unnumberedsubsec replace
+@findex replace
+
+@example
+replace(@var{list}, @var{position}, @var{data})
+@end example
+
+This function returns the result of replacing the element of @var{list}
+numbered by @var{position} with @var{data}.  If @var{position} is less
+than one or is greater than the length of @var{list}, then
+@code{replace()} throws a @code{~range} error.
+
+Examples:
+
+@example
+replace([2, 3, 4], 2, 'foo)
+     @result{} [2, 'foo, 4]
+@end example
+
+@node setadd, setremove, replace, List Functions
+@unnumberedsubsec setadd
+@findex setadd
+
+@example
+setadd(@var{list}, @var{data})
+@end example
+
+This function returns the result of adding @var{data} to the end of
+@var{list} if it was not already somewhere in @var{list}.  If @var{data}
+was already in @var{list}, then @code{setadd()} returns @var{list}
+unmodified.
+
+Examples:
+
+@example
+setadd([2, 3, 4], 'foo)
+     @result{} [2, 3, 4, 'foo]
+setadd([2, 3, 4], 3)
+     @result{} [2, 3, 4]
+@end example
+
+@node setremove, sublist, setadd, List Functions
+@unnumberedsubsec setremove
+@findex setremove
+
+@example
+setremove(@var{list}, @var{data})
+@end example
+
+This function returns the result of removing the first occurrence of
+@var{data} from @var{list} if @var{data} exists in @var{list}.  If
+@var{data} does not exist in @var{list}, then @code{setremove()} returns
+@var{list} unmodified.
+
+Examples:
+
+@example
+setremove([2, 3, 4, 'foo], 'foo)
+     @result{} [2, 3, 4]
+setremove([2, 3, 4], 5)
+     @result{} [2, 3, 4]
+setremove([2, 3, 2, 4], 2)
+     @result{} [3, 2, 4]
+@end example
+
+@node sublist, union, setremove, List Functions
+@unnumberedsubsec sublist
+@findex sublist
+
+@example
+sublist(@var{list}, @var{start})
+sublist(@var{list}, @var{start}, @var{length})
+@end example
+
+This function returns a sublist of @var{list} beginning at the element
+numbered by @var{start}.  If @var{length} is specified, then the sublist
+has that length; otherwise, the length is given by
+@code{(length(@var{list}) - (@var{start} - 1))}.  If @var{start} is less
+than @code{1}, if the length of the sublist is negative, or if the sum
+of @var{start} and @var{length} is greater than one more than the length
+of the list, then @code{sublist()} throws a @code{~range} error.
+
+Examples:
+
+@example
+sublist([2, 3, 4, 5, 6, 7], 2, 3)
+     @result{} [3, 4, 5]
+sublist([2, 3, 4, 5, 6, 7], 3)
+     @result{} [4, 5, 6, 7]
+sublist([2, 3, 4, 5, 6, 7], 7)
+     @result{} []
+@end example
+
+@node union, , sublist, List Functions
+@unnumberedsubsec union
+@findex union
+
+@example
+union(@var{list1}, @var{list2})
+@end example
+
+This function returns the result of adding each element of @var{list2}
+which does not already exist in @var{list1} to the elements of
+@var{list1}.  Elements which exist in @var{list2} more than once will
+only be added once, but duplicate elements in @var{list1} will remain.
+
+@example
+union([2, 3, 4], [4, 5, 4, 6])
+     @result{} [2, 3, 4, 5, 6]
+union([2, 2, 4, 5], [4, 5, 6, 6, 7])
+     @result{} [2, 2, 4, 5, 6, 7])
+@end example
+
+@node Dictionary Functions, Buffer Functions, List Functions, Function Descriptions
+@section Dictionary Functions
+@cindex Dictionary functions
+@cindex Manipulating dictionaries
+
+The functions described in this section perform operations on
+dictionaries.  These options do not actually modify the dictionaries
+they accept as arguments; instead, they return the modified dictionaries
+as their return values.
+
+@menu
+* dict_add::			Add an association to a dictionary
+* dict_add_elem::		Add an element to a list value
+* dict_contains::		Determine if a key is in a dictionary
+* dict_del::			Delete an association to a dictionary
+* dict_del_elem::		Remove an element from a list value
+* dict_keys::			Get a list of keys in a dictionary
+@end menu
+
+@node dict_add, dict_add_elem, , Dictionary Functions
+@unnumberedsubsec dict_add
+@findex dict_add
+
+@example
+dict_add(@var{dictionary}, @var{key}, @var{value})
+@end example
+
+This function returns the result of adding the association
+@code{[@var{key}, @var{value}]} to the dictionary @var{dictionary}.  If
+@var{key} already exists in @var{dictionary}, then @code{dict_add()}
+replaces the value of that key with @var{value}.
+
+Examples:
+
+@example
+dict_add(#[["foo", "bar"]], 3, 'quux)
+     @result{} #[["foo", "bar"], [3, 'quux]]
+dict_add(#[["foo", 1], ["bar", 2], ["baz", 3]], "bar", 4)
+     @result{} #[["foo", 1], ["bar", 4], ["baz", 3]]
+@end example
+
+@node dict_add_elem, dict_contains, dict_add, Dictionary Functions
+@unnumberedsubsec dict_add_elem
+@findex dict_add_elem
+
+@example
+dict_add_elem(@var{dictionary}, @var{key}, @var{element})
+@end example
+
+This function returns the result of adding @var{element} to the list
+value @var{key} in @var{dictionary}.  If @var{dictionary} has no
+association with key @var{key}, then @code{dict_add_elem()} adds an
+association @code{[@var{key}, [@var{element}]]} to @var{dictionary}.  If
+@var{dictionary} has an association with key @var{key}, and the value
+part of the association is a list, then @code{dict_add_elem()} adds
+@var{element} to the end of that list.  If @var{dictionary} has an
+association with key @var{key}, but the value part of the association is
+not a list, then @code{dict_add_elem()} throws a @code{~type} error.
+
+Examples:
+
+@example
+dict_add_elem(#[["foo", ["bar"]]], "foo", "baz")
+     @result{} #[["foo", ["bar", "baz"]]]
+dict_add_elem(#[], "foo", "bar")
+     @result{} #[["foo", ["bar"]]]
+@end example
+
+@node dict_contains, dict_del, dict_add_elem, Dictionary Functions
+@unnumberedsubsec dict_contains
+@findex dict_contains
+
+@example
+dict_contains(@var{dictionary}, @var{key})
+@end example
+
+This function returns 1 if there is an association in @var{dictionary}
+with the key @var{key}, or 0 otherwise.
+
+Examples:
+
+@example
+dict_contains(#[["foo", "bar"]], "foo")
+     @result{} 1
+dict_contains(#[["foo", "bar"]], "bar")
+     @result{} 0
+@end example
+
+@node dict_del, dict_del_elem, dict_contains, Dictionary Functions
+@unnumberedsubsec dict_del
+@findex dict_del
+
+@example
+dict_del(@var{dictionary}, @var{key})
+@end example
+
+This function returns the result of removing the association in
+@var{dictionary} which has the key @var{key}.  If there is no such
+association, then @code{dict_del()} raises a @code{~keynf} exception.
+
+@example
+dict_del(#[["foo", 1], ["bar", 2]], "foo")
+     @result{} #[["bar", 2]]
+@end example
+
+@node dict_del_elem, dict_keys, dict_del, Dictionary Functions
+@unnumberedsubsec dict_del_elem
+@findex dict_del_elem
+
+@example
+dict_del_elem(@var{dictionary}, @var{key}, @var{element})
+@end example
+
+This function returns the result of removing @var{element} from the list
+value of @var{key} in @var{dictionary}.  If @var{dictionary} contains no
+association with key @var{key}, then @code{dict_del_elem()} throws a
+@code{~keynf} error.  If @var{dictionary} contains an association with
+key @var{key}, and it is not a list, then @code{dict_del_elem()} throws
+a @code{~type} error.
+
+Assuming that @var{dictionary} contains an association with key
+@var{key}, and it is a list, @code{dict_del_elem()} removes the first
+occurrence of @var{element} in the list if @var{element} occurs in the
+list.  If the resulting list is an empty list, then
+@code{dict_del_elem()} removes the association from @var{dictionary}
+altogether.  If @var{element} does not occur in the list, then
+@code{dict_del_elem()} returns @var{dictionary} unchanged.
+
+Examples:
+
+@example
+dict_del_elem(#[["foo", ["bar", "baz"]]], "foo", "bar")
+     @result{} #[["foo", ["baz"]]]
+dict_del_elem(#[["foo", ["baz"]]], "foo", "baz")
+     @result{} #[]
+@end example
+
+@node dict_keys, , dict_del_elem, Dictionary Functions
+@unnumberedsubsec dict_keys
+@findex dict_keys
+
+@example
+dict_keys(@var{dictionary})
+@end example
+
+This function returns a list of the keys of the associations in
+@var{dictionary}.
+
+@example
+dict_keys(#[["foo", 1"], ["bar", 2], ['baz, 3]])
+     @result{} ["foo", "bar", 'baz]
+@end example
+
+@node Buffer Functions, Method Functions, Dictionary Functions, Function Descriptions
+@section Buffer Functions
+@cindex Buffer functions
+@cindex Operations on buffers
+
+The functions described in this section apply to buffers.  As with
+strings and lists, these functions will not actually modify any buffers
+passed as arguments, but will instead return the results of performing
+modifications on the buffers.
+
+@menu
+* buffer_add::			Add a byte value to the end of a buffer
+* buffer_append::		Append two buffers together
+* buffer_from_strings::		Convert a list of strings into a buffer
+* buffer_len::			Get the length of a buffer
+* buffer_replace::		Replace a byte value in a buffer
+* buffer_retrieve::		Retrieve a byte value from a buffer
+* buffer_to_strings::		Convert a buffer to a list of strings
+* buffer_truncate::		Truncate a buffer to a length
+@end menu
+
+@node buffer_add, buffer_append, , Buffer Functions
+@unnumberedsubsec buffer_add
+@findex buffer_add
+
+@example
+buffer_add(@var{buffer}, @var{byte})
+@end example
+
+This function returns the result of adding @var{byte}, an integer, to
+the end of @var{buffer}.  If @var{byte} is not between @code{0} and
+@code{255}, the value appended to @var{buffer} will be the lower-order
+eight bits of @var{byte}.
+
+Examples:
+
+@example
+buffer_add(%[65, 66, 67], 10)
+     @result{} %[65, 66, 67, 10]
+@end example
+
+@node buffer_append, buffer_from_strings, buffer_add, Buffer Functions
+@unnumberedsubsec buffer_append
+@findex buffer_append
+
+@example
+buffer_append(@var{buffer1}, @var{buffer2})
+@end example
+
+This function returns the result of appending @var{buffer2} to the end
+of @var{buffer1}.
+
+Examples:
+
+@example
+buffer_append(%[65, 66, 67, 10], %[67, 66, 65, 10])
+     @result{} %[65, 66, 67, 10, 67, 66, 65, 10]
+@end example
+
+@node buffer_from_strings, buffer_len, buffer_append, Buffer Functions
+@unnumberedsubsec buffer_from_strings
+@findex buffer_from_strings
+
+@example
+buffer_from_strings(@var{list-of-strings}, [@var{terminator}])
+@end example
+
+This function returns a buffer constructed by appending the strings in
+@var{list-of-strings} together, treating the strings as sequences of
+ASCII values, with each string followed by @var{terminator}, a buffer.
+If @var{terminator} is not specified, then @code{buffer_from_strings()}
+uses the buffer @code{%[13, 10]}, a two-byte buffer containing the ASCII
+codes for a carriage return and a newline.
+
+Examples:
+
+@example
+buffer_from_strings(["foo", "bar"])
+     @result{} @code{%[102, 111, 111, 13, 10, 98, 97, 4, 13, 10]}
+buffer_from_strings(["foo", "bar"], %[10])
+     @result{} @code{%[102, 111, 111, 10, 98, 97, 4, 10]}
+@end example
+
+@node buffer_len, buffer_replace, buffer_from_strings, Buffer Functions
+@unnumberedsubsec buffer_len
+@findex buffer_len
+
+@example
+buffer_len(@var{buffer})
+@end example
+
+This function returns the length of the buffer @var{buffer}.
+
+Examples:
+
+@example
+buffer_len(%[65, 66, 67, 10])
+     @result{} 4
+@end example
+
+@node buffer_replace, buffer_retrieve, buffer_len, Buffer Functions
+@unnumberedsubsec buffer_replace
+@findex buffer_replace
+
+@example
+buffer_replace(@var{buffer}, @var{pos}, @var{value})
+@end example
+
+This function returns the result of replacing the byte numbered
+@var{pos} in @var{buffer} with the value @var{value}, with the first
+byte of @var{buffer} is numbered @code{1}.  If @var{pos} is less than
+@code{1}, or greater than the length of @var{buffer}, then
+@code{buffer_replace()} throws a @code{~range} error.
+
+Examples:
+
+@example
+buffer_replace(%[65, 66, 67, 10], 3, 15)
+    @result{} %[65, 66, 15, 10]
+@end example
+
+@node buffer_retrieve, buffer_to_strings, buffer_replace, Buffer Functions
+@unnumberedsubsec buffer_retrieve
+@findex buffer_retrieve
+
+@example
+buffer_retrieve(@var{buffer}, @var{pos})
+@end example
+
+This function returns the byte numbered @var{pos} in @var{buffer}, with
+the first byte of @var{buffer} is numbered @code{1}.  If @var{pos} is
+less than @code{1}, or greater than the length of @var{buffer}, then
+@code{buffer_replace()} throws a @code{~range} error.
+
+Examples:
+
+@example
+buffer_retrieve(%[65, 66, 67, 10], 3)
+     @result{} 67
+@end example
+
+@node buffer_to_strings, buffer_truncate, buffer_retrieve, Buffer Functions
+@unnumberedsubsec buffer_to_strings
+@findex buffer_to_strings
+
+@example
+buffer_to_strings(@var{buffer}, [@var{separator}])
+@end example
+
+This function returns a list of strings constructed from @var{buffer} by
+splitting it around the bytes given by the buffer @var{separator}.  If
+@var{separator} is not specified, @code{buffer_to_strings()} uses the
+buffer @code{%[10]}, a single-byte buffer containing the ASCII code for
+a newline.  @code{buffer_to_strings()} treats the bytes in @var{buffer}
+not accounted for by the separator as ASCII values; unprintable ASCII
+values are stripped.  The last element of the returned list is a buffer
+containing the bytes in the buffer after the last separator found; no
+string is included in the returned list for these bytes.
+
+Examples:
+
+@example
+buffer_to_strings(%[65, 66, 67, 13, 10, 67, 66, 65, 13, 10, 66])
+     @result{} ["ABC", "CBA", %[66]]
+buffer_to_strings(%[66, 10, 10, 65, 10])
+     @result{} ["B", "", "A", %[]]
+buffer_to_strings(%[65, 66, 67, 13, 10, 67, 66, 65, 10, 66], %[66])
+     @result{} ["A", "CC", "A", %[]]
+@end example
+
+@node buffer_truncate, , buffer_to_strings, Buffer Functions
+@unnumberedsubsec buffer_truncate
+@findex buffer_truncate
+
+@example
+buffer_truncate(@var{buffer}, @var{length})
+@end example
+
+This function returns the result of truncating @var{buffer} to the
+length @var{length}.  If @var{length} is less than @code{0} or greater
+than the length of @var{buffer}, then @code{buffer_truncate()} throws a
+@code{~range} error.
+
+Examples:
+
+@example
+buffer_truncate(%[65, 66, 67, 10], 2)
+     @result{} %[65, 66]
+@end example
+
+@node Method Functions, Error Functions, Buffer Functions, Function Descriptions
+@section Method Functions
+@cindex Method functions
+@cindex Information about the current method
+@cindex Current object
+@cindex Sending object
+
+The functions described in this section return information about the
+objects involved in the call to the current method: the caller, the
+definer, the sender, and the current object.  If a method defined by
+object A, processing a message for object B, sends a message to object
+C, which results in a call to a method defined by object D, then A is
+the caller, B is the sender, C is the current object, and D is the
+definer.
+
+@menu
+* caller::			The definer of the calling method
+* definer::			The definer of the current method
+* sender::			The sending object
+* task_id::			ID of the current task
+* this::			The current object
+@end menu
+
+@node caller, definer, , Method Functions
+@unnumberedsubsec caller
+@findex caller
+
+@example
+caller()
+@end example
+
+This function returns the dbref of the object which defines the method
+which called the current method, or @code{0} if the current method was
+called by the server.
+
+@node definer, sender, caller, Method Functions
+@unnumberedsubsec definer
+@findex definer
+
+@example
+definer()
+@end example
+
+This function returns the dbref of the object which defines the current
+method.
+
+@node sender, task_id, definer, Method Functions
+@unnumberedsubsec sender
+@findex sender
+
+@example
+sender()
+@end example
+
+This function returns the dbref of the object which sent the current
+message, or @code{0} if the current method was called by the server.
+
+@node task_id, this, sender, Method Functions
+@unnumberedsubsec task_id
+@findex task_id
+
+@example
+task_id()
+@end example
+
+This function returns the ID of the current task.  The task ID is an
+integer which begins at @code{0} for the first task and increases by
+@code{1} each time a task runs.
+
+@node this, , task_id, Method Functions
+@unnumberedsubsec this
+@findex this
+
+@example
+this()
+@end example
+
+This function returns the dbref of the current object.
+
+@node Error Functions, Communication Functions, Method Functions, Function Descriptions
+@section Error Functions
+@cindex Error functions
+@cindex Throwing errors
+@cindex Tracebacks, getting
+@cindex Functions to handle errors
+
+The functions described in this section perform operations related to
+handling error conditions.
+
+@menu
+* error::			Get the error code, in a handler
+* error_arg::			Get the error argument, in a handler
+* error_str::			Get the error explanation, in a handler
+* rethrow::			Continue propagating an error
+* throw::			Throw an error in the calling method
+* traceback::			Get the traceback, in a handler
+@end menu
+
+@node error, error_arg, , Error Functions
+@unnumberedsubsec error
+@findex error
+
+@example
+error()
+@end example
+
+This function, which you should only call inside an error handler for a
+catch statement (@pxref{Error-Handling Statements}), returns the error
+code for the error which triggered the error handler.  If you are not in
+an error handler, this function throws an @code{~error} error.
+
+@node error_arg, error_str, error, Error Functions
+@unnumberedsubsec error_arg
+@findex error_arg
+
+@example
+error_arg()
+@end example
+
+This function, which you should only call inside an error handler for a
+catch statement (@pxref{Error-Handling Statements}), returns the error
+argument specified in the @code{throw()} call which caused the error
+which triggered the error handler, or @code{0} if the no error argument
+was specified in the @code{throw()} caller or if the error was thrown by
+the interpreter.  If you are not in an error handler, this function
+throws an @code{~error} error.
+
+@node error_str, rethrow, error_arg, Error Functions
+@unnumberedsubsec error_str
+@findex error_str
+
+@example
+error_str()
+@end example
+
+This function, which you should only call inside an error handler for a
+catch statement (@pxref{Error-Handling Statements}), returns the string
+argument specified in the @code{throw()} call which caused the error
+which triggered the error handler, or the interpreter's explanation of
+the error if the error was thrown by the interpreter.  If you are not in
+an error handler, this function throws an @code{~error} error.
+
+@node rethrow, throw, error_str, Error Functions
+@unnumberedsubsec rethrow
+@findex rethrow
+
+@example
+rethrow(@var{error-code})
+@end example
+
+This function, which you should only call inside an error handler for a
+catch statement (@pxref{Error-Handling Statements}), continues
+propagating an error condition.  The interpreter will abort the current
+method and throw an error of type @var{error-code} in the calling
+method.  If you are not in an error handler, this function throws an
+@code{~error} error.
+
+Examples:
+
+@example
+rethrow(~perm);
+@end example
+
+@node throw, traceback, rethrow, Error Functions
+@unnumberedsubsec throw
+@findex throw
+
+@example
+throw(@var{error-code}, @var{explanation}, [@var{arg}])
+@end example
+
+This function throws an error in the method which called the current
+method.  The interpreter will abort the current method and throw an
+error of type @var{error-code} in the calling method.  The string
+@var{explanation} will appear in the traceback.  If @var{arg} is
+specified, then it can be retrieved in an error handler by
+@code{error_arg()}.
+
+Examples:
+
+@example
+throw(~perm, "Sender is not the system object.");
+@end example
+
+@node traceback, , throw, Error Functions
+@unnumberedsubsec traceback
+@findex traceback
+
+@example
+traceback()
+@end example
+
+This function, which you should only call inside an eror handler for a
+catch statement (@pxref{Error-Handling Statements}), returns the
+traceback for the error which triggered the error handler.  If you are
+not in an error handler, this function throws an @code{~error}
+error.
+
+@node Communication Functions, Object Functions, Error Functions, Function Descriptions
+@section Communication Functions
+@cindex Input and output functions
+@cindex Output to a connection
+@cindex Communicating with users
+@cindex User communication
+@cindex Sending text to users
+@cindex Files, sending to users
+@cindex Text files, sending to users
+
+The functions described in this section allow you to perform input 
+and output to connections.  All of these functions apply to all 
+connections associated with the current object; you can never refer 
+to a particular connection directly using these functions.
+
+@menu
+* disconnect::                  Close connections to the current object
+* echo::                        Echo text to the current object
+* echo_file::                   Echo a file to the current object
+@end menu
+
+@node disconnect, echo, , Communication Functions
+@unnumberedsubsec disconnect
+@findex disconnect
+
+@example
+disconnect()
+@end example
+
+This function closes all connections associated with the current object,
+and returns the number of connections closed.
+
+@node echo, echo_file, disconnect, Communication Functions
+@unnumberedsubsec echo
+@findex echo
+
+@example
+echo(@var{buffer})
+@end example
+
+This function sends the bytes in @var{buffer} to all connections
+associated with the current object, and returns @code{1}.
+
+Examples:
+
+@example
+echo(%[65, 66, 67, 13, 10])
+     @result{} 1
+@end example
+
+@node echo_file, , echo, Communication Functions
+@unnumberedsubsec echo_file
+@findex echo_file
+
+@example
+echo_file(@var{name})
+@end example
+
+This function sends the contents of the file named by the string
+@var{name} to all connections associated with the current object.  The
+filename @var{name} must not contain the sequence @samp{../}.
+@code{echo_file()} returns @code{1} if @var{name} exists in the
+subdirectory "text" of the current directory; otherwise, the result of
+@code{echo_file()} is a @code{~file} error.
+
+@node Object Functions, Administrative Functions, Communication Functions, Function Descriptions
+@section Object Functions
+@cindex Object functions
+@cindex Manipulating objects
+@cindex Operations on objects
+
+The functions described in this section allow you to modify or retrieve
+information from the current object.
+
+@menu
+* add_parameter::		Add a parameter
+* ancestors::			Get a list of ancestors
+* children::			Get a list of children dbrefs
+* compile::			Compile @code{C--} code into a method
+* del_method::			Remove a method
+* del_parameter::		Remove a parameter
+* find_method::			Find location of method definition
+* find_next_method::		Find location of next method definition
+* get_var::			Get value of a variable
+* list_method::			Decompile method into @code{C--} code
+* methods::			Get a list of defined method names
+* parameters::			Get a list of parameter names
+* parents::			Get a list of parent dbrefs
+* set_var::			Assign to a variable
+@end menu
+
+@node add_parameter, ancestors, , Object Functions
+@unnumberedsubsec add_parameter
+@findex add_parameter
+
+@example
+add_parameter(@var{name})
+@end example
+
+This function adds a parameter named @var{name} to the current object.
+@var{name} must be a symbol.  If @var{name} is already a parameter on
+the current object, then @code{add_parameter} throws a
+@code{~paramexists} error.  Otherwise, @code{add_parameter()} returns 1.
+
+@node ancestors, children, add_parameter, Object Functions
+@unnumberedsubsec ancestors
+@findex ancestors
+
+@example
+ancestors()
+@end example
+
+This function returns a list of the dbrefs of the ancestors of the
+current object, in the order that they would normally be searched for
+methods.  The dbref of the current object will be the first element of
+the list.
+
+@node children, compile, ancestors, Object Functions
+@unnumberedsubsec children
+@findex children
+
+@example
+children()
+@end example
+
+This function returns a list of the dbrefs of the children of the
+current object, in no particular order.
+
+@node compile, del_method, children, Object Functions
+@unnumberedsubsec compile
+@findex compile
+
+@example
+compile(@var{code}, @var{name})
+@end example
+
+This function compiles the list of strings @var{code} and uses the
+result as the definition of the method named by the symbol @var{name}.
+If there were errors in compiling @var{code}, then @code{compile()}
+returns a list of strings describing the errors; otherwise
+@code{compile()} returns an empty list.
+
+Examples:
+
+@example
+compile(["echo(\"foo\");"], 'foo)
+     @result{} []
+compile(["echo(\"foo\")"], 'foo)
+     @result{} ["Line 2: parse error"]
+@end example
+
+@node del_method, del_parameter, compile, Object Functions
+@unnumberedsubsec del_method
+@findex del_method
+
+@example
+del_method(@var{name})
+@end example
+
+This function removes the method named by the symbol @var{name} from the
+current object.  @code{del_method()} returns @code{1} if there was a
+method named @var{name} on the current object; otherwise, it throws a
+@code{~methodnf} error.
+
+@node del_parameter, find_method, del_method, Object Functions
+@unnumberedsubsec del_parameter
+@findex del_parameter
+
+@example
+del_parameter(@var{name})
+@end example
+
+This function removes the parameter named by the symbol @var{name} from
+the current object.  @code{del_parameter()} returns @code{1} if there
+was a parameter named @var{name} on the current object; otherwise, it
+throws a @code{~paramnf} error.
+
+@node find_method, find_next_method, del_parameter, Object Functions
+@unnumberedsubsec find_method
+@findex find_method
+
+@example
+find_method(@var{name})
+@end example
+
+This function returns the object which contains the method definition
+which would be used if a message @var{name} were sent to the current
+object.  If none of the ancestors of the current object define a method
+@var{name}, then @code{find_method()} throws a @code{~methodnf}
+exception.
+
+@node find_next_method, get_var, find_method, Object Functions
+@unnumberedsubsec find_method
+@findex find_method
+
+@example
+find_next_method(@var{name}, @var{after})
+@end example
+
+This function returns the ancestor of the current object which contains
+the method definition which would be used if a method @var{name} defined
+by the object @var{after} executed an inspecific @code{pass()}.  If no
+method would be found, then @code{find_method()} throws a
+@code{~methodnf} exception.
+
+@node get_var, list_method, find_next_method, Object Functions
+@unnumberedsubsec get_var
+@findex get_var
+
+@example
+get_var(@var{name})
+@end example
+
+This function returns the value of the object variable on the current
+object referred to by the parameter @var{name} (a symbol) on the
+current method's defining object.  If the current method's defining
+object does not have a parameter @var{name}, then @code{get_var()}
+throws a @code{~paramnf} error.
+
+@node list_method, methods, get_var, Object Functions
+@unnumberedsubsec list_method
+@findex list_method
+
+@example
+list_method(@var{name})
+list_method(@var{name}, @var{indentation})
+list_method(@var{name}, @var{indentation}, @var{parenthesization})
+@end example
+
+This function returns a list of strings containing a decompiled version
+of the method named by the symbol @var{name}.  If the method @var{name}
+is not defined on the current object, then @code{list_method()} results
+in a @code{~methodnf} error.  Note that @var{name} must be defined on
+the current object, not on its ancestors.
+
+The decompiled code may not look exactly like the code that was compiled
+to produce the method.  The only guarantee is that it will compile to a
+method with the same behavior.
+
+If you specify the integer @var{indentation}, then the decompiler will
+use that number of spaces for indenting.  The default is 4 spaces.  If
+you specify the integer @var{parenthesization} and it is non-zero, then
+the decompiler will put parentheses around every subexpression.
+Otherwise, the compiler will only use parentheses when needed.
+
+@node methods, parameters, list_method, Object Functions
+@unnumberedsubsec methods
+@findex methods
+
+@example
+methods()
+@end example
+
+This function returns a list of symbols giving the names of the methods
+defined on the current object.
+
+@node parameters, parents, methods, Object Functions
+@unnumberedsubsec parameters
+@findex parameters
+
+@example
+parameters()
+@end example
+
+This function returns a list of symbols giving the names of the
+parameters defined on the current object.
+
+@node parents, set_var, parameters, Object Functions
+@unnumberedsubsec parents
+@findex parents
+
+@example
+parents()
+@end example
+
+This function returns a list of the dbrefs of the parents of the current
+object.
+
+@node set_var, , parents, Object Functions
+@unnumberedsubsec set_var
+@findex set_var
+
+@example
+set_var(@var{name}, @var{data})
+@end example
+
+This function assigns the value @var{data} to the object variable on
+the current object referred to by the parameter @var{name} (a symbol)
+on the current method's defining object.  If the current method's
+defining object does not have a parameter @var{name}, then
+@code{get_var()} throws a @code{~paramnf} error.
+
+@node Administrative Functions, Miscellaneous Functions, Object Functions, Function Descriptions
+@section Administrative Functions
+@cindex Administrative functions
+@cindex Privileged operations
+@cindex Server operations
+
+The functions in this section allow you to perform privileged
+operations.  These functions can only be called from the system object.
+For any other object, the result of any of these functions is an
+@code{~perm} error.
+
+@menu
+* binary_dump::                 Bring binary database up to date
+* bind::			Begin listening on a port
+* chparents::                   Change parents of an object
+* conn_assign::                 Set the current connection's object
+* connect::			Connect to a remote server
+* create::			Create an object
+* data::			Getting the data on an object
+* destroy::			Destroy an object
+* log::                         Write a string to stderr
+* run_script::			Execute an administrative script
+* set_heartbeat_freq::		Set the heartbeat frequency
+* shutdown::                    Shut down the server
+* text_dump::                   Dump a text database image
+* unbind::			Stop listening on a port
+@end menu
+
+@node binary_dump, bind, , Administrative Functions
+@unnumberedsubsec binary_dump
+@findex binary_dump
+
+@example
+binary_dump()
+@end example
+
+This function writes out all modified objects in the object cache to the
+disk database.  This guarantees that the disk database files @file{db},
+@file{db.dir}, and @file{db.pag} are consistent.
+
+@node bind, chparents, binary_dump, Administrative Functions
+@unnumberedsubsec bind
+@findex bind
+
+@example
+bind(@var{port}, @var{receiver})
+@end example
+
+This function instructs the server to begin listening on the port
+numbered @var{port}, with the receiver object @var{receiver}.  If the
+server is already listening on that port, then the receiver object is
+changed, with no other effect.  If the socket cannot be created, then
+@code{bind()} throws a @code{~socket} error.  If the server cannot
+bind to the port @var{port}, then @code{bind()} throws a @code{~bind}
+error.  Otherwise, @code{bind()} returns 1.
+
+@node chparents, conn_assign, bind, Administrative Functions
+@unnumberedsubsec chparents
+@findex chparents
+
+@example
+chparents(@var{dbref}, @var{parents})
+@end example
+
+This function changes the parents of the object referred to by
+@var{dbref} to the list of dbrefs in @var{parents}.  If any of the
+dbrefs in @var{parents} do not refer to an existing object, then
+@code{chparents()} throws an @code{~objnf} error.  If any of the parents
+have @var{dbref} as an ancestor, or are @var{dbref} themselves, then
+@code{chparents()} throws a @code{~parent} error.  If @var{dbref} refers
+to the root object, or @var{parents} is an empty list, then then
+@code{chparents()} throws a @code{~perm} error.  Otherwise,
+@code{chparents()} returns @code{1}.
+
+@node conn_assign, connect, chparents, Administrative Functions
+@unnumberedsubsec conn_assign
+@findex conn_assign
+
+@example
+conn_assign(@var{dbref})
+@end example
+
+This function sets the handler object of the current connection to
+@var{dbref}.  @code{conn_assign()} always returns @code{1}.
+
+Examples:
+
+@example
+conn_assign(#76)
+     @result{} 1
+@end example
+
+@node connect, create, conn_assign, Administrative Functions
+@unnumberedsubsec connect
+@findex connect
+
+@example
+connect(@var{address}, @var{port}, @var{receiver})
+@end example
+
+This function establishes a connection to the remote Internet host named
+by @var{address} (a string giving the IP address of the remote host) at
+the port @var{port}.
+
+If @var{address} is not a valid IP address, then @code{connect()} throw
+an @code{~address} error.  If a socket cannot be created for the
+connection, then @code{connect()} throws a @code{~socket} error.
+Otherwise, @code{connect()} attemptes to connect to the remote host and
+returns 1 immediately; it does not wait to see if the connection attempt
+succeeded.
+
+If the connection succeeds, then the server will send the object
+@var{receiver} a @code{connect} message, with one argument the task ID
+of the task which called @code{connect()} (@pxref{task_id}).
+@var{receiver} then becomes the handler object for the connection, and
+receives @code{parse} messages when lines arrive from the connection, as
+well as a @code{disconnect} message when the connection terminates.
+
+If the connection fails, then the object @var{receiver} will receive a
+@code{failed} message with two arguments, the task ID of the task which
+called @code{connect()}, and an error code: @code{~refused} indicates
+that the connection was refused, @code{~net} indicates that the network
+of the remote host could not be reached, @code{~timeout} indicates that
+the connection attempt timed out, and @code{~other} indicates that some
+other error occurred.
+
+@node create, data, connect, Administrative Functions
+@unnumberedsubsec create
+@findex create
+
+@example
+create(@var{dbref}, @var{parents})
+@end example
+
+This function creates an object with the dbref @var{dbref} and the
+parents @var{parents}, which should be a list of dbrefs referring to
+existing objects.  If any of the parent dbrefs do not refer to
+existing objects, then @code{create()} throws a @code{~objnf} error.
+If an object with the dbref @var{dbref} already exists,
+@code{create()} throws a @code{~perm} error.  Otherwise,
+@code{create()} returns @var{dbref}.
+
+@node data, destroy, create, Administrative Functions
+@unnumberedsubsec data
+@findex data
+
+@example
+data(@var{dbref})
+@end example
+
+This function retrieves all the variables on the object given by the
+dbref @var{dbref}.  The return value is a dictionary whose associations
+are between ancestors of the object and subdictionaries giving the
+variable values for each ancestor's parameters.  Each subdictionary's
+associations are between parameters (expressed as symbols) of the
+ancestor in question (as symbols) and the values of the variables
+corresponding to those parameters.  Thus, if the object given by
+@var{dbref} defines a variable corresponding to a parameter
+@var{parameter} on an ancestor @var{ancestor}, then
+@code{data(@var{dbref})[@var{ancestor}][@var{parameter}])} is the value
+of that variable.
+
+The subdictionaries in the dictionary returned by @code{data()} only
+contains @code{[@var{parameter}, @var{value}]} associations for
+variables which have been assigned values on the object given by
+@var{dbref}, not variables which have never been assigned values and
+which still have the default value @code{0}.  Also, if no variables have
+been assigned values for any parameters on an ancestor of the object
+given by @var{dbref} (as is the case when the ancestor has no
+parameters), then there will not be an association for that ancestor in
+the dictionary returned by @code{data()}.  Neither the keys in the
+dictionary returned by @code{data()} nor the parameters in the
+subdictionaries have any particular ordering.
+
+If @var{dbref} is not the dbref of an object, then @code{data()} throws
+an @code{~objnf} error.
+
+@node destroy, log, data, Administrative Functions
+@unnumberedsubsec destroy
+@findex destroy
+
+@example
+destroy(@var{dbref})
+@end example
+
+This function destroys the object given by the dbref @var{dbref}.  If
+any methods are currently executing on that object, or any methods are
+executing which are defined by that object, then it will not be
+destroyed immediately.  If no object exists with the dbref
+@var{dbref}, then @code{destroy()} throws a @code{~objnf} error.
+
+Objects left orphaned by the destruction of their only parent are
+reparented to the parents of the parent which was destroyed.
+
+@code{destroy()} throws a @code{~perm} error if you attempt to destroy
+the root object or system object, which is not allowed.  Otherwise,
+@code{destroy()} returns @code{1}.
+
+@node log, run_script, destroy, Administrative Functions
+@unnumberedsubsec log
+@findex log
+
+@example
+log(@var{string})
+@end example
+
+This function sends @var{string} to the standard error string, prefixed
+by the date.  @code{log()} always returns @code{1}.
+
+Examples:
+
+@example
+log("foo")
+     @result{} 1
+@end example
+
+@node run_script, set_heartbeat_freq, log, Administrative Functions
+@unnumberedsubsec run_script
+@findex run_script
+
+@example
+run_script(@var{name}, @var{arguments})
+run_script(@var{name}, @var{arguments}, @var{background-flag})
+@end example
+
+This function executes the script named by string @var{name}, passing it
+the arguments in the list @var{arguments}.  Each element of
+@var{arguments} must be a string.  Coldmud looks for the script named by
+@var{name} in the directory @file{scripts} in the current directory.
+@var{name} cannot contain a @samp{../} sequence; that is, it cannot walk
+back down the directory hierarchy.
+
+If @var{background-flag} is specified, it must be an integer.  If it is
+non-zero, then @var{script} is run in the background.  Otherwise,
+Coldmud waits for the script to execute.
+
+If @var{background-flag} is not specified, @code{run_script()} returns
+the return status of the script, or @code{-1} if it does not
+successfully execute the script.  If @var{background-flag} is specified,
+then @code{run_script()} might return @code{-1} if the script is not
+successfully executed, and it may even return the return status of the
+script if the script executes extremely quickly, but it will usually
+return @code{0}.
+
+@node set_heartbeat_freq, shutdown, run_script, Administrative Functions
+@unnumberedsubsec set_heartbeat_freq
+@findex set_heartbeat_freq
+
+@example
+set_heartbeat_freq(@var{seconds})
+@end example
+
+This function sets the frequency of the server heartbeat to
+@var{seconds} seconds.  If @var{seconds} is less than or equal to zero,
+then the heartbeat is turned off; otherwise, the system object will
+receive a @code{heartbeat} message approximately every @var{seconds}
+seconds.
+
+@node shutdown, text_dump, set_heartbeat_freq, Administrative Functions
+@unnumberedsubsec shutdown
+@findex shutdown
+
+@example
+shutdown()
+@end example
+
+This function updates the binary database in the same manner as
+@code{binary_dump()}, and causes the server to shut down at the next
+cycle of the main loop.
+
+@node text_dump, unbind, shutdown, Administrative Functions
+@unnumberedsubsec text_dump
+@findex text_dump
+
+@example
+text_dump()
+@end example
+
+This function writes a text database dump to the file @file{textdump}.
+@code{text_dump()} returns @code{1} if it is successful, or @code{0} if
+it cannot write the text dump.  @code{text_dump()} uses a temporary file
+@file{textdump.new} to avoid overwriting the old @file{textdump} until
+it has finished; thus, if there is a server or machine crash while the
+text dump is in progress, the partial text dump will be in
+@file{textdump.new}, and the old @file{textdump} will be unmodified.
+
+@node unbind, , text_dump, Administrative Functions
+@unnumberedsubsec unbind
+@findex unbind
+
+@example
+unbind(@var{port})
+@end example
+
+This function instructs the server to stop listening on the port
+numbered @var{port}.  If the server was not already listening on that
+port, then @code{unbind()} throws a @code{~servnf} error; otherwise,
+@code{unbind()} returns 1.
+
+@node Miscellaneous Functions, , Administrative Functions, Function Descriptions
+@section Miscellaneous Functions
+@cindex Miscellaneous functions
+
+The functions in this section perform operations which do not fit into
+any other category.
+
+@menu
+* abs::				Take the absolute value of a number
+* ctime::			Convert the time to string format
+* max::				Find the maximum of several values
+* min::				Find the minimum of several values
+* random::			Get a random number
+* time::			Get the current time
+* version::			Get the server version number
+@end menu
+
+@node abs, ctime, , Miscellaneous Functions
+@unnumberedsubsec abs
+@findex abs
+
+@example
+abs(@var{number})
+@end example
+
+This function returns the absolute value of @var{number}.
+
+Examples:
+
+@example
+abs(-6)
+     @result{} 6
+abs(7)
+     @result{} 7
+@end example
+
+@node ctime, max, abs, Miscellaneous Functions
+@unnumberedsubsec ctime
+@findex ctime
+
+@example
+ctime()
+ctime(@var{time})
+@end example
+
+This function converts the integer @var{time} into a string format.
+If @var{time} is not specified, then @code{ctime()} uses the current
+time.
+
+Examples:
+
+@example
+ctime(739180536)
+     @result{} "Fri Jun  4 03:55:36 1993\n"
+@end example
+
+@node max, min, ctime, Miscellaneous Functions
+@unnumberedsubsec max
+@findex max
+
+@example
+max(@var{value1}, @var{value2}, @var{...})
+@end example
+
+This function returns the maximum of its arguments.  All of the
+arguments must be of the same type, and must be integers or strings.
+
+@example
+max(3, 7, 9, 5)
+    @result{} 9
+max("Foo", "aardvark", "bar", "Quux")
+    @result{} "Quux"
+@end example
+
+@node min, random, max, Miscellaneous Functions
+@unnumberedsubsec min
+@findex min
+
+@example
+min(@var{value1}, @var{value2}, @var{...})
+@end example
+
+This function returns the minimum of its arguments.  All of the
+arguments must be of the same type, and must be integers or strings.
+
+@example
+min(3, 7, 9, 5)
+    @result{} 3
+min("Foo", "aardvark", "bar", "Quux")
+    @result{} "aardvark"
+@end example
+
+@node random, time, min, Miscellaneous Functions
+@unnumberedsubsec random
+@findex random
+
+@example
+random(@var{max})
+@end example
+
+This function returns a random integer between one and @var{max}.
+
+@node time, version, random, Miscellaneous Functions
+@unnumberedsubsec time
+@findex time
+
+@example
+time()
+@end example
+
+This function returns the system time in seconds since midnight GMT,
+January 1, 1970.  You can use @code{ctime()} to turn this number into a
+string.
+
+@node version, , time, Miscellaneous Functions
+@unnumberedsubsec version
+@findex version
+
+@example
+version()
+@end example
+
+This function returns the version number of the Coldmud server as a
+list of three numbers.  The first two numbers are the major and minor
+release numbers; the third number is a bug-fix release number.
+
+Examples:
+
+@example
+version()
+     @result{} [0, 10, 0]
+@end example
+
+@node Administration, Function Index, Function Descriptions, Top
+@chapter Running and Maintaining Coldmud
+
+This chapter is intended for Coldmud adminstrators.  It documents
+Coldmud's behavior on startup, how Coldmud databases should be
+maintained, and how Coldmud manages network connections.  All of the
+functions referred to in this chapter are administrative functions, and
+only work if called by the system object (@pxref{System Object}).
+
+@menu
+* Starting::                    Starting up the server
+* Disk Database::               Managing the disk database
+* Connections::                 How Coldmud manages network connections
+@end menu
+
+@node Starting, Disk Database, , Administration
+@section Starting the Server
+@cindex Runnning the server
+@cindex Starting the server
+@cindex Invoking the server
+@cindex Options to the server
+
+Coldmud has the following usage:
+
+@example
+coldmud @var{directory} [@var{other arguments}]
+@end example
+
+The first argument specifies the database directory, which can be
+relative to the current directory.  You can specify any number of
+arguments after @var{directory}; these will be visible to the
+@code{startup} method on the system object.
+
+@node Disk Database, Connections, Starting, Administration
+@section Disk Database
+@cindex Database
+@cindex Disk database
+@cindex Text database dumps
+@cindex Checkpoint databases
+@cindex Consistency of databases
+@cindex Files used by Coldmud
+
+Coldmud normally operates using a binary disk-based database, storing
+only a small number of objects in memory at any given time.  This number
+is usually no more than the product of the cache width and the cache
+depth (fixed at 7 and 23 in this version).
+
+Coldmud's database is normally stored in binary format in the file
+@file{binary/objects} (relative to the database directory) and in an
+ndbm database with the prefix @file{binary/index}.  The file
+@file{binary/clean} exists when the database is consistent.  The
+functions @code{binary_dump()} and @code{shutdown()} force binary
+database consistency.
+
+Because ndbm databases are usually byte-order-dependent, a binary
+database generated by a Coldmud process on one machine cannot be
+guaranteed to work with a process on another machine.  Binary databases
+are also heavily version-dependent; small changes in the internal format
+of an object in a new version of the server will invalidate old binary
+databases, even if the @code{C--} language and the conceptual structure
+of a Coldmud object remain the same in the new version.
+
+Coldmud also supports a text format for databases.  The
+@code{text_dump()} function stores a text database dump in the file
+@file{textdump}.  Text dumps specify the database in terms of the
+@code{C--} language and a few simple directives, so they are compatible
+with any version of Coldmud which can understand the @code{C--} code
+contained in it.  Text dumps are also simple enough to be written and
+edited by humans, so they provide a good mechanism for distribution of
+core databases.
+
+At startup time, Coldmud looks for the file @file{binary/clean} to
+determine if a consistent binary database exists and was generated by
+the same version of Coldmud as the running process.  If a clean binary
+database exists, Coldmud will start up very quickly, pausing only to
+read in the root object and system object.  Otherwise, Coldmud tries to
+read in a text dump from the file @file{textdump}.  You can force the
+use of a text dump by simple removing the file @file{binary/clean}.
+Coldmud will fail to start if it cannot find a consistent binary
+database or a text dump.
+
+@node Connections, , Disk Database, Administration
+@section Connections
+@cindex Connections
+@cindex Managing connections
+@cindex Associating objects with connections
+@cindex Receiving text from connections
+@cindex Parsing text from connections
+@cindex Closed connections
+@cindex New connections
+@cindex Reading text from connections
+@cindex Making connections to remote hosts
+@cindex Connecting to remote hosts
+
+As a network server, Coldmud has the ability to listen for Internet
+connections on ports.  The @code{bind()} function instructs Coldmud to
+listen on a port, with some object acting as a @emph{receiver object}
+for that port.
+
+Network connections have associated with them a @emph{handler object}.
+When a connection occurs on a port, Coldmud initially uses the receiver
+object for the port as the handler object for the connection, and sends
+a @code{connect} message to the handler object, with two arguments: a
+string giving the IP address of the remote host, and an integer giving
+the port of the connection on the remote host.  Because there is no way
+to distinguish between connections with the same handler object, the
+@code{connect} method on the handler object should arrange to have the
+system object change either the receiver object for the port (using
+@code{bind()}) or the handler object for the connection (using
+@code{conn_assign()}).
+
+When text arrives from a network connection, Coldmud sends a
+@code{parse} message to the handler object for that connection, with the
+text as a buffer argument.  The @code{parse} method can then use
+@code{buffer_to_strings()} to convert the buffer to a list of text
+lines, if that is the usual form of input.
+
+When a network connection is terminated, Coldmud sends a
+@code{disconnect} message to the handler object for that connection.
+
+Coldmud can also make make connections actively, using the
+@code{connect()} function.  The third argument to @code{connect()}
+specifies a receiver object for the new connection; the server sends a
+@code{connect} message to the receiver object upon success, or a
+@code{failed} message to the receiver object upon failure, as described
+in @ref{connect}.
+
+@node Function Index, Concept Index, Administration, Top
+@unnumbered Function Index
+
+@printindex fn
+
+@node Concept Index, , Function Index, Top
+@unnumbered Concept Index
+
+@printindex cp
+
+@shortcontents
+@contents
+@bye
+

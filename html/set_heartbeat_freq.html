@@ -1,0 +1,16 @@
+<TITLE>coldmud.info: set_heartbeat_freq</TITLE>
+Next: <A HREF="shutdown.html">shutdown</A><P>
+Prev: <A HREF="run_script.html">run_script</A><P>
+
+<H3>set_heartbeat_freq</H3>
+
+<PRE>
+set_heartbeat_freq(<VAR>seconds</VAR>)
+</PRE
+>
+This function sets the frequency of the server heartbeat to
+<VAR>seconds</VAR> seconds.  If <VAR>seconds</VAR> is less than or equal to zero,
+then the heartbeat is turned off; otherwise, the system object will
+receive a <CODE>heartbeat</CODE> message approximately every <VAR>seconds</VAR>
+seconds.<P>
+<P>

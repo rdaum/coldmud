@@ -1,0 +1,24 @@
+<TITLE>coldmud.info: buffer_replace</TITLE>
+Next: <A HREF="buffer_retrieve.html">buffer_retrieve</A><P>
+Prev: <A HREF="buffer_len.html">buffer_len</A><P>
+
+<H3>buffer_replace</H3>
+
+<PRE>
+buffer_replace(<VAR>buffer</VAR>, <VAR>pos</VAR>, <VAR>value</VAR>)
+</PRE
+>
+This function returns the result of replacing the byte numbered
+<VAR>pos</VAR> in <VAR>buffer</VAR> with the value <VAR>value</VAR>, with the first
+byte of <VAR>buffer</VAR> is numbered <CODE>1</CODE>.  If <VAR>pos</VAR> is less than
+<CODE>1</CODE>, or greater than the length of <VAR>buffer</VAR>, then
+<CODE>buffer_replace()</CODE> throws a <CODE>~range</CODE> error.<P>
+
+
+Examples:<P>
+<P>
+<PRE>
+buffer_replace(%[65, 66, 67, 10], 3, 15)
+    => %[65, 66, 15, 10]
+</PRE
+>

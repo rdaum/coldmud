@@ -1,0 +1,22 @@
+<TITLE>coldmud.info: buffer_truncate</TITLE>
+Prev: <A HREF="buffer_to_strings.html">buffer_to_strings</A><P>
+
+<H3>buffer_truncate</H3>
+
+<PRE>
+buffer_truncate(<VAR>buffer</VAR>, <VAR>length</VAR>)
+</PRE
+>
+This function returns the result of truncating <VAR>buffer</VAR> to the
+length <VAR>length</VAR>.  If <VAR>length</VAR> is less than <CODE>0</CODE> or greater
+than the length of <VAR>buffer</VAR>, then <CODE>buffer_truncate()</CODE> throws a
+<CODE>~range</CODE> error.<P>
+
+
+Examples:<P>
+<P>
+<PRE>
+buffer_truncate(%[65, 66, 67, 10], 2)
+     => %[65, 66]
+</PRE
+>

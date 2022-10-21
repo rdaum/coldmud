@@ -1,0 +1,19 @@
+<TITLE>coldmud.info: create</TITLE>
+Next: <A HREF="data.html">data</A><P>
+Prev: <A HREF="connect.html">connect</A><P>
+
+<H3>create</H3>
+
+<PRE>
+create(<VAR>dbref</VAR>, <VAR>parents</VAR>)
+</PRE
+>
+This function creates an object with the dbref <VAR>dbref</VAR> and the
+parents <VAR>parents</VAR>, which should be a list of dbrefs referring to
+existing objects.  If any of the parent dbrefs do not refer to
+existing objects, then <CODE>create()</CODE> throws a <CODE>~objnf</CODE> error.
+If an object with the dbref <VAR>dbref</VAR> already exists,
+<CODE>create()</CODE> throws a <CODE>~perm</CODE> error.  Otherwise,
+<CODE>create()</CODE> returns <VAR>dbref</VAR>.<P>
+
+

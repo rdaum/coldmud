@@ -1,0 +1,29 @@
+<TITLE>coldmud.info: crypt</TITLE>
+Next: <A HREF="explode.html">explode</A><P>
+
+<H3>crypt</H3>
+
+<PRE>
+crypt(<VAR>string</VAR>)
+crypt(<VAR>string</VAR>, <VAR>salt</VAR>)
+</PRE
+>
+This function performs one-way encryption on <VAR>string</VAR>, using the
+host system's <CODE>crypt()</CODE> library routine.  If <VAR>salt</VAR> is
+specified, then it must be a two-character string; otherwise, a salt is
+chosen randomly.  The return value of <CODE>crypt()</CODE> is the encrypted
+string; the first two characters of the encrypted string are the salt
+used.<P>
+<P>
+The encryption performed by this function has the property that it is
+very difficult to find a string which will produce a given result;
+however, a given string and a given salt will always yield the same
+encrypted string.<P>
+<P>
+Examples:<P>
+<P>
+<PRE>
+crypt("foo", "ab")
+     => "abQ9KY.KfrYrc"
+</PRE
+>

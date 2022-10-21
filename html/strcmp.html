@@ -1,0 +1,26 @@
+<TITLE>coldmud.info: strcmp</TITLE>
+Next: <A HREF="strlen.html">strlen</A><P>
+Prev: <A HREF="pad.html">pad</A><P>
+
+<H3>strcmp</H3>
+
+<PRE>
+strcmp(<VAR>string1</VAR>, <VAR>string2</VAR>)
+</PRE
+>
+This function compares <VAR>string1</VAR> against <VAR>string2</VAR> and returns
+zero if they are equal, greater than zero if <VAR>string1</VAR> is lexically
+greater than <VAR>string2</VAR>, and less than zero if <VAR>string1</VAR> is
+lexically less than <VAR>string2</VAR>.  The comparison performed by
+<CODE>strcmp()</CODE> is case-sensitive.<P>
+
+
+<PRE>
+strcmp("Foo", "bar")
+     => -28
+strcmp("cashmir", "cashmiR")
+     => 32
+strcmp("foo", "foo")
+     => 0
+</PRE
+>

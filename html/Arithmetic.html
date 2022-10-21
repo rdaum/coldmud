@@ -1,0 +1,31 @@
+<TITLE>coldmud.info: Arithmetic</TITLE>
+Next: <A HREF="Logic.html">Logic</A><P>
+Prev: <A HREF="Precedence.html">Precedence</A><P>
+
+<H4>Arithmetic</H4>
+
+<CODE>C--</CODE> provides seven operators for doing arithmetic, two unary
+operators and five binary operators.  These operators apply primarily to
+integers, but the addition operator also applies to strings.  Using
+these operators on inappropriate data is an error of type <CODE>~type</CODE>.<P>
+<P>
+The unary <CODE>-</CODE> operator takes the negative of an integer value.  The
+expression <CODE>-(3 + 4)</CODE> has the value <CODE>-7</CODE>.  The unary <CODE>+</CODE>
+operator has no effect on its argument, and is provided only for
+completeness.<P>
+<P>
+The binary operator <CODE>*</CODE> performs multiplication on its arguments.
+The expression <CODE>(3 * 4)</CODE> has the value <CODE>12</CODE>.  The binary
+operators <CODE>/</CODE> and <CODE>%</CODE> perform integer division and modulus,
+respectively, on their arguments.  The expressions <CODE>(13 / 5)</CODE> and
+<CODE>(13 % 5)</CODE> have the values <CODE>2</CODE> and <CODE>3</CODE> respectively.<P>
+
+
+The binary operators <CODE>+</CODE> and <CODE>-</CODE> perform addition and
+subtraction.  The expressions <CODE>(3 + 4)</CODE> and <CODE>(3 - 4)</CODE> have the
+values <CODE>7</CODE> and <CODE>-1</CODE> respectively.  The binary <CODE>+</CODE>
+operator can also apply to strings and lists, in which case it performs
+concatenation; the expression <CODE>("foo" + "bar")</CODE> has the value
+<CODE>"foobar"</CODE>, and the expression <CODE>(["foo", "bar"] + ["baz"])</CODE>
+has the value <CODE>["foo", "bar", "baz"]</CODE>.<P>
+<P>

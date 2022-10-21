@@ -1,0 +1,20 @@
+<TITLE>coldmud.info: buffer_append</TITLE>
+Next: <A HREF="buffer_from_strings.html">buffer_from_strings</A><P>
+Prev: <A HREF="buffer_add.html">buffer_add</A><P>
+
+<H3>buffer_append</H3>
+
+<PRE>
+buffer_append(<VAR>buffer1</VAR>, <VAR>buffer2</VAR>)
+</PRE
+>
+This function returns the result of appending <VAR>buffer2</VAR> to the end
+of <VAR>buffer1</VAR>.<P>
+<P>
+Examples:<P>
+<P>
+<PRE>
+buffer_append(%[65, 66, 67, 10], %[67, 66, 65, 10])
+     => %[65, 66, 67, 10, 67, 66, 65, 10]
+</PRE
+>

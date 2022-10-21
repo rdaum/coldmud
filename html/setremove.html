@@ -1,0 +1,27 @@
+<TITLE>coldmud.info: setremove</TITLE>
+Next: <A HREF="sublist.html">sublist</A><P>
+Prev: <A HREF="setadd.html">setadd</A><P>
+
+<H3>setremove</H3>
+
+<PRE>
+setremove(<VAR>list</VAR>, <VAR>data</VAR>)
+</PRE
+>
+This function returns the result of removing the first occurrence of
+<VAR>data</VAR> from <VAR>list</VAR> if <VAR>data</VAR> exists in <VAR>list</VAR>.  If
+<VAR>data</VAR> does not exist in <VAR>list</VAR>, then <CODE>setremove()</CODE> returns
+<VAR>list</VAR> unmodified.<P>
+
+
+Examples:<P>
+<P>
+<PRE>
+setremove([2, 3, 4, 'foo], 'foo)
+     => [2, 3, 4]
+setremove([2, 3, 4], 5)
+     => [2, 3, 4]
+setremove([2, 3, 2, 4], 2)
+     => [3, 2, 4]
+</PRE
+>

@@ -1,0 +1,214 @@
+
+Notes on testing
+----------------
+
+Major subsystems that need to be tested:
+
+	Language:
+	* Parser
+	* Code generator
+	* Interpreter
+	* Intepreter functions
+	* Data types
+	* Decompiler
+	* Line counter
+
+	Database:
+	* Object hierarchy
+	* Object cache
+	* Packing and unpacking
+
+Kinds of bugs to look for:
+
+	* Reference count leaks
+	* Incorrect behavior
+	* Inconsistency in generation/interpretation of data
+
+Kinds of tests:
+
+	* Test for correct behavior
+	* Test for reference count leaks
+
+Testing method:
+
+	The text dump loader is probably the simplest interface to the
+	compiler, interpreter, and object database.  Thus, it makes
+	sense to do testing using the text dump loader.
+
+	Of course, we also need to test connection-handling, I/O, and
+	database dumps (text dumps, binary dumps); this will involve
+	some manual intervention.
+
+
+Specifics: Language
+-------------------
+
+Method body:
+
+	disallow_overrides;
+		Sets non-overridable bit
+	arg arg1, arg2, ...;
+	arg arg1, arg2, ..., [rest];
+	arg [args];
+		Translates into arg specs
+	var var1, var2, ...;
+		Arguments
+
+Statements:
+
+	comments (// foobar)
+	empty (;)
+	expression
+	compound
+	assignment
+	if
+	if-else
+	for-range
+	for-list
+	while
+	switch
+	break
+	continue
+	return
+	catch
+	catch-with-handler
+
+Expressions:
+
+	integer
+	string
+	dbref
+	symbol
+	error
+	identifier
+	function call
+	pass
+	pass-to
+	message
+	expr-message
+	list construction
+	dictionary construction
+	frob construction
+	indexing
+	unary operators: ! - +
+	binary operators: * / % + - == != > GE < LE IN AND OR ?|
+	critical
+	propagation
+	special: ranges in case
+		 splicing
+
+Data types:
+
+	integers
+	strings
+	dbrefs
+	lists
+	symbols
+	errors
+	frobs
+	dictionaries
+
+Functions
+
+Specifics: Object hierarchy
+---------------------------
+
+Object variable access:
+
+	Different definers use different namespace
+	Different current objects use different namespace
+	Parameter must be on definer object
+	Assignment persists indefinitely
+	Assignment to or retrieval from nonexistent parameter results
+		in error
+
+Ancestor search (has_ancestor())
+Ancestor building (ancestors()):
+
+	Left-to-right, up-to-join
+
+Method search:
+
+	Should follow ancestors() order
+	Should take non-overridable methods
+	Can start after a given object for inspecific pass
+
+Creation
+Destruction (including reparenting)
+Changing parents
+
+Adding methods
+Deleting methods
+Deleting methods while they're running
+
+Specifics: Line counter
+-----------------------
+
+declarations
+simple statements
+
+comments:
+
+	beginning of blocks of various types
+	after other comments
+	after different kinds of statements
+
+if-else:
+
+	end in body
+	end in else body
+	end in else body with complex body
+	body is complex
+	else body is complex
+	else body is spanning if
+	else body is spanning if with complex body
+	else body is spanning if-else
+	else body is spanning if-else with complex parts
+	multiple nested if-elses terminating with if-else
+	multiple nested if-elses terminating with if-else, complex parts
+	multiple nested if-elses terminating with if
+	multiple nested if-elses terminating with if, complex parts
+	multiple nested if-elses terminating with if, complex final part
+	multiple nested if-elses with end in some clause
+	multiple nested if-elses with end in some clause, complex parts
+	multiple nested if-elses with end in final clause
+
+if
+for-range
+for-list
+while
+last-case-range
+last-case-value:
+
+	end in body
+
+switch:
+
+	end in cases
+	end in default case
+	complex cases
+	complex default case
+	with default case
+	without default case
+
+catch:
+
+	with handler
+	without handler
+
+Specifics: Decompiler
+---------------------
+
+See language section
+
+Also see line counter section for screw cases of if-else and switch
+
+
+Regression tests
+----------------
+
+Where possible, I've made an effort to test past bugs which have been
+fixed.  Bugs which are not likely to regress, which are already tested
+in other parts of the source, or which can't easily be tested in this
+kind of test db are not tested.
+

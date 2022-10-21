@@ -1,0 +1,58 @@
+<TITLE>coldmud.info: Error-Handling Statements</TITLE>
+Prev: <A HREF="Looping_Statements.html">Looping Statements</A><P>
+
+<H2>Error-Handling Statements</H2>
+
+The <EM>catch statement</EM> allows you to indicate how errors should be
+handled in a block.  You can use this statement when you anticipate that
+an error might occur for reasons other than your programming errors.
+For instance, you may anticipate being denied permission to perform an
+operation, and use a catch statement to handle this error explicitly.
+You can also use the catch statement to make sure that cleanup
+operations are performed if an error occurs.<P>
+<P>
+The catch statement has the following syntax:<P>
+<P>
+<PRE>
+catch <VAR>error code</VAR>, <VAR>error code</VAR>, <VAR>...</VAR>
+    <VAR>body-statement</VAR>
+with handler
+    <VAR>handler-statement</VAR>
+</PRE
+>
+You can substitute the keyword <CODE>any</CODE> for the list of errors to
+indicate that you wish to catch all errors.  You can leave out the
+<CODE>with handler</CODE> and the handler statement if you do not wish to do
+anything in the handler.<P>
+<P>
+If an error listed in the error list is thrown inside
+<VAR>body-statement</VAR>, the interpreter will execute the handler rather
+than aborting the method.  After the handler is done, control continues
+after the end of the catch statement, as if <VAR>body-statement</VAR> had
+completed with no errors.<P>
+<P>
+Inside the handler, you can use the function <CODE>error()</CODE> to determine
+the error code which triggered the handler, the function
+<CODE>error_arg()</CODE> to retrieve the error argument specified by
+<CODE>throw()</CODE> if one weas given, and the function <CODE>traceback()</CODE> to
+retrieve a list of strings describing the propagation of the error down
+the call stack.  You can use the function <CODE>rethrow()</CODE> to continue
+propagating an error.<P>
+<P>
+Here is an example of how you might use a catch statement to
+intelligently handle a <CODE>~methodnf</CODE> error from the
+<CODE>list_method()</CODE> function:<P>
+
+
+<PRE>
+catch ~methodnf {
+    code = list_method(method_name);
+} with handler {
+    .tell("There is no method named " + tostr(method_name) + ".");
+}
+</PRE
+>
+Note that critical expressions (see <A HREF="Error-Handling_Expressions.html">Error-Handling Expressions</A>)
+inside <VAR>body-statement</VAR> will override the behavior of the catch
+statement.  For more detail on errors in <CODE>C--</CODE>, see <A HREF="Errors.html">Errors</A>.<P>
+<P>

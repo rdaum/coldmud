@@ -1,0 +1,103 @@
+<TITLE>coldmud.info: Data Types</TITLE>
+Next: <A HREF="Names.html">Names</A><P>
+
+<H3>Data Types</H3>
+
+Every piece of data in <CODE>C--</CODE> has a type.  This section documents
+the data types in <CODE>C--</CODE>.  You can produce values of the simpler
+data types (integers, strings, dbrefs, symbols, error codes) can be
+produced with <VAR>literal</VAR> expressions; you can produce values of the
+more complex data types (lists, dictionaries, frobs, buffers) with
+<VAR>constructor</VAR> expressions.  As we go, we will explain how to specify
+or construct values of each of the data types, and explain what it means
+for a value of each data type to be true.<P>
+<P>
+Every piece of data in <CODE>C--</CODE> has a type and a truth value.  The
+type can be one of:<P>
+<P>
+<UL>
+<LI>Integer
+<LI>String
+<LI>Dbref
+<LI>List
+<LI>Symbol
+<LI>Error type
+<LI>Frob
+<LI>Dictionary
+<LI>Buffer
+</UL>
+
+An <EM>integer</EM> is just a number.  Integers can reliably be from
+-2147483648 to +2147483647.  An integer is true if it is not zero.  You
+can denote integer literals in <CODE>C--</CODE> by writing a sequence of
+digits, optionally preceded by a <SAMP>-</SAMP> or <SAMP>+</SAMP> sign.<P>
+<P>
+A <EM>string</EM> is a sequence of printable characters.  A string is true
+if it is not empty.  You can denote string literals in <CODE>C--</CODE> by
+enclosing a sequence of characters in double quotes (<SAMP>"</SAMP>).  To
+include a double quote or backslash character in a string literal,
+precede it by a backslash (<SAMP>\</SAMP>).  The following are string
+literals:<P>
+<P>
+<PRE>
+"foo"
+"\"foo\" is a metasyntactic variable."
+"The backslash (`\\') is a much-abused character in many languages."
+</PRE
+>
+A <EM>dbref</EM> is a reference to an object, which may or may not exist.
+Database references are always true, whether or not they refer to actual
+objects.  You can denote dbref literals in <CODE>C--</CODE> by preceding a
+number with a sharp (<SAMP>#</SAMP>); for example, <CODE>#1</CODE> and <CODE>#267</CODE>
+are valid dbref literals.<P>
+<P>
+A <EM>list</EM> is a collection of objects of any type.  Lists are useful
+for manipulating several objects at once.  A list is true if it is not
+empty.  You can construct a list value by enclosing a comma-separated
+series of expressions in square brackets; for example, <CODE>[1, 2, 3]</CODE>
+and <CODE>[1, ["foo", 'bar], #23]</CODE> are valid list construction
+expressions.<P>
+<P>
+A <EM>symbol</EM> is a symbolic value.  You can denote symbols in
+<CODE>C--</CODE> by preceding an identifier or string with an apostrophe
+(<SAMP>'</SAMP>).  <CODE>'remote</CODE>, <CODE>'template</CODE>, and <CODE>'object</CODE> are
+valid symbol literals.  Symbols are always true.<P>
+<P>
+An <EM>error code</EM> identifies a type of error condition.  Both the
+<CODE>C--</CODE> interpreter and <CODE>C--</CODE> methods use error codes to
+identify types of errors when they occur.  See <A HREF="Errors.html">Errors</A> for
+information about how Coldmud handles errors.  You can denote error code
+literals in <CODE>C--</CODE> by preceding an identifier or string with a tilde
+(<SAMP>~</SAMP>).  Error codes are always false.<P>
+<P>
+A <EM>frob</EM> consists of a <EM>class</EM>, the dbref of an object, and a
+<EM>representation</EM>, a list or dictionary.  Frobs are intended to
+serve as lightweight objects.  You can construct a frob value by
+enclosing expressions for the class and representation in triangular
+brackets, separated by a comma; for instance, <CODE><#73, [1, 2]></CODE> is a
+valid frob construction expression.  Frobs are always true.<P>
+<P>
+A <EM>dictionary</EM> is a collection of <EM>associations</EM>, each of
+which has a <EM>key</EM> and a <EM>value</EM>.  Dictionaries take up more
+space than lists, but searching for a data value in a dictionary is
+generally faster than searching for data values in lists.  You can
+construct a dictionary by enclosing a comma-separated series of
+associations in square brackets, where each association is a two-element
+list giving a key and a value, and preceding the whole thing with a hash
+mark (<SAMP>#</SAMP>).  For instance, <CODE>#[["foo", 3], ["bar", 'baz]]</CODE> is a
+valid dictionary construction expression.  A dictionary is true if it is
+not empty.<P>
+<P>
+a <EM>buffer</EM> is an array of unsigned eight-bit values, intended for
+network I/O.  You can construct a buffer by enclosing a comma-separated
+series of integer expressions in square brackets, preceded by a percent
+sign (<SAMP>%</SAMP>).  For instance, <CODE>%[65, 66, 67, 10]</CODE> is a valid
+buffer construction expression.  A buffer is true if it is not empty.<P>
+<P>
+You can get the type of a piece of <CODE>C--</CODE> data using the
+<CODE>type()</CODE> function.  The <CODE>type()</CODE> function returns a symbol
+corresponding to the type of its argument.  This symbol can be
+<CODE>'integer</CODE>, <CODE>'string</CODE>, <CODE>'dbref</CODE>, <CODE>'list</CODE>,
+<CODE>'symbol</CODE>, <CODE>'error</CODE>, <CODE>'frob</CODE>, or <CODE>'dictionary</CODE>.<P>
+
+

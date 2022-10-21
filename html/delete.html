@@ -1,0 +1,22 @@
+<TITLE>coldmud.info: delete</TITLE>
+Next: <A HREF="insert.html">insert</A><P>
+
+<H3>delete</H3>
+
+<PRE>
+delete(<VAR>list</VAR>, <VAR>position</VAR>)
+</PRE
+>
+This function returns the result of deleting the element of <VAR>list</VAR>
+numbered by the integer <VAR>position</VAR>.  If <VAR>position</VAR> is less than
+<CODE>1</CODE> or is greater than the length of <VAR>list</VAR>, then
+<CODE>delete()</CODE> throws a <CODE>~range</CODE> error.<P>
+
+
+Examples:<P>
+<P>
+<PRE>
+delete([2, 3, 4], 2)
+     => [2, 4]
+</PRE
+>

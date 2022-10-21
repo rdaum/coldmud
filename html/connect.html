@@ -1,0 +1,36 @@
+<TITLE>coldmud.info: connect</TITLE>
+Next: <A HREF="create.html">create</A><P>
+Prev: <A HREF="conn_assign.html">conn_assign</A><P>
+
+<H3>connect</H3>
+
+<PRE>
+connect(<VAR>address</VAR>, <VAR>port</VAR>, <VAR>receiver</VAR>)
+</PRE
+>
+This function establishes a connection to the remote Internet host named
+by <VAR>address</VAR> (a string giving the IP address of the remote host) at
+the port <VAR>port</VAR>.<P>
+<P>
+If <VAR>address</VAR> is not a valid IP address, then <CODE>connect()</CODE> throw
+an <CODE>~address</CODE> error.  If a socket cannot be created for the
+connection, then <CODE>connect()</CODE> throws a <CODE>~socket</CODE> error.
+Otherwise, <CODE>connect()</CODE> attemptes to connect to the remote host and
+returns 1 immediately; it does not wait to see if the connection attempt
+succeeded.<P>
+<P>
+If the connection succeeds, then the server will send the object
+<VAR>receiver</VAR> a <CODE>connect</CODE> message, with one argument the task ID
+of the task which called <CODE>connect()</CODE> (see <A HREF="task_id.html">task_id</A>).
+<VAR>receiver</VAR> then becomes the handler object for the connection, and
+receives <CODE>parse</CODE> messages when lines arrive from the connection, as
+well as a <CODE>disconnect</CODE> message when the connection terminates.<P>
+<P>
+If the connection fails, then the object <VAR>receiver</VAR> will receive a
+<CODE>failed</CODE> message with two arguments, the task ID of the task which
+called <CODE>connect()</CODE>, and an error code: <CODE>~refused</CODE> indicates
+that the connection was refused, <CODE>~net</CODE> indicates that the network
+of the remote host could not be reached, <CODE>~timeout</CODE> indicates that
+the connection attempt timed out, and <CODE>~other</CODE> indicates that some
+other error occurred.<P>
+<P>

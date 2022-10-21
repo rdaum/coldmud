@@ -1,0 +1,30 @@
+<TITLE>coldmud.info: sublist</TITLE>
+Next: <A HREF="union.html">union</A><P>
+Prev: <A HREF="setremove.html">setremove</A><P>
+
+<H3>sublist</H3>
+
+<PRE>
+sublist(<VAR>list</VAR>, <VAR>start</VAR>)
+sublist(<VAR>list</VAR>, <VAR>start</VAR>, <VAR>length</VAR>)
+</PRE
+>
+This function returns a sublist of <VAR>list</VAR> beginning at the element
+numbered by <VAR>start</VAR>.  If <VAR>length</VAR> is specified, then the sublist
+has that length; otherwise, the length is given by
+<CODE>(length(<VAR>list</VAR>) - (<VAR>start</VAR> - 1))</CODE>.  If <VAR>start</VAR> is less
+than <CODE>1</CODE>, if the length of the sublist is negative, or if the sum
+of <VAR>start</VAR> and <VAR>length</VAR> is greater than one more than the length
+of the list, then <CODE>sublist()</CODE> throws a <CODE>~range</CODE> error.<P>
+<P>
+Examples:<P>
+<P>
+<PRE>
+sublist([2, 3, 4, 5, 6, 7], 2, 3)
+     => [3, 4, 5]
+sublist([2, 3, 4, 5, 6, 7], 3)
+     => [4, 5, 6, 7]
+sublist([2, 3, 4, 5, 6, 7], 7)
+     => []
+</PRE
+>

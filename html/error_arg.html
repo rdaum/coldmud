@@ -1,0 +1,18 @@
+<TITLE>coldmud.info: error_arg</TITLE>
+Next: <A HREF="error_str.html">error_str</A><P>
+Prev: <A HREF="error.html">error</A><P>
+
+<H3>error_arg</H3>
+
+<PRE>
+error_arg()
+</PRE
+>
+This function, which you should only call inside an error handler for a
+catch statement (see <A HREF="Error-Handling_Statements.html">Error-Handling Statements</A>), returns the error
+argument specified in the <CODE>throw()</CODE> call which caused the error
+which triggered the error handler, or <CODE>0</CODE> if the no error argument
+was specified in the <CODE>throw()</CODE> caller or if the error was thrown by
+the interpreter.  If you are not in an error handler, this function
+throws an <CODE>~error</CODE> error.<P>
+<P>
