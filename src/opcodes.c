@@ -3,6 +3,7 @@
 #define _POSIX_SOURCE
 
 #include <ctype.h>
+#include <string.h>
 #include "x.tab.h"
 #include "opcodes.h"
 #include "operator.h"

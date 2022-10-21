@@ -4,7 +4,7 @@
 #include <sys/types.h>
 #include <sys/file.h>
 #include <sys/stat.h>
-#include <ndbm.h>
+#include <qdbm/relic.h>
 #include <fcntl.h>
 #include <string.h>
 #include <stdlib.h>
@@ -124,8 +124,9 @@ long lookup_first_dbref(void)
     key = dbm_firstkey(dbp);
     if (key.dptr == NULL)
 	return NOT_AN_IDENT;
-    if (key.dsize > 1 && *key.dptr == 0)
-	return atoln(key.dptr + 1, key.dsize - 1);
+    char *dval = key.dptr;
+    if (key.dsize > 1 && dval[0] == 0)
+	return atoln(dval + 1, key.dsize - 1);
     return lookup_next_dbref();
 }
 
@@ -136,8 +137,9 @@ long lookup_next_dbref(void)
     key = dbm_nextkey(dbp);
     if (key.dptr == NULL)
 	return NOT_AN_IDENT;
-    if (key.dsize > 1 && *key.dptr == 0)
-	return atoln(key.dptr + 1, key.dsize - 1);
+    char *dval = key.dptr;
+    if (key.dsize > 1 && dval[0] == 0)
+	return atoln(dval + 1, key.dsize - 1);
     return lookup_next_dbref();
 }
 
@@ -229,8 +231,9 @@ long lookup_first_name(void)
     key = dbm_firstkey(dbp);
     if (key.dptr == NULL)
 	return NOT_AN_IDENT;
-    if (key.dsize == 1 || *key.dptr != 0)
-	return ident_get(key.dptr);
+    char *dval = key.dptr;
+    if (key.dsize == 1 || dval[0] != 0)
+	return ident_get(dval);
     return lookup_next_name();
 }
 
@@ -241,8 +244,9 @@ long lookup_next_name(void)
     key = dbm_nextkey(dbp);
     if (key.dptr == NULL)
 	return NOT_AN_IDENT;
-    if (key.dsize == 1 || *key.dptr != 0)
-	return ident_get(key.dptr);
+    char *dval = key.dptr;
+    if (key.dsize == 1 || dval[0] != 0)
+	return ident_get(dval);
     return lookup_next_name();
 }
 

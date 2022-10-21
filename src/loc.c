@@ -4,7 +4,7 @@
 #include <sys/types.h>
 #include <sys/file.h>
 #include <sys/stat.h>
-#include <ndbm.h>
+#include <qdbm/relic.h>
 #include <fcntl.h>
 #include "log.h"
 
